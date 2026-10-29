@@ -31,7 +31,7 @@ export default function DeathAnnouncementsPage() {
       <div className="flex items-center justify-between gap-3 flex-wrap mb-1.5">
         <div className="flex items-center gap-2.5">
           <HeartCrack size={26} className="text-dp2-primary-dark" />
-          <h1 className="font-heading text-[21px] font-bold text-dp2-primary">{t('da.pageTitle')}</h1>
+          <h1 className="font-heading text-[20px] md:text-[21px] font-bold text-dp2-primary">{t('da.pageTitle')}</h1>
         </div>
         <Link href="/portal/death-announcement" className="flex items-center gap-2 px-4 py-2 bg-dp2-primary-dark text-white rounded-xl font-sans text-[14px] font-semibold hover:bg-dp2-primary transition-all">
           <PlusCircle size={15} /> {t('da.newAnnouncement')}
@@ -47,7 +47,7 @@ export default function DeathAnnouncementsPage() {
         <div className="space-y-4">
           {items.map((a) => (
             <div key={a.id} className="bg-white border border-dp2-card-border rounded-2xl p-5">
-              <p className="font-heading text-[19px] font-bold text-slate-800">
+              <p className="font-heading text-[15px] font-bold text-slate-800">
                 {a.deceased_name}{a.deceased_name_ur ? ` (${a.deceased_name_ur})` : ''}{a.age ? ` · ${a.age}` : ''}
               </p>
               {a.message && <p className="font-sans text-[14.5px] text-slate-500 mt-2">{a.message}</p>}

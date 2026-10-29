@@ -35,7 +35,7 @@ export default function SportsPage() {
 
   const card = (e: Ev, faded = false) => (
     <div key={e.id} className={`bg-white border border-dp2-card-border rounded-2xl p-5 ${faded ? 'opacity-60' : ''}`}>
-      <p className="font-heading text-[19px] font-bold text-slate-800">{isUrdu && e.title_ur ? e.title_ur : e.title}</p>
+      <p className="font-heading text-[15px] font-bold text-slate-800">{isUrdu && e.title_ur ? e.title_ur : e.title}</p>
       {e.tournament_name && <p className="font-sans text-[14.5px] text-slate-800 mt-1">{e.tournament_name}{e.entry_fee ? ` · ${t('ve.entryFee')}: ${e.entry_fee}` : ''}</p>}
       {(isUrdu ? e.description_ur : e.description) && <p className="font-sans text-[14.5px] text-slate-500 mt-1.5">{isUrdu ? e.description_ur : e.description}</p>}
       <div className="flex flex-wrap gap-x-5 gap-y-1 mt-3 font-sans text-[13.5px] text-slate-500">
@@ -51,7 +51,7 @@ export default function SportsPage() {
       <div className="flex items-center justify-between gap-3 flex-wrap mb-1.5">
         <div className="flex items-center gap-2.5">
           <Trophy size={26} className="text-amber-600" />
-          <h1 className="font-heading text-[21px] font-bold text-dp2-primary">{t('sp.pageTitle')}</h1>
+          <h1 className="font-heading text-[20px] md:text-[21px] font-bold text-dp2-primary">{t('sp.pageTitle')}</h1>
         </div>
         <Link href="/portal/suggestions" className="flex items-center gap-2 px-4 py-2 border-2 border-dp2-primary-dark text-dp2-primary-dark rounded-xl font-sans text-[14px] font-semibold hover:bg-dp2-primary-dark hover:text-white transition-all">
           <PlusCircle size={15} /> {t('sp.proposeEvent')}
@@ -70,7 +70,7 @@ export default function SportsPage() {
           )}
           {past.length > 0 && (
             <>
-              <h2 className="font-heading text-[19px] font-bold text-slate-500 mb-4">{t('x.past')}</h2>
+              <h2 className="font-heading text-[15px] font-bold text-slate-500 mb-4">{t('x.past')}</h2>
               <div className="space-y-4">{past.map((e) => card(e, true))}</div>
             </>
           )}

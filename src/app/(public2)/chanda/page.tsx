@@ -72,7 +72,7 @@ export default function ChandaPage() {
       <div className="flex items-center justify-between gap-3 flex-wrap mb-1.5">
         <div className="flex items-center gap-2.5">
           <Landmark size={26} className="text-dp2-primary" />
-          <h1 className="font-heading text-[21px] font-bold text-dp2-primary">{t('ch.pageTitle')}</h1>
+          <h1 className="font-heading text-[20px] md:text-[21px] font-bold text-dp2-primary">{t('ch.pageTitle')}</h1>
         </div>
         <button onClick={copyLink} className="flex items-center gap-2 px-3 py-2 border border-dp2-card-border rounded-xl font-sans text-[13.5px] font-semibold hover:bg-dp2-surface transition-all cursor-pointer">
           <Copy size={14} /> {t('ch.shareLink')}
@@ -103,7 +103,7 @@ export default function ChandaPage() {
                 <div className="flex items-center justify-between gap-3 flex-wrap mb-2">
                   <div>
                     <span className="text-[11.5px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 uppercase">{t(`ch.type.${c.type}`)}</span>
-                    <p className="font-heading text-[19px] font-bold text-slate-800 mt-1">{isUrdu && c.title_ur ? c.title_ur : c.title}</p>
+                    <p className="font-heading text-[15px] font-bold text-slate-800 mt-1">{isUrdu && c.title_ur ? c.title_ur : c.title}</p>
                   </div>
                   <button onClick={() => setShowForm(c.id)} className="px-4 py-2 bg-dp2-primary-dark text-white rounded-xl font-sans text-[14px] font-semibold hover:bg-dp2-primary transition-all cursor-pointer">{t('ch.donateBtn')}</button>
                 </div>
@@ -155,7 +155,7 @@ export default function ChandaPage() {
       {showForm && (
         <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4" onClick={() => setShowForm(null)}>
           <div className="bg-white rounded-2xl p-6 w-full max-w-sm" onClick={(e) => e.stopPropagation()}>
-            <h3 className="font-heading text-[19px] font-bold text-dp2-primary mb-4">{t('ch.donateBtn')}</h3>
+            <h3 className="font-heading text-[15px] font-bold text-dp2-primary mb-4">{t('ch.donateBtn')}</h3>
             <label className="block font-sans text-[14px] font-semibold text-slate-500 mb-1.5">{t('sl.amount')}</label>
             <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} className="input-field mb-3" />
             <label className="block font-sans text-[14px] font-semibold text-slate-500 mb-1.5">{t('sl.message')}</label>

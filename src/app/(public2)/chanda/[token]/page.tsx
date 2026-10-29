@@ -60,7 +60,7 @@ export default function ChandaManagePage() {
     <div className="max-w-[700px] mx-auto px-6 py-10" dir={isUrdu ? 'rtl' : 'ltr'} style={isUrdu ? { fontFamily: 'var(--font-urdu-ui)' } : undefined}>
       <div className="flex items-center gap-2.5 mb-1.5">
         <Landmark size={24} className="text-dp2-primary-dark" />
-        <h1 className="font-heading text-[19px] font-bold text-dp2-primary">{campaign.title}</h1>
+        <h1 className="font-heading text-[20px] font-bold text-dp2-primary">{campaign.title}</h1>
       </div>
       <p className="font-sans text-[14.5px] text-slate-500 mb-6">{t('sl.managePageIntro')}</p>
 
@@ -71,7 +71,7 @@ export default function ChandaManagePage() {
 
       {pending.length > 0 && (
         <>
-          <h2 className="font-heading text-[17px] font-bold text-slate-800 mb-3">{t('sl.pending')}</h2>
+          <h2 className="font-heading text-[15px] font-bold text-slate-800 mb-3">{t('sl.pending')}</h2>
           <div className="space-y-2 mb-6">
             {pending.map((p) => (
               <div key={p.id} className="bg-white border border-amber-200 rounded-2xl p-3.5 flex items-center justify-between gap-3">
@@ -90,7 +90,7 @@ export default function ChandaManagePage() {
         </>
       )}
 
-      <h2 className="font-heading text-[17px] font-bold text-slate-800 mb-3">{t('sl.confirmed')}</h2>
+      <h2 className="font-heading text-[15px] font-bold text-slate-800 mb-3">{t('sl.confirmed')}</h2>
       {received.length === 0 ? (
         <p className="font-sans text-[14.5px] text-slate-500">{t('sl.noneYet')}</p>
       ) : (

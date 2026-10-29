@@ -3,9 +3,10 @@
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
-import { motion, AnimatePresence } from 'motion/react'
-import { X, Image as ImageIcon, ChevronLeft, ChevronRight, PlayCircle } from 'lucide-react'
+import { motion } from 'motion/react'
+import { Images, ChevronLeft, PlayCircle } from 'lucide-react'
 import { useLocale } from '@/lib/i18n/LocaleProvider'
+import { Lightbox } from '@/components/public/Lightbox'
 
 interface Album {
   id: string
@@ -25,7 +26,7 @@ interface GalleryItem {
 }
 
 const categoryColors: Record<string, string> = {
-  projects: 'from-dp2-primary-dark to-amber-100',
+  projects: 'from-dp2-primary-dark to-amber-600',
   sports: 'from-emerald-600 to-emerald-800',
   kids: 'from-blue-500 to-blue-700',
   events: 'from-indigo-500 to-indigo-700',
@@ -34,11 +35,12 @@ const categoryColors: Record<string, string> = {
 }
 
 export default function GalleryPage() {
-  const { t } = useLocale()
+  const { t, isUrdu } = useLocale()
   const [albums, setAlbums] = useState<Album[]>([])
   const [items, setItems] = useState<GalleryItem[]>([])
   const [selectedAlbum, setSelectedAlbum] = useState<string | null>(null)
-  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
+  const [itemsLoading, setItemsLoading] = useState(false)
+  const [lightboxIndex, setLightboxIndex] = useState(-1)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -55,6 +57,8 @@ export default function GalleryPage() {
 
   const loadAlbumItems = async (albumId: string) => {
     setSelectedAlbum(albumId)
+    setItemsLoading(true)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
     const supabase = createClient()
     const { data } = await supabase
       .from('gallery_items')
@@ -62,75 +66,82 @@ export default function GalleryPage() {
       .eq('album_id', albumId)
       .order('display_order')
     setItems(data ?? [])
+    setItemsLoading(false)
   }
 
   const closeAlbum = () => {
     setSelectedAlbum(null)
     setItems([])
-    setLightboxIndex(null)
+    setLightboxIndex(-1)
   }
 
   const selectedAlbumData = albums.find((a) => a.id === selectedAlbum)
-  const albumItems = items
+  const albumTitle = (a: Album) => (isUrdu && a.title_ur) || a.title
 
   return (
-    <div className="max-w-[1200px] mx-auto px-6 md:px-12 py-10 min-h-screen">
+    <div className="max-w-[1200px] mx-auto px-4 sm:px-6 md:px-12 py-8 md:py-10 min-h-screen">
       {/* Header */}
-      <div className="mb-10">
-        <h1 className="font-heading text-[23px] font-bold leading-[28px] text-dp2-primary section-title">
+      <div className="mb-6 md:mb-8">
+        <h1 className="font-heading text-[20px] md:text-[23px] font-bold leading-snug text-dp2-primary section-title">
           {t('x.photoVideoGallery')}
         </h1>
-        <p className="text-slate-500 font-sans text-[19px] leading-[20px] mt-2">
-          Browse through moments captured from village events, projects, and celebrations.
+        <p className="text-slate-500 font-sans text-[15px] leading-relaxed mt-1.5">
+          {t('x.galleryIntro')}
         </p>
       </div>
 
       {/* Loading */}
       {loading && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="aspect-[4/3] bg-dp2-surface rounded-xl animate-pulse" />
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="aspect-[4/5] bg-slate-200/70 rounded-2xl animate-pulse" />
           ))}
         </div>
       )}
 
       {/* Albums Grid (when no album selected) */}
       {!loading && !selectedAlbum && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
           {albums.map((album, i) => {
             const gradient = categoryColors[album.category ?? ''] ?? 'from-dp2-primary to-dp2-primary-dark'
             return (
               <motion.button
                 key={album.id}
-                initial={{ opacity: 0, y: 16 }}
+                initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.35, delay: i * 0.05 }}
-                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.3, delay: Math.min(i * 0.04, 0.3) }}
                 onClick={() => loadAlbumItems(album.id)}
-                className="relative aspect-[4/3] rounded-xl overflow-hidden group cursor-pointer text-start"
+                className="relative aspect-[4/5] rounded-2xl overflow-hidden group cursor-pointer text-start shadow-sm ring-1 ring-black/5 active:scale-[0.98] transition-transform"
               >
                 {album.cover_url ? (
-                  <Image src={album.cover_url} alt={album.title} fill sizes="(min-width: 768px) 33vw, 100vw" className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <Image
+                    src={album.cover_url} alt={albumTitle(album)} fill
+                    sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
+                    priority={i < 4}
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
                 ) : (
-                  <div className={`absolute inset-0 bg-gradient-to-br ${gradient} group-hover:scale-105 transition-transform duration-500`} />
+                  <div className={`absolute inset-0 bg-gradient-to-br ${gradient} flex items-center justify-center`}>
+                    <Images size={34} className="text-white/60" />
+                  </div>
                 )}
-                <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors" />
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-white p-4">
-                  {!album.cover_url && <ImageIcon size={36} className="mb-3 opacity-80" />}
-                  <h3 className="font-heading text-[21px] font-bold text-center leading-[20px] drop-shadow">
-                    {album.title}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/15 to-transparent" />
+                {album.category && (
+                  <span className="absolute top-2.5 start-2.5 text-[10.5px] font-sans font-bold tracking-wide uppercase text-white bg-black/35 backdrop-blur-sm px-2 py-0.5 rounded-full">
+                    {album.category}
+                  </span>
+                )}
+                <div className="absolute inset-x-0 bottom-0 p-3">
+                  <h3 className="font-heading text-[14px] md:text-[16px] font-bold text-white leading-snug line-clamp-2 drop-shadow">
+                    {albumTitle(album)}
                   </h3>
-                  {album.category && (
-                    <span className="mt-2 text-[13px] font-sans font-semibold tracking-[0.05em] uppercase bg-white/20 px-3 py-1 rounded-full">
-                      {album.category}
-                    </span>
-                  )}
                 </div>
               </motion.button>
             )
           })}
-          {albums.length === 0 && !loading && (
-            <div className="col-span-3 text-center py-16 text-slate-500 font-sans">
+          {albums.length === 0 && (
+            <div className="col-span-full flex flex-col items-center text-center py-16 text-slate-500 font-sans gap-3">
+              <Images size={36} className="text-slate-300" />
               {t('x.noAlbums')}
             </div>
           )}
@@ -140,57 +151,55 @@ export default function GalleryPage() {
       {/* Album Items View */}
       {selectedAlbum && selectedAlbumData && (
         <div>
-          {/* Back header */}
-          <div className="flex items-center gap-4 mb-8">
+          <div className="sticky top-0 z-20 -mx-4 sm:-mx-6 md:mx-0 px-4 sm:px-6 md:px-0 py-3 mb-4 bg-dp2-surface/95 backdrop-blur flex items-center gap-3">
             <button
               onClick={closeAlbum}
-              className="flex items-center gap-2 text-dp2-primary-dark font-sans text-[15px] font-semibold tracking-[0.05em] hover:underline cursor-pointer"
+              className="shrink-0 flex items-center gap-1 ps-2 pe-3 py-1.5 rounded-full bg-white border border-dp2-card-border text-dp2-primary-dark font-sans text-[13px] font-semibold hover:bg-dp2-primary-dark hover:text-white transition-colors cursor-pointer"
             >
               <ChevronLeft size={16} />
               {t('x.backToAlbums')}
             </button>
-            <h2 className="font-heading text-[19px] font-bold leading-[24px] text-dp2-primary section-title">
-              {selectedAlbumData.title}
+            <h2 className="min-w-0 font-heading text-[16px] md:text-[18px] font-bold leading-snug text-dp2-primary truncate">
+              {albumTitle(selectedAlbumData)}
             </h2>
+            {!itemsLoading && items.length > 0 && (
+              <span className="ms-auto shrink-0 text-[12px] font-sans font-semibold text-slate-500 ltr-num" dir="ltr">{items.length}</span>
+            )}
           </div>
 
-          {/* Masonry-style grid */}
-          <div className="columns-2 md:columns-3 gap-4 space-y-4">
-            {albumItems.map((item, i) => (
-              <motion.button
+          {/* Uniform square grid: optimized thumbnails at the size they are
+              shown, rather than every original photo at full resolution. */}
+          <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-1 md:gap-2">
+            {itemsLoading && Array.from({ length: 9 }).map((_, i) => (
+              <div key={i} className="aspect-square bg-slate-200/70 rounded-md md:rounded-lg animate-pulse" />
+            ))}
+            {!itemsLoading && items.map((item, i) => (
+              <button
                 key={item.id}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: Math.min(i * 0.04, 0.4) }}
-                whileHover={{ scale: 1.015 }}
                 onClick={() => setLightboxIndex(i)}
-                className="relative block w-full rounded-xl overflow-hidden bg-dp2-surface hover:opacity-95 transition-opacity cursor-pointer break-inside-avoid"
+                className="relative aspect-square rounded-md md:rounded-lg overflow-hidden bg-slate-200 cursor-pointer group"
+                aria-label={item.caption ?? undefined}
               >
                 {item.type === 'video' ? (
-                  <div className="relative">
-                    <video src={item.url} className="w-full h-auto block" muted preload="metadata" />
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                      <PlayCircle size={40} className="text-white drop-shadow" />
+                  <>
+                    <video src={`${item.url}#t=0.1`} className="absolute inset-0 w-full h-full object-cover" muted playsInline preload="metadata" />
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/25">
+                      <PlayCircle size={32} className="text-white drop-shadow" />
                     </div>
-                  </div>
+                  </>
                 ) : (
-                  // Masonry relies on each image's own natural aspect ratio (that's
-                  // the whole point of the layout) — next/image needs width/height
-                  // (or a fixed-size `fill` parent) known ahead of render, which we
-                  // don't have without storing per-image dimensions. Kept as a plain
-                  // lazy-loaded <img> deliberately, not an oversight.
-                  <img src={item.url} alt={item.caption ?? ''} className="w-full h-auto block" loading="lazy" />
+                  <Image
+                    src={item.url} alt={item.caption ?? ''} fill
+                    sizes="(min-width: 1024px) 20vw, (min-width: 768px) 25vw, 33vw"
+                    priority={i < 6}
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
                 )}
-                {item.caption && (
-                  <p className="p-3 text-[15px] font-sans text-slate-500 text-start">
-                    {item.caption}
-                  </p>
-                )}
-              </motion.button>
+              </button>
             ))}
           </div>
 
-          {albumItems.length === 0 && (
+          {!itemsLoading && items.length === 0 && (
             <div className="text-center py-16 text-slate-500 font-sans">
               {t('x.noItemsAlbum')}
             </div>
@@ -198,60 +207,12 @@ export default function GalleryPage() {
         </div>
       )}
 
-      {/* Lightbox */}
-      <AnimatePresence>
-        {lightboxIndex !== null && albumItems[lightboxIndex] && (
-          <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center"
-          >
-            <button
-              onClick={() => setLightboxIndex(null)}
-              className="absolute top-4 right-4 text-white/80 hover:text-white cursor-pointer z-[110]"
-            >
-              <X size={32} />
-            </button>
-
-            {lightboxIndex > 0 && (
-              <button
-                onClick={() => setLightboxIndex(lightboxIndex - 1)}
-                className="absolute left-4 text-white/80 hover:text-white cursor-pointer"
-              >
-                <ChevronLeft size={40} />
-              </button>
-            )}
-
-            {lightboxIndex < albumItems.length - 1 && (
-              <button
-                onClick={() => setLightboxIndex(lightboxIndex + 1)}
-                className="absolute right-4 text-white/80 hover:text-white cursor-pointer"
-              >
-                <ChevronRight size={40} />
-              </button>
-            )}
-
-            <motion.div
-              key={lightboxIndex}
-              initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.96 }}
-              transition={{ duration: 0.2 }}
-              className="max-w-4xl max-h-[80vh] flex flex-col items-center px-4"
-            >
-              {albumItems[lightboxIndex].type === 'video' ? (
-                <video src={albumItems[lightboxIndex].url} controls autoPlay className="max-w-full max-h-[70vh] rounded-xl" />
-              ) : (
-                // Same reasoning as the masonry grid above — unknown dimensions,
-                // sized by its own natural aspect ratio.
-                <img src={albumItems[lightboxIndex].url} alt={albumItems[lightboxIndex].caption ?? ''} className="max-w-full max-h-[70vh] rounded-xl object-contain" />
-              )}
-              {albumItems[lightboxIndex].caption && (
-                <p className="text-white/80 font-sans text-[17px] mt-4 text-center">
-                  {albumItems[lightboxIndex].caption}
-                </p>
-              )}
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <Lightbox
+        images={items.map((it) => ({ url: it.url, caption: it.caption, type: it.type }))}
+        index={lightboxIndex}
+        onClose={() => setLightboxIndex(-1)}
+        onNavigate={setLightboxIndex}
+      />
     </div>
   )
 }

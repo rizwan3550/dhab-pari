@@ -315,7 +315,7 @@ export default function MoonFinderPage() {
     <div className="max-w-[600px] mx-auto px-6 md:px-12 py-10" dir={isUrdu ? 'rtl' : 'ltr'} style={isUrdu ? { fontFamily: 'var(--font-urdu-ui)' } : undefined}>
       <div className="flex items-center gap-2.5 mb-1.5">
         <Moon size={24} className="text-dp2-primary-dark" />
-        <h1 className="font-heading text-[23px] md:text-[27px] font-bold text-dp2-primary">{t('mf.title')}</h1>
+        <h1 className="font-heading text-[20px] md:text-[27px] font-bold text-dp2-primary">{t('mf.title')}</h1>
       </div>
       <p className="font-sans text-[15px] text-slate-500 mb-6">{t('mf.subtitle')}</p>
 
@@ -339,7 +339,7 @@ export default function MoonFinderPage() {
       {phase === 'belowHorizon' && (
         <div className="bg-slate-900 rounded-xl p-8 text-center text-white">
           <Moon size={40} className="mx-auto mb-3 opacity-40" />
-          <p className="font-heading text-[19px] font-bold mb-1.5">{t('mf.belowHorizonTitle')}</p>
+          <p className="font-heading text-[15px] font-bold mb-1.5">{t('mf.belowHorizonTitle')}</p>
           <p className="font-sans text-[14.5px] text-white/70 mb-5">{t('mf.belowHorizonBody')}</p>
           <button onClick={() => setPhase('idle')} className="px-5 py-2.5 border border-white/40 rounded-2xl font-sans text-[14.5px] font-semibold cursor-pointer hover:bg-white/10">{t('mf.stop')}</button>
         </div>

@@ -118,7 +118,7 @@ export default function MarketplaceLandingPage() {
   return (
     <div className="max-w-[1000px] mx-auto px-4 md:px-6 py-8" dir={isUrdu ? 'rtl' : 'ltr'}>
       <div className="mb-6">
-        <h1 className="font-heading text-[23px] md:text-[34px] font-bold text-dp2-primary section-title flex items-center gap-2.5">
+        <h1 className="font-heading text-[20px] md:text-[34px] font-bold text-dp2-primary section-title flex items-center gap-2.5">
           <Store size={26} className="text-dp2-primary-dark" /> {dt('heading')}
         </h1>
         <p className="text-slate-500 font-sans text-[16px] mt-1.5">{dt('subheading')}</p>

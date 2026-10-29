@@ -104,10 +104,10 @@ export default function NewsPage() {
     <div className="max-w-[1200px] mx-auto px-6 md:px-12 py-10 min-h-screen">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="font-heading text-[23px] font-bold leading-[28px] text-dp2-primary section-title">
+        <h1 className="font-heading text-[20px] md:text-[23px] font-bold leading-[28px] text-dp2-primary section-title">
           {t('x.villageNewsUpdates')}
         </h1>
-        <p className="text-slate-500 font-sans text-[19px] leading-[20px] mt-2">
+        <p className="text-slate-500 font-sans text-[15px] leading-[20px] mt-2">
           {t('x.newsPageIntro')}
         </p>
       </div>
@@ -147,7 +147,7 @@ export default function NewsPage() {
       )}
 
       {!loading && filtered.length === 0 && (
-        <div className="text-center py-16 text-slate-500 font-sans text-[17px]">
+        <div className="text-center py-16 text-slate-500 font-sans text-[15px]">
           {t('x.noNewsCategory')}
         </div>
       )}
@@ -168,10 +168,10 @@ export default function NewsPage() {
                 <span className={`text-[11px] font-bold uppercase tracking-widest font-sans ${categoryColors[featured.category ?? '']?.text ?? 'text-dp2-primary-dark'}`}>
                   {featured.category}
                 </span>
-                <h2 className="font-heading text-[19px] font-bold leading-[24px] text-dp2-primary mt-2 group-hover:text-dp2-primary-dark transition-colors">
+                <h2 className="font-heading text-[15px] font-bold leading-[24px] text-dp2-primary mt-2 group-hover:text-dp2-primary-dark transition-colors">
                   {featured.title}
                 </h2>
-                <p className={`text-slate-500 font-sans text-[17px] mt-3 line-clamp-3 ${isUrdu ? 'leading-[26px]' : 'leading-[24px]'}`}>
+                <p className={`text-slate-500 font-sans text-[15px] mt-3 line-clamp-3 ${isUrdu ? 'leading-[26px]' : 'leading-[24px]'}`}>
                   {featured.content}
                 </p>
               </div>
@@ -218,7 +218,7 @@ export default function NewsPage() {
                     <span className={`text-[11px] font-bold uppercase tracking-widest font-sans ${colors.text}`}>
                       {post.category}
                     </span>
-                    <h3 className="font-bold text-dp2-primary text-[17px] font-sans leading-[24px] mt-1 group-hover:text-dp2-primary-dark transition-colors line-clamp-2">
+                    <h3 className="font-bold text-dp2-primary text-[15px] font-sans leading-[24px] mt-1 group-hover:text-dp2-primary-dark transition-colors line-clamp-2">
                       {post.title}
                     </h3>
                     <p className="text-slate-500 text-[15px] font-sans tracking-[0.05em] mt-2 line-clamp-2">

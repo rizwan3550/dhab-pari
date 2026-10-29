@@ -99,14 +99,14 @@ export default async function NewsDetailPage({
         </span>
 
         {/* Title */}
-        <h1 className="font-heading text-[23px] md:text-[40px] font-bold leading-[28px] md:leading-[28px] text-dp2-primary mb-4">
+        <h1 className="font-heading text-[20px] md:text-[40px] font-bold leading-[28px] md:leading-[28px] text-dp2-primary mb-4">
           {post.title}
         </h1>
 
         {/* Urdu title */}
         {post.title_ur && (
           <p
-            className="text-slate-500 text-[23px] mb-6"
+            className="text-slate-500 text-[20px] mb-6"
             style={{ fontFamily: 'var(--font-urdu-ui)', lineHeight: '1.6', direction: 'rtl' }}
           >
             {post.title_ur}
@@ -135,7 +135,7 @@ export default async function NewsDetailPage({
           {post.content.split('\n').map((paragraph: string, i: number) => (
             <p
               key={i}
-              className="text-slate-800 font-sans text-[19px] leading-[20px] mb-4"
+              className="text-slate-800 font-sans text-[15px] leading-[20px] mb-4"
             >
               {paragraph}
             </p>
@@ -151,7 +151,7 @@ export default async function NewsDetailPage({
             {post.content_ur.split('\n').map((paragraph: string, i: number) => (
               <p
                 key={i}
-                className="text-slate-800 text-[19px] mb-4"
+                className="text-slate-800 text-[15px] mb-4"
                 style={{
                   fontFamily: 'var(--font-urdu-ui)',
                   lineHeight: '1.6',

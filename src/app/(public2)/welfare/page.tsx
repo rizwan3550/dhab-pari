@@ -78,7 +78,7 @@ export default function WelfarePage() {
     // ZakatCalculator (checked), so safe to flip as a whole.
     <div className="max-w-[1000px] mx-auto px-6 md:px-12 py-10 min-h-screen" dir={isUrdu ? 'rtl' : 'ltr'}>
       <div className="mb-8">
-        <h1 className="font-heading text-[23px] font-bold leading-[28px] text-dp2-primary">{t('wf.title')}</h1>
+        <h1 className="font-heading text-[20px] md:text-[23px] font-bold leading-[28px] text-dp2-primary">{t('wf.title')}</h1>
         <p className="font-sans text-[16.5px] text-slate-500 mt-2.5 leading-relaxed max-w-2xl">{t('wf.blurb')}</p>
       </div>
 
@@ -87,7 +87,7 @@ export default function WelfarePage() {
         <div className="flex items-start gap-3">
           <ShieldCheck size={22} className="text-dp2-primary-dark shrink-0 mt-0.5" />
           <div>
-            <h2 className="font-heading text-[20px] font-bold text-dp2-primary mb-1.5">{t('wf.privacy.title')}</h2>
+            <h2 className="font-heading text-[17px] font-bold text-dp2-primary mb-1.5">{t('wf.privacy.title')}</h2>
             <p className="font-sans text-[15px] text-slate-800 leading-relaxed"
               style={{ fontFamily: 'var(--font-urdu-ui)', direction: 'rtl' }}>
               {t('wf.privacy.urdu')}
@@ -110,7 +110,7 @@ export default function WelfarePage() {
                     <m.icon size={21} />
                   </div>
                   <div className="min-w-0">
-                    <h2 className="font-heading text-[24px] font-bold text-dp2-primary leading-tight">{m.title}</h2>
+                    <h2 className="font-heading text-[21px] md:text-[24px] font-bold text-dp2-primary leading-tight">{m.title}</h2>
                     <p className="font-sans text-[15px] text-slate-500 mt-1 leading-relaxed">{m.lead}</p>
                   </div>
                 </div>
@@ -155,14 +155,14 @@ export default function WelfarePage() {
 
       {/* ── Calculator ──────────────────────────────────────────────────── */}
       <div className="mb-10">
-        <h2 className="font-heading text-[27px] font-bold text-dp2-primary mb-2">{t('wf.calculator.title')}</h2>
+        <h2 className="font-heading text-[22px] md:text-[27px] font-bold text-dp2-primary mb-2">{t('wf.calculator.title')}</h2>
         <p className="font-sans text-[15px] text-slate-500 mb-5 max-w-2xl leading-relaxed">{t('wf.calculator.blurb')}</p>
         <ZakatCalculator />
       </div>
 
       {/* ── How to apply ────────────────────────────────────────────────── */}
       <div className="bg-white border border-dp2-card-border rounded-2xl p-6">
-        <h2 className="font-heading text-[23px] font-bold text-dp2-primary mb-3">{t('wf.apply.title')}</h2>
+        <h2 className="font-heading text-[20px] md:text-[23px] font-bold text-dp2-primary mb-3">{t('wf.apply.title')}</h2>
         <p className="font-sans text-[15px] text-slate-800 leading-relaxed mb-3"
           style={{ fontFamily: 'var(--font-urdu-ui)', direction: 'rtl' }}>
           {t('wf.apply.urdu')}

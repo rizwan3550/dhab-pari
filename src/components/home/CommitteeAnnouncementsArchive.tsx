@@ -39,7 +39,7 @@ export function CommitteeAnnouncementsArchive({ notes }: { notes: CommitteeNote[
     <section id="announcements" dir={isUrdu ? 'rtl' : 'ltr'}>
       <div className="flex items-center gap-3 mb-8">
         <span className="bg-dp2-primary-dark text-white rounded-full p-2.5 shrink-0"><Megaphone size={20} /></span>
-        <h2 className="font-heading text-[29px] md:text-[33px] font-bold leading-[37px] text-dp2-primary">
+        <h2 className="font-heading text-[20px] md:text-[26px] font-bold leading-snug text-dp2-primary">
           {t('home.allAnnouncements')}
         </h2>
       </div>

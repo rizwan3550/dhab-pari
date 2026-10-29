@@ -68,7 +68,7 @@ export function NewsComments({ newsPostId }: { newsPostId: string }) {
 
   return (
     <div dir={isUrdu ? 'rtl' : 'ltr'} className="mt-10 pt-8 border-t border-dp2-card-border">
-      <h3 className="font-heading text-[19px] font-bold text-dp2-primary flex items-center gap-2 mb-4">
+      <h3 className="font-heading text-[15px] font-bold text-dp2-primary flex items-center gap-2 mb-4">
         <MessageCircle size={18} className="text-dp2-primary-dark" /> {t('nc.comments')} {comments.length > 0 && `(${comments.length})`}
       </h3>
 

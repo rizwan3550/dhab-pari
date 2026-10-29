@@ -108,7 +108,7 @@ export default function ClassifiedsPage() {
           <h3 className="font-sans text-[16.5px] font-semibold text-slate-800 mt-2 truncate">{l.title}</h3>
           {detail && <p className="font-sans text-[13.5px] text-slate-500 mt-1 ltr-num">{detail}</p>}
           {l.specifications && <p className="font-sans text-[13px] text-slate-500 mt-1 line-clamp-2">{l.specifications}</p>}
-          {l.price_pkr != null && <p className="font-heading text-[18px] font-bold text-dp2-primary mt-1 ltr-num">PKR {fmt(l.price_pkr)}</p>}
+          {l.price_pkr != null && <p className="font-heading text-[15px] font-bold text-dp2-primary mt-1 ltr-num">PKR {fmt(l.price_pkr)}</p>}
           {l.location_text && (
             <p className="font-sans text-[13.5px] text-slate-500 mt-1.5 flex items-center gap-1"><MapPin size={12} /> {l.location_text}</p>
           )}
@@ -130,8 +130,8 @@ export default function ClassifiedsPage() {
   return (
     <div className="max-w-[1100px] mx-auto px-6 md:px-12 py-10 min-h-screen" dir={isUrdu ? 'rtl' : 'ltr'} style={isUrdu ? { fontFamily: 'var(--font-urdu-ui)' } : undefined}>
       <div className="mb-8">
-        <h1 className="font-heading text-[23px] font-bold leading-[28px] text-slate-800 flex items-center gap-3"><ShoppingBag size={28} className="text-dp2-primary-dark" /> {t('cl.pageTitle')}</h1>
-        <p className="text-slate-500 font-sans text-[17px] leading-[26px] max-w-2xl mt-2">
+        <h1 className="font-heading text-[20px] md:text-[23px] font-bold leading-[28px] text-slate-800 flex items-center gap-3"><ShoppingBag size={28} className="text-dp2-primary-dark" /> {t('cl.pageTitle')}</h1>
+        <p className="text-slate-500 font-sans text-[15px] leading-[26px] max-w-2xl mt-2">
           {t('cl.pageIntro')}{' '}
           <Link href="/portal/classifieds" className="text-dp2-primary-dark font-semibold hover:underline">{t('cl.postYourOwn')}</Link>.
         </p>
@@ -150,7 +150,7 @@ export default function ClassifiedsPage() {
       {loading ? (
         <p className="font-sans text-[15px] text-slate-500 text-center py-16"><LoadingDots /></p>
       ) : filtered.length === 0 ? (
-        <div className="text-center py-16 text-slate-500 font-sans text-[17px]">{t('cl.noneFound')}</div>
+        <div className="text-center py-16 text-slate-500 font-sans text-[15px]">{t('cl.noneFound')}</div>
       ) : category ? (
         // A specific category is already chosen via the filter — a
         // repeated section heading above a single grid would be noise.

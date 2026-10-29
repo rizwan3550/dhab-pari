@@ -53,13 +53,13 @@ export default async function VideoDetailPage({
             </span>
           )}
 
-          <h1 className="font-heading text-[21px] md:text-[23px] font-bold leading-[26px] md:leading-[28px] text-dp2-primary mb-2">
+          <h1 className="font-heading text-[20px] md:text-[23px] font-bold leading-[26px] md:leading-[28px] text-dp2-primary mb-2">
             {video.title}
           </h1>
 
           {video.title_ur && (
             <p
-              className="text-slate-500 text-[21px] mb-4"
+              className="text-slate-500 text-[17px] mb-4"
               style={{ fontFamily: 'var(--font-urdu-ui)', lineHeight: '1.6' }}
             >
               {video.title_ur}
@@ -78,7 +78,7 @@ export default async function VideoDetailPage({
           </div>
 
           {video.description && (
-            <p className="font-sans text-[19px] leading-[20px] text-slate-500">
+            <p className="font-sans text-[15px] leading-[20px] text-slate-500">
               {video.description}
             </p>
           )}

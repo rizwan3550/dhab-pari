@@ -53,7 +53,7 @@ export default function VillageEventsPage() {
   const card = (e: Ev, faded = false) => (
     <div key={e.id} className={`bg-white border border-dp2-card-border rounded-2xl p-5 ${faded ? 'opacity-60' : ''}`}>
       <span className={`text-[11.5px] font-bold px-2 py-0.5 rounded-full uppercase ${categoryTone[e.category] ?? categoryTone.other}`}>{t(`ve.cat.${e.category}`)}{e.category === 'condolence' && e.gathering_type ? ` · ${t(`ve.gt.${e.gathering_type}`)}` : ''}</span>
-      <p className="font-heading text-[19px] font-bold text-slate-800 mt-2">{isUrdu && e.title_ur ? e.title_ur : e.title}</p>
+      <p className="font-heading text-[15px] font-bold text-slate-800 mt-2">{isUrdu && e.title_ur ? e.title_ur : e.title}</p>
       {e.category === 'wedding' && (e.groom_name || e.bride_name) && (
         <p className="font-sans text-[14.5px] text-slate-800 mt-1">{e.groom_name}{e.groom_name && e.bride_name ? ' & ' : ''}{e.bride_name}</p>
       )}
@@ -86,7 +86,7 @@ export default function VillageEventsPage() {
     <div className="max-w-[900px] mx-auto px-6 md:px-12 py-10" dir={isUrdu ? 'rtl' : 'ltr'} style={isUrdu ? { fontFamily: 'var(--font-urdu-ui)' } : undefined}>
       <div className="flex items-center gap-2.5 mb-1.5">
         <CalendarDays size={26} className="text-dp2-primary" />
-        <h1 className="font-heading text-[21px] font-bold text-dp2-primary">{t('ve.pageTitle')}</h1>
+        <h1 className="font-heading text-[20px] md:text-[21px] font-bold text-dp2-primary">{t('ve.pageTitle')}</h1>
       </div>
       <p className="font-sans text-[15px] text-slate-500 mb-8">{t('ve.pageIntro')}</p>
 
@@ -102,7 +102,7 @@ export default function VillageEventsPage() {
 
           {past.length > 0 && (
             <>
-              <h2 className="font-heading text-[19px] font-bold text-slate-500 mb-4">{t('x.past')}</h2>
+              <h2 className="font-heading text-[15px] font-bold text-slate-500 mb-4">{t('x.past')}</h2>
               <div className="space-y-4">{past.map((e) => card(e, true))}</div>
             </>
           )}

@@ -19,6 +19,14 @@ const nextConfig: NextConfig = {
     ]
   },
   images: {
+    // Every upload in this app gets a unique timestamped filename and
+    // nothing is ever overwritten in place (see components/admin/*Upload),
+    // so a given image URL never changes content. Keeping each resized copy
+    // for 30 days instead of the 4-hour default means a photo is optimized
+    // once, not again for whoever happens to visit after the cache lapsed
+    // -- the "some photos show instantly, some take ages" pattern on the
+    // committee and project pages.
+    minimumCacheTTL: 2592000,
     remotePatterns: [
       {
         protocol: 'https',

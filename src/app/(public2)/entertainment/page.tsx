@@ -27,10 +27,10 @@ export default function EntertainmentPage() {
   return (
     <div className="max-w-[1200px] mx-auto px-6 md:px-12 py-10 min-h-screen">
       <div className="text-center mb-12 max-w-3xl mx-auto">
-        <h1 className="font-heading text-[23px] font-bold leading-[28px] text-dp2-primary mb-2">
+        <h1 className="font-heading text-[20px] md:text-[23px] font-bold leading-[28px] text-dp2-primary mb-2">
           <T k="x.communityCorner" />
         </h1>
-        <p className="text-slate-500 font-sans text-[19px] leading-[20px]">
+        <p className="text-slate-500 font-sans text-[15px] leading-[20px]">
           Sports, talent, and community life from the village.
         </p>
       </div>
@@ -41,7 +41,7 @@ export default function EntertainmentPage() {
             <Trophy size={28} />
           </div>
           <div className="flex-1">
-            <h2 className="font-heading text-[23px] font-bold leading-[22px] text-dp2-primary mb-1.5">
+            <h2 className="font-heading text-[20px] md:text-[23px] font-bold leading-snug text-dp2-primary mb-1.5">
               <T k="x.sportsUpdates" />
             </h2>
             <p className="text-slate-500 font-sans text-[15.5px] leading-[22px]">
@@ -60,7 +60,7 @@ export default function EntertainmentPage() {
             <Sparkles size={28} />
           </div>
           <div className="flex-1">
-            <h2 className="font-heading text-[23px] font-bold leading-[22px] text-dp2-primary mb-1.5">Talent Showcase</h2>
+            <h2 className="font-heading text-[20px] md:text-[23px] font-bold leading-snug text-dp2-primary mb-1.5">Talent Showcase</h2>
             <p className="text-slate-500 font-sans text-[15.5px] leading-[22px]">
               Poetry, art, Quran recitation, and other talent submitted by villagers themselves — admin-reviewed before it goes up.
             </p>
@@ -75,7 +75,7 @@ export default function EntertainmentPage() {
         <div className="inline-flex items-center justify-center p-2.5 bg-white/15 rounded-full mb-3">
           <MessageSquarePlus size={22} />
         </div>
-        <h3 className="font-heading text-[23px] font-bold leading-[22px] mb-2">
+        <h3 className="font-heading text-[20px] md:text-[23px] font-bold leading-snug mb-2">
           <T k="x.talentToShare" />
         </h3>
         <p className="opacity-90 font-sans text-[16px] mb-6 max-w-xl mx-auto">

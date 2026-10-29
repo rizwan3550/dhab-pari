@@ -124,10 +124,10 @@ export default function WaterApplyPage() {
           <div className="inline-flex items-center justify-center p-3 bg-dp2-primary-dark rounded-full text-emerald-100 mb-4">
             <Droplets size={32} />
           </div>
-          <h1 className="font-heading text-[23px] font-bold leading-[28px] text-dp2-primary mb-2">
+          <h1 className="font-heading text-[20px] md:text-[23px] font-bold leading-[28px] text-dp2-primary mb-2">
             {dt('title')}
           </h1>
-          <p className="text-slate-500 font-sans text-[17px]" style={isUrdu ? { lineHeight: '1.6' } : undefined}>
+          <p className="text-slate-500 font-sans text-[15px]" style={isUrdu ? { lineHeight: '1.6' } : undefined}>
             {dt('subtitle')}
           </p>
         </div>
@@ -136,10 +136,10 @@ export default function WaterApplyPage() {
         {submitted && (
           <div className="bg-white border border-dp2-card-border rounded-2xl p-12 text-center">
             <CheckCircle size={48} className="text-dp2-primary-dark mx-auto mb-4" />
-            <h2 className="font-heading text-[19px] font-bold leading-[24px] text-dp2-primary mb-2">
+            <h2 className="font-heading text-[15px] font-bold leading-[24px] text-dp2-primary mb-2">
               {dt('submittedTitle')}
             </h2>
-            <p className="text-slate-500 font-sans text-[17px] mb-6" style={isUrdu ? { lineHeight: '1.6' } : undefined}>
+            <p className="text-slate-500 font-sans text-[15px] mb-6" style={isUrdu ? { lineHeight: '1.6' } : undefined}>
               {dt('submittedBody')}
             </p>
             <Link
@@ -166,7 +166,7 @@ export default function WaterApplyPage() {
                     value={form.name}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-3 bg-white border-2 border-dp2-card-border rounded-2xl focus:border-dp2-primary-dark focus:ring-0 transition-all font-sans text-[17px]"
+                    className="w-full px-4 py-3 bg-white border-2 border-dp2-card-border rounded-2xl focus:border-dp2-primary-dark focus:ring-0 transition-all font-sans text-[15px]"
                   />
                 </div>
                 <div>
@@ -178,7 +178,7 @@ export default function WaterApplyPage() {
                     name="fatherName"
                     value={form.fatherName}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 bg-white border-2 border-dp2-card-border rounded-2xl focus:border-dp2-primary-dark focus:ring-0 transition-all font-sans text-[17px]"
+                    className="w-full px-4 py-3 bg-white border-2 border-dp2-card-border rounded-2xl focus:border-dp2-primary-dark focus:ring-0 transition-all font-sans text-[15px]"
                   />
                 </div>
               </div>
@@ -195,7 +195,7 @@ export default function WaterApplyPage() {
                     onChange={handleChange}
                     required
                     placeholder="0300-1234567"
-                    className="w-full px-4 py-3 bg-white border-2 border-dp2-card-border rounded-2xl focus:border-dp2-primary-dark focus:ring-0 transition-all font-sans text-[17px]"
+                    className="w-full px-4 py-3 bg-white border-2 border-dp2-card-border rounded-2xl focus:border-dp2-primary-dark focus:ring-0 transition-all font-sans text-[15px]"
                     style={{ direction: 'ltr', textAlign: isUrdu ? 'right' : 'left' }}
                   />
                 </div>
@@ -209,7 +209,7 @@ export default function WaterApplyPage() {
                     value={form.cnic}
                     onChange={handleChange}
                     placeholder="xxxxx-xxxxxxx-x"
-                    className="w-full px-4 py-3 bg-white border-2 border-dp2-card-border rounded-2xl focus:border-dp2-primary-dark focus:ring-0 transition-all font-sans text-[17px]"
+                    className="w-full px-4 py-3 bg-white border-2 border-dp2-card-border rounded-2xl focus:border-dp2-primary-dark focus:ring-0 transition-all font-sans text-[15px]"
                     style={{ direction: 'ltr', textAlign: isUrdu ? 'right' : 'left' }}
                   />
                 </div>
@@ -226,7 +226,7 @@ export default function WaterApplyPage() {
                   required
                   rows={3}
                   placeholder={dt('addressPlaceholder')}
-                  className="w-full px-4 py-3 bg-white border-2 border-dp2-card-border rounded-2xl focus:border-dp2-primary-dark focus:ring-0 transition-all font-sans text-[17px] resize-none"
+                  className="w-full px-4 py-3 bg-white border-2 border-dp2-card-border rounded-2xl focus:border-dp2-primary-dark focus:ring-0 transition-all font-sans text-[15px] resize-none"
                 />
               </div>
 
@@ -239,7 +239,7 @@ export default function WaterApplyPage() {
                     name="sector"
                     value={form.sector}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 bg-white border-2 border-dp2-card-border rounded-2xl focus:border-dp2-primary-dark focus:ring-0 transition-all font-sans text-[17px]"
+                    className="w-full px-4 py-3 bg-white border-2 border-dp2-card-border rounded-2xl focus:border-dp2-primary-dark focus:ring-0 transition-all font-sans text-[15px]"
                   >
                     <option value="">{dt('selectSector')}</option>
                     <option value="Sector A">Sector A</option>
@@ -255,7 +255,7 @@ export default function WaterApplyPage() {
                     name="connectionType"
                     value={form.connectionType}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 bg-white border-2 border-dp2-card-border rounded-2xl focus:border-dp2-primary-dark focus:ring-0 transition-all font-sans text-[17px]"
+                    className="w-full px-4 py-3 bg-white border-2 border-dp2-card-border rounded-2xl focus:border-dp2-primary-dark focus:ring-0 transition-all font-sans text-[15px]"
                   >
                     <option value="residential">{dt('residential')}</option>
                     <option value="commercial">{dt('commercial')}</option>
@@ -272,7 +272,7 @@ export default function WaterApplyPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-dp2-primary-dark text-white py-4 rounded-xl font-sans text-[19px] font-semibold hover:bg-dp2-primary transition-all active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-50 cursor-pointer"
+                className="w-full bg-dp2-primary-dark text-white py-4 rounded-xl font-sans text-[15px] font-semibold hover:bg-dp2-primary transition-all active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-50 cursor-pointer"
               >
                 {loading ? dt('submitting') : dt('submit')}
               </button>

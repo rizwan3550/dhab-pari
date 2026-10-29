@@ -40,7 +40,7 @@ export default function EmergencyPage() {
     <div className="max-w-[900px] mx-auto px-6 md:px-12 py-10" dir={isUrdu ? 'rtl' : 'ltr'} style={isUrdu ? { fontFamily: 'var(--font-urdu-ui)' } : undefined}>
       <div className="flex items-center gap-2.5 mb-1.5">
         <Siren size={26} className="text-red-600" />
-        <h1 className="font-heading text-[21px] font-bold text-red-700">{t('em.pageTitle')}</h1>
+        <h1 className="font-heading text-[20px] md:text-[21px] font-bold text-red-700">{t('em.pageTitle')}</h1>
       </div>
       <p className="font-sans text-[15px] text-slate-500 mb-8">{t('em.pageIntro')}</p>
 
@@ -85,7 +85,7 @@ export default function EmergencyPage() {
 
           {/* Need Help board */}
           <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
-            <h2 className="font-heading text-[21px] font-bold text-dp2-primary flex items-center gap-2"><HandHeart size={20} className="text-dp2-primary-dark" /> {t('em.needHelpTitle')}</h2>
+            <h2 className="font-heading text-[17px] md:text-[21px] font-bold text-dp2-primary flex items-center gap-2"><HandHeart size={20} className="text-dp2-primary-dark" /> {t('em.needHelpTitle')}</h2>
             <Link href="/portal/ask-for-help" className="bg-dp2-primary-dark text-white px-4 py-2 rounded-xl font-sans text-[14px] font-semibold hover:bg-dp2-primary transition-all">{t('em.askForHelp')}</Link>
           </div>
           <p className="font-sans text-[14.5px] text-slate-500 mb-4">{t('em.needHelpIntro')}</p>

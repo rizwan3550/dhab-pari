@@ -239,10 +239,10 @@ export function ProjectsListClient({ projects, voteCounts, commentCounts, receiv
     <div className="max-w-[1200px] mx-auto px-6 md:px-12 py-10 min-h-screen" dir={isUrdu ? 'rtl' : 'ltr'}>
       {/* Header */}
       <div className="mb-12">
-        <h2 className="font-heading text-[23px] md:text-[33px] font-bold leading-tight md:leading-[41px] text-dp2-primary" style={isUrdu ? { fontFamily: 'var(--font-urdu-ui)' } : undefined}>
+        <h2 className="font-heading text-[20px] md:text-[33px] font-bold leading-tight md:leading-[41px] text-dp2-primary" style={isUrdu ? { fontFamily: 'var(--font-urdu-ui)' } : undefined}>
           {dt('pageTitle')}
         </h2>
-        <p className="text-slate-500 font-sans text-[19px] leading-[29px] max-w-2xl mt-2" style={isUrdu ? { fontFamily: 'var(--font-urdu-ui)' } : undefined}>
+        <p className="text-slate-500 font-sans text-[15px] leading-[29px] max-w-2xl mt-2" style={isUrdu ? { fontFamily: 'var(--font-urdu-ui)' } : undefined}>
           {dt('pageSubtitle')}
         </p>
       </div>
@@ -332,7 +332,7 @@ export function ProjectsListClient({ projects, voteCounts, commentCounts, receiv
         })}
 
         {filtered.length === 0 && (
-          <div className="text-center py-16 text-slate-500 font-sans text-[17px]" style={isUrdu ? { fontFamily: 'var(--font-urdu-ui)' } : undefined}>
+          <div className="text-center py-16 text-slate-500 font-sans text-[15px]" style={isUrdu ? { fontFamily: 'var(--font-urdu-ui)' } : undefined}>
             {dt('noProjects')}
           </div>
         )}
@@ -341,10 +341,10 @@ export function ProjectsListClient({ projects, voteCounts, commentCounts, receiv
       {/* Bottom CTA */}
       <div className="mt-20 text-white p-12 rounded-2xl text-center relative overflow-hidden border border-dp2-gold/20" style={{ background: 'linear-gradient(135deg,#005A36,#166534)' }}>
         <div className="relative z-10">
-          <h3 className="font-heading text-[23px] md:text-[33px] font-bold leading-tight md:leading-[41px] mb-4" style={isUrdu ? { fontFamily: 'var(--font-urdu-ui)' } : undefined}>
+          <h3 className="font-heading text-[20px] md:text-[33px] font-bold leading-tight md:leading-[41px] mb-4" style={isUrdu ? { fontFamily: 'var(--font-urdu-ui)' } : undefined}>
             {dt('ctaTitle')}
           </h3>
-          <p className="font-sans text-[19px] leading-[29px] mb-8 max-w-xl mx-auto opacity-90" style={isUrdu ? { fontFamily: 'var(--font-urdu-ui)' } : undefined}>
+          <p className="font-sans text-[15px] leading-[29px] mb-8 max-w-xl mx-auto opacity-90" style={isUrdu ? { fontFamily: 'var(--font-urdu-ui)' } : undefined}>
             {dt('ctaBody')}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -440,12 +440,12 @@ function OngoingCard({ project, isHot, commentCount, expense, fee, dt, isUrdu }:
               {dt('ongoingBadge')}
             </span>
           </div>
-          <h3 className="font-sans text-[21px] font-semibold leading-[29px] mb-1 text-dp2-primary">
+          <h3 className="font-sans text-[17px] font-semibold leading-[29px] mb-1 text-dp2-primary">
             {displayTitle(project)}
           </h3>
           <div className="flex items-center text-slate-500 mb-6 gap-1">
             <MapPin size={16} />
-            <span className="font-sans text-[17px]">{isUrdu ? (project.location_ur || project.location) : project.location}</span>
+            <span className="font-sans text-[15px]">{isUrdu ? (project.location_ur || project.location) : project.location}</span>
           </div>
 
           {/* Progress */}
@@ -468,7 +468,7 @@ function OngoingCard({ project, isHot, commentCount, expense, fee, dt, isUrdu }:
               <p className="text-slate-500 text-[13px] uppercase font-semibold mb-1 font-sans" style={isUrdu ? urduStyle : undefined}>
                 {dt('budgetLabel')}
               </p>
-              <p className="text-[21px] font-bold text-dp2-primary font-sans leading-[29px]">
+              <p className="text-[17px] font-bold text-dp2-primary font-sans leading-[29px]">
                 {fmtFull(project.budget_pkr)}{' '}
                 <span className="text-[15px] font-normal">PKR</span>
               </p>
@@ -477,7 +477,7 @@ function OngoingCard({ project, isHot, commentCount, expense, fee, dt, isUrdu }:
               <p className="text-slate-500 text-[13px] uppercase font-semibold mb-1 font-sans" style={isUrdu ? urduStyle : undefined}>
                 {dt('spentLabel')}
               </p>
-              <p className="text-[21px] font-bold text-dp2-primary-dark font-sans leading-[29px]">
+              <p className="text-[17px] font-bold text-dp2-primary-dark font-sans leading-[29px]">
                 {fmtFull(expense)}{' '}
                 <span className="text-[15px] font-normal">PKR</span>
               </p>
@@ -556,12 +556,12 @@ function CompletedCard({ project, isHot, dt, isUrdu, received, expense }: { proj
               {dt('completedBadge')}
             </span>
           </div>
-          <h3 className="font-sans text-[21px] font-semibold leading-[29px] mb-1 text-dp2-primary">
+          <h3 className="font-sans text-[17px] font-semibold leading-[29px] mb-1 text-dp2-primary">
             {displayTitle(project)}
           </h3>
           <div className="flex items-center text-slate-500 mb-6 gap-1">
             <MapPin size={16} />
-            <span className="font-sans text-[17px]">{isUrdu ? (project.location_ur || project.location) : project.location}</span>
+            <span className="font-sans text-[15px]">{isUrdu ? (project.location_ur || project.location) : project.location}</span>
           </div>
 
           {/* Progress */}
@@ -581,7 +581,7 @@ function CompletedCard({ project, isHot, dt, isUrdu, received, expense }: { proj
               <p className="text-slate-500 text-[12px] uppercase font-semibold mb-1 font-sans" style={isUrdu ? urduStyle : undefined}>
                 {dt('totalReceived')}
               </p>
-              <p className={`text-[17px] font-bold text-slate-800 font-sans ${isUrdu ? 'leading-[29px]' : 'leading-[23px]'}`}>
+              <p className={`text-[15px] font-bold text-slate-800 font-sans ${isUrdu ? 'leading-[29px]' : 'leading-[23px]'}`}>
                 {fmtFull(received)}
               </p>
             </div>
@@ -589,7 +589,7 @@ function CompletedCard({ project, isHot, dt, isUrdu, received, expense }: { proj
               <p className="text-slate-500 text-[12px] uppercase font-semibold mb-1 font-sans" style={isUrdu ? urduStyle : undefined}>
                 {dt('totalSpent')}
               </p>
-              <p className={`text-[17px] font-bold text-slate-800 font-sans ${isUrdu ? 'leading-[29px]' : 'leading-[23px]'}`}>
+              <p className={`text-[15px] font-bold text-slate-800 font-sans ${isUrdu ? 'leading-[29px]' : 'leading-[23px]'}`}>
                 {fmtFull(expense)}
               </p>
             </div>
@@ -597,7 +597,7 @@ function CompletedCard({ project, isHot, dt, isUrdu, received, expense }: { proj
               <p className="text-slate-500 text-[12px] uppercase font-semibold mb-1 font-sans" style={isUrdu ? urduStyle : undefined}>
                 {dt('beneficiaries')}
               </p>
-              <p className={`text-[17px] font-bold text-slate-800 font-sans ${isUrdu ? 'leading-[29px]' : 'leading-[23px]'}`}>
+              <p className={`text-[15px] font-bold text-slate-800 font-sans ${isUrdu ? 'leading-[29px]' : 'leading-[23px]'}`}>
                 {project.beneficiaries_count ?? 0}+{' '}
                 <span className="text-[13px] font-normal" style={isUrdu ? urduStyle : undefined}>{dt('homes')}</span>
               </p>
@@ -663,7 +663,7 @@ function UpcomingCard({ project, voteCount, isHot, dt, isUrdu }: { project: Proj
             <h4 className="font-heading text-[25px] font-bold leading-[33px] text-dp2-primary mb-2" style={isUrdu ? urduStyle : undefined}>
               {dt('futureVision')}
             </h4>
-            <p className="text-dp2-primary-dark font-sans text-[17px]" style={isUrdu ? urduStyle : undefined}>{dt('votingStage')}</p>
+            <p className="text-dp2-primary-dark font-sans text-[15px]" style={isUrdu ? urduStyle : undefined}>{dt('votingStage')}</p>
           </div>
         )}
         <div
@@ -687,27 +687,27 @@ function UpcomingCard({ project, voteCount, isHot, dt, isUrdu }: { project: Proj
               {dt('upcomingVoting')}
             </span>
           </div>
-          <h3 className="font-sans text-[21px] font-semibold leading-[29px] mb-1 text-dp2-primary">
+          <h3 className="font-sans text-[17px] font-semibold leading-[29px] mb-1 text-dp2-primary">
             {displayTitle(project)}
           </h3>
           <div className="flex items-center text-slate-500 mb-6 gap-1">
             <MapPin size={16} />
-            <span className="font-sans text-[17px]">{isUrdu ? (project.location_ur || project.location) : project.location}</span>
+            <span className="font-sans text-[15px]">{isUrdu ? (project.location_ur || project.location) : project.location}</span>
           </div>
-          <p className={`text-slate-500 mb-4 line-clamp-3 font-sans text-[17px] ${isUrdu ? 'leading-[27px]' : 'leading-[25px]'}`}>
+          <p className={`text-slate-500 mb-4 line-clamp-3 font-sans text-[15px] ${isUrdu ? 'leading-[27px]' : 'leading-[25px]'}`}>
             {project.description}
           </p>
 
           {/* Budget — compulsory info before voting, not just votes */}
           <div className="flex items-center justify-between mb-4 px-1">
             <span className="font-sans text-[14px] font-semibold text-slate-500 uppercase tracking-wide" style={isUrdu ? urduStyle : undefined}>{dt('requestedBudget')}</span>
-            <span className="font-heading text-[21px] font-bold text-dp2-primary">{fmtFull(project.budget_pkr)}</span>
+            <span className="font-heading text-[17px] md:text-[21px] font-bold text-dp2-primary">{fmtFull(project.budget_pkr)}</span>
           </div>
 
           {/* Vote Box */}
           <div className="bg-dp2-surface p-4 rounded-xl border border-dp2-card-border flex items-center justify-between mb-6">
             <div>
-              <p className="text-dp2-primary font-bold text-[21px] font-sans leading-[29px]">
+              <p className="text-dp2-primary font-bold text-[17px] font-sans leading-[29px]">
                 {voteCount} {dt('votesWord')}
               </p>
               <p className="text-dp2-primary-dark text-[15px] font-sans font-semibold tracking-[0.05em]" style={isUrdu ? urduStyle : undefined}>
@@ -780,19 +780,19 @@ function AnnouncedCard({ project, dt, isUrdu }: { project: Project; dt: Dt; isUr
               {dt('announcedBadge')}
             </span>
           </div>
-          <h3 className="font-sans text-[21px] font-semibold leading-[29px] mb-1 text-slate-500">
+          <h3 className="font-sans text-[17px] font-semibold leading-[29px] mb-1 text-slate-500">
             {displayTitle(project)}
           </h3>
           <div className="flex items-center text-slate-500 mb-6 gap-1">
             <MapPin size={16} />
-            <span className="font-sans text-[17px]">{isUrdu ? (project.location_ur || project.location) : project.location}</span>
+            <span className="font-sans text-[15px]">{isUrdu ? (project.location_ur || project.location) : project.location}</span>
           </div>
-          <p className={`text-slate-500 line-clamp-3 font-sans text-[17px] mb-4 ${isUrdu ? 'leading-[27px]' : 'leading-[25px]'}`}>
+          <p className={`text-slate-500 line-clamp-3 font-sans text-[15px] mb-4 ${isUrdu ? 'leading-[27px]' : 'leading-[25px]'}`}>
             {project.description}
           </p>
           <div className="flex items-center justify-between px-1">
             <span className="font-sans text-[14px] font-semibold text-slate-500 uppercase tracking-wide" style={isUrdu ? urduStyle : undefined}>{dt('requestedBudget')}</span>
-            <span className="font-heading text-[19px] font-bold text-slate-500">{fmtFull(project.budget_pkr)}</span>
+            <span className="font-heading text-[15px] font-bold text-slate-500">{fmtFull(project.budget_pkr)}</span>
           </div>
         </div>
         <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>

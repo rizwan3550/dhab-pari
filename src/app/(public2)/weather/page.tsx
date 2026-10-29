@@ -112,7 +112,7 @@ export default function WeatherPage() {
     <div className="max-w-[900px] mx-auto px-6 md:px-12 py-10 min-h-screen" dir={isUrdu ? 'rtl' : 'ltr'} style={isUrdu ? { fontFamily: 'var(--font-urdu-ui)' } : undefined}>
       <div className="flex items-center gap-2.5 mb-1.5">
         <Sun size={26} className="text-amber-500" />
-        <h1 className="font-heading text-[21px] font-bold text-dp2-primary">{t('wx.pageTitle')}</h1>
+        <h1 className="font-heading text-[20px] md:text-[21px] font-bold text-dp2-primary">{t('wx.pageTitle')}</h1>
       </div>
       <div className="flex items-center justify-between gap-3 flex-wrap mb-8">
         <p className="font-sans text-[14px] text-slate-500 flex items-center gap-1.5">
@@ -159,7 +159,7 @@ export default function WeatherPage() {
           </div>
 
           {/* Hourly */}
-          <h2 className="font-heading text-[19px] font-bold text-dp2-primary mb-3">{t('wx.hourly')}</h2>
+          <h2 className="font-heading text-[15px] font-bold text-dp2-primary mb-3">{t('wx.hourly')}</h2>
           <div className="flex gap-3 overflow-x-auto pb-2 mb-8 hide-scrollbar">
             {weather.hourly.map((h, i) => (
               <div key={i} className="bg-white border border-dp2-card-border rounded-2xl p-3 flex flex-col items-center gap-1.5 shrink-0 w-[68px]">
@@ -174,7 +174,7 @@ export default function WeatherPage() {
           </div>
 
           {/* 7-day */}
-          <h2 className="font-heading text-[19px] font-bold text-dp2-primary mb-3">{t('wx.sevenDay')}</h2>
+          <h2 className="font-heading text-[15px] font-bold text-dp2-primary mb-3">{t('wx.sevenDay')}</h2>
           <div className="bg-white border border-dp2-card-border rounded-2xl overflow-hidden mb-8">
             {weather.daily.map((d, i) => (
               <div key={i} className={`flex items-center gap-3 px-4 py-3 ${i !== 0 ? 'border-t border-dp2-card-border' : ''}`}>
@@ -218,7 +218,7 @@ export default function WeatherPage() {
               explicitly passing detail=false (the original URL left this
               param blank, which did not suppress it); confirmed via
               other real embed.windy.com URLs that set it explicitly. */}
-          <h2 className="font-heading text-[19px] font-bold text-dp2-primary mb-3">{t('wx.map')}</h2>
+          <h2 className="font-heading text-[15px] font-bold text-dp2-primary mb-3">{t('wx.map')}</h2>
           <div className="rounded-xl overflow-hidden border border-dp2-card-border" style={{ height: 450 }}>
             <iframe
               title="weather-map"

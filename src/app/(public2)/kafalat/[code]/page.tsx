@@ -69,9 +69,9 @@ export default async function KafalatChildSharePage({ params }: { params: Promis
               {child.first_name.charAt(0)}
             </div>
           )}
-          <h1 className="font-heading text-[27px] font-bold mt-4">{child.first_name}</h1>
+          <h1 className="font-heading text-[22px] md:text-[27px] font-bold mt-4">{child.first_name}</h1>
           {child.first_name_ur && (
-            <p className="text-[21px] mt-1 opacity-90" style={{ fontFamily: 'var(--font-urdu-ui)' }}>{child.first_name_ur}</p>
+            <p className="text-[17px] mt-1 opacity-90" style={{ fontFamily: 'var(--font-urdu-ui)' }}>{child.first_name_ur}</p>
           )}
           <div className="flex items-center justify-center gap-2 mt-3 flex-wrap">
             {child.is_orphan && <span className="px-2.5 py-1 rounded-full bg-sky-500/90 text-[12.5px] font-bold">یتیم · Orphan</span>}
@@ -88,7 +88,7 @@ export default async function KafalatChildSharePage({ params }: { params: Promis
 
         {/* ── The pitch, in Urdu first ──────────────────────────────────── */}
         <div className="px-6 py-6">
-          <p className="text-[20px] leading-[2.1] text-slate-800 font-bold text-center"
+          <p className="text-[17px] leading-[2.1] text-slate-800 font-bold text-center"
             style={{ fontFamily: 'var(--font-urdu-ui)', direction: 'rtl' }}>
             {isFull
               ? `${child.first_name_ur ?? child.first_name} کی اس سال کی تعلیمی ضرورت مکمل طور پر پوری ہو چکی ہے، الحمدللہ۔`
@@ -107,15 +107,15 @@ export default async function KafalatChildSharePage({ params }: { params: Promis
             </div>
             <div className="grid grid-cols-3 gap-3 mt-4 text-center">
               <div>
-                <p className="font-heading text-[21px] font-bold text-dp2-primary">{fmt(child.this_year_requirement)}</p>
+                <p className="font-heading text-[17px] md:text-[21px] font-bold text-dp2-primary">{fmt(child.this_year_requirement)}</p>
                 <p className="font-sans text-[12px] text-slate-500">سالانہ ضرورت · Annual need</p>
               </div>
               <div>
-                <p className="font-heading text-[21px] font-bold text-dp2-primary-dark">{fmt(child.already_named)}</p>
+                <p className="font-heading text-[17px] md:text-[21px] font-bold text-dp2-primary-dark">{fmt(child.already_named)}</p>
                 <p className="font-sans text-[12px] text-slate-500">موصول شدہ · Confirmed</p>
               </div>
               <div>
-                <p className="font-heading text-[21px] font-bold text-slate-800">{fmt(remaining)}</p>
+                <p className="font-heading text-[17px] md:text-[21px] font-bold text-slate-800">{fmt(remaining)}</p>
                 <p className="font-sans text-[12px] text-slate-500">باقی · Remaining</p>
               </div>
             </div>

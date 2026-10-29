@@ -42,7 +42,7 @@ export default function AgricultureSchemesPage() {
       <Link href="/agriculture" className="inline-flex items-center gap-1.5 font-sans text-[14px] text-dp2-primary-dark hover:underline mb-4"><ArrowLeft size={14} className={isUrdu ? 'rotate-180' : ''} /> {t('ag.pageTitle')}</Link>
       <div className="flex items-center gap-2.5 mb-1.5">
         <Landmark size={26} className="text-dp2-primary" />
-        <h1 className="font-heading text-[21px] font-bold text-dp2-primary">{t('agh.schemesTitle')}</h1>
+        <h1 className="font-heading text-[20px] md:text-[21px] font-bold text-dp2-primary">{t('agh.schemesTitle')}</h1>
       </div>
       <p className="font-sans text-[15px] text-slate-500 mb-6">{t('agh.schemesIntro')}</p>
 
@@ -65,7 +65,7 @@ export default function AgricultureSchemesPage() {
                 <span className={`text-[11.5px] font-bold px-2 py-0.5 rounded-full uppercase ${STATUS_STYLE[s.status]}`}>{t(`agh.status.${s.status}`)}</span>
                 {s.deadline && <span className="font-sans text-[13px] text-slate-500">{t('agh.deadline')}: <span className="ltr-num">{s.deadline}</span></span>}
               </div>
-              <h3 className="font-heading text-[19px] font-bold text-slate-800 mb-1.5">{isUrdu ? s.title_ur : s.title}</h3>
+              <h3 className="font-heading text-[15px] font-bold text-slate-800 mb-1.5">{isUrdu ? s.title_ur : s.title}</h3>
               {(isUrdu ? s.description_ur : s.description) && <p className="font-sans text-[15px] text-slate-500 leading-relaxed mb-3">{isUrdu ? s.description_ur : s.description}</p>}
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 mb-3">

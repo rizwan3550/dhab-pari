@@ -46,8 +46,8 @@ export default function LostFoundPage() {
   return (
     <div className="max-w-[1000px] mx-auto px-6 md:px-12 py-10 min-h-screen" dir={isUrdu ? 'rtl' : 'ltr'} style={isUrdu ? { fontFamily: 'var(--font-urdu-ui)' } : undefined}>
       <div className="mb-8">
-        <h1 className="font-heading text-[23px] font-bold leading-[28px] text-slate-800 flex items-center gap-3"><Search size={28} className="text-dp2-primary-dark" /> {t('lf.pageTitle')}</h1>
-        <p className="text-slate-500 font-sans text-[17px] leading-[26px] max-w-2xl mt-2">
+        <h1 className="font-heading text-[20px] md:text-[23px] font-bold leading-[28px] text-slate-800 flex items-center gap-3"><Search size={28} className="text-dp2-primary-dark" /> {t('lf.pageTitle')}</h1>
+        <p className="text-slate-500 font-sans text-[15px] leading-[26px] max-w-2xl mt-2">
           {t('lf.pageIntro')}{' '}
           <Link href="/portal/lost-found" className="text-dp2-primary-dark font-semibold hover:underline">{t('lf.postYourOwn')}</Link>.
         </p>
@@ -68,7 +68,7 @@ export default function LostFoundPage() {
       {loading ? (
         <p className="font-sans text-[15px] text-slate-500 text-center py-16"><LoadingDots /></p>
       ) : filtered.length === 0 ? (
-        <div className="text-center py-16 text-slate-500 font-sans text-[17px]">{t('lf.noneFound')}</div>
+        <div className="text-center py-16 text-slate-500 font-sans text-[15px]">{t('lf.noneFound')}</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {filtered.map((p) => (
@@ -82,7 +82,7 @@ export default function LostFoundPage() {
                 <span className={`text-[11.5px] font-bold px-2.5 py-1 rounded-full uppercase ${p.type === 'lost' ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'}`}>
                   {p.type === 'lost' ? t('lf.lost') : t('lf.found')}
                 </span>
-                <h3 className="font-sans text-[18px] font-semibold text-slate-800 mt-2">{p.item_name}</h3>
+                <h3 className="font-sans text-[15px] font-semibold text-slate-800 mt-2">{p.item_name}</h3>
                 {p.description && <p className="font-sans text-[14.5px] text-slate-500 mt-1.5 leading-[20px]">{p.description}</p>}
                 {p.location_text && (
                   <p className="font-sans text-[14px] text-slate-500 mt-2 flex items-center gap-1"><MapPin size={12} /> {p.location_text}</p>

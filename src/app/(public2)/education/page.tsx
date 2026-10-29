@@ -31,10 +31,10 @@ export default async function EducationPage() {
         <div className="inline-flex items-center justify-center p-3 bg-blue-100 rounded-full text-blue-600 mb-4">
           <GraduationCap size={32} />
         </div>
-        <h1 className="font-heading text-[23px] font-bold leading-[28px] text-dp2-primary mb-2">
+        <h1 className="font-heading text-[20px] md:text-[23px] font-bold leading-[28px] text-dp2-primary mb-2">
           <T k="x.educationCorner" />
         </h1>
-        <p className="text-slate-500 font-sans text-[19px] leading-[20px]">
+        <p className="text-slate-500 font-sans text-[15px] leading-[20px]">
           Supporting the next generation of {site.name} through sponsorship, stipends, and community support.
         </p>
       </div>
@@ -45,7 +45,7 @@ export default async function EducationPage() {
             <HeartHandshake size={28} />
           </div>
           <div className="flex-1">
-            <h2 className="font-heading text-[23px] font-bold leading-[22px] text-dp2-primary mb-1.5">Kafalat, Wazifa &amp; Zakat</h2>
+            <h2 className="font-heading text-[20px] md:text-[23px] font-bold leading-snug text-dp2-primary mb-1.5">Kafalat, Wazifa &amp; Zakat</h2>
             <p className="text-slate-500 font-sans text-[15.5px] leading-[22px]">
               Sponsor an orphan or student directly (Kafalat), support ongoing education stipends (Taleemi Wazifa), or contribute to the pooled Zakat &amp; Ushr fund. Every program here is run and tracked by the committee — real sponsors, real recipients.
             </p>
@@ -60,7 +60,7 @@ export default async function EducationPage() {
         <div className="inline-flex items-center justify-center p-2.5 bg-white rounded-full text-blue-600 mb-3">
           <MessageSquarePlus size={22} />
         </div>
-        <h3 className="font-heading text-[23px] font-bold leading-[22px] text-blue-900 mb-2">Have an idea for education in {site.name}?</h3>
+        <h3 className="font-heading text-[20px] md:text-[23px] font-bold leading-snug text-blue-900 mb-2">Have an idea for education in {site.name}?</h3>
         <p className="text-blue-700 font-sans text-[16px] mb-6 max-w-xl mx-auto">
           A tuition center, a book drive, a tutoring program — suggest it directly to the committee.
         </p>

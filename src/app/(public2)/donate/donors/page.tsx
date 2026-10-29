@@ -46,7 +46,7 @@ export default async function AllDonorsPage() {
             <Heart size={24} />
           </div>
           <div style={isUrdu ? { fontFamily: 'var(--font-urdu-ui)' } : undefined}>
-            <h1 className="font-heading text-[19px] md:text-[21px] font-bold leading-[24px] text-dp2-primary section-title">
+            <h1 className="font-heading text-[20px] md:text-[21px] font-bold leading-[24px] text-dp2-primary section-title">
               <T k="x.allDonorsTitle" />
             </h1>
             <p className="text-slate-500 font-sans text-[15px] mt-0.5">

@@ -1,3 +1,5 @@
+import Image from 'next/image'
+
 // Phase 1 of the card-based redesign, 2026-10-12. The new design's own
 // `image-slot` placeholder, backed by a real image two ways: `src`
 // (an existing real column -- project.before_image_url, a classified's
@@ -8,21 +10,32 @@
 // it (absolute inset-0, matching every card slot in the design), never
 // its own intrinsic size -- card dimensions stay identical whether a
 // tenant has uploaded a photo yet or not.
+// next/image only for hosts next.config.ts allows (every hosted Supabase
+// project is *.supabase.co, plus same-origin paths) — anything else falls
+// back to a plain lazy <img> rather than throwing.
+function isOptimizable(src: string) {
+  if (src.startsWith('/')) return true
+  try { return new URL(src).hostname.endsWith('.supabase.co') } catch { return false }
+}
+
 export function ImageSlot2({
-  src, shape = 'rect', placeholder, className = '',
+  src, shape = 'rect', placeholder, className = '', sizes = '(min-width: 1024px) 50vw, 100vw', priority = false,
 }: {
   src?: string | null
   shape?: 'rect' | 'circle'
   placeholder?: string
   className?: string
+  // How wide the slot renders, so a 160px card thumbnail downloads a
+  // ~320px image instead of the full-resolution original upload.
+  sizes?: string
+  priority?: boolean
 }) {
   if (src) {
-    // Plain <img>, not next/image: these slots can point at any tenant's
-    // own Supabase Storage URL, which a fixed remotePatterns allowlist
-    // can't cover across self-serve tenants the way it can for assets
-    // this app controls itself.
+    if (isOptimizable(src)) {
+      return <Image src={src} alt="" fill sizes={sizes} priority={priority} className={`object-cover ${className}`} />
+    }
     // eslint-disable-next-line @next/next/no-img-element
-    return <img src={src} alt="" className={`absolute inset-0 w-full h-full object-cover ${className}`} />
+    return <img src={src} alt="" loading={priority ? 'eager' : 'lazy'} decoding="async" className={`absolute inset-0 w-full h-full object-cover ${className}`} />
   }
   return (
     <div

@@ -160,7 +160,7 @@ export default function PublicBloodPage() {
 
   const helplineBlock = (
     <div className="bg-red-600/10 border-2 border-red-600 rounded-xl p-5">
-      <h3 className="font-heading text-[20px] font-bold text-red-600 mb-1.5">{dt('urgentTitle')}</h3>
+      <h3 className="font-heading text-[17px] font-bold text-red-600 mb-1.5">{dt('urgentTitle')}</h3>
       <p className="font-sans text-[14.5px] text-slate-500 mb-4">{dt('urgentBody')}</p>
       <div className="flex flex-col sm:flex-row gap-3">
         <a href={`tel:${waNumber}`}
@@ -172,7 +172,7 @@ export default function PublicBloodPage() {
           <MessageCircle size={17} /> {dt('whatsappNow')}
         </a>
       </div>
-      <p dir="ltr" className="text-center font-mono text-[20px] font-bold text-red-600 mt-3">{site.whatsapp}</p>
+      <p dir="ltr" className="text-center font-mono text-[17px] font-bold text-red-600 mt-3">{site.whatsapp}</p>
     </div>
   )
 
@@ -188,7 +188,7 @@ export default function PublicBloodPage() {
           <div className="inline-flex items-center justify-center p-3 bg-red-600/10 rounded-full text-red-600 mb-4">
             <Droplet size={28} />
           </div>
-          <h1 className="font-heading text-[23px] font-bold text-dp2-primary">{dt('title')}</h1>
+          <h1 className="font-heading text-[20px] md:text-[23px] font-bold text-dp2-primary">{dt('title')}</h1>
           <p className="font-sans text-[15.5px] text-slate-500 mt-2 leading-relaxed">{dt('subtitle')}</p>
         </div>
 
@@ -198,8 +198,8 @@ export default function PublicBloodPage() {
             <div className="grid grid-cols-4 gap-3">
               {counts.map((g) => (
                 <div key={g.blood_group} className="text-center border border-dp2-card-border rounded-xl py-3">
-                  <p dir="ltr" className="font-heading text-[19px] font-bold text-red-600 leading-none">{g.blood_group}</p>
-                  <p className="font-sans text-[23px] font-bold text-slate-800 leading-tight mt-1">{g.registered}</p>
+                  <p dir="ltr" className="font-heading text-[15px] font-bold text-red-600 leading-none">{g.blood_group}</p>
+                  <p className="font-sans text-[20px] font-bold text-slate-800 leading-tight mt-1">{g.registered}</p>
                   <p className="font-sans text-[11px] text-slate-500 leading-tight">{dt('registered')}</p>
                   <p className="font-sans text-[12px] text-dp2-primary-dark font-semibold mt-1">{g.available_now} {dt('available')}</p>
                 </div>
@@ -213,7 +213,7 @@ export default function PublicBloodPage() {
           <div className="space-y-6">
             <div className="bg-white border border-dp2-card-border rounded-2xl p-8 text-center">
               <CheckCircle size={44} className="text-dp2-primary-dark mx-auto mb-4" />
-              <h2 className="font-heading text-[19px] font-bold text-dp2-primary mb-2">{dt('doneTitle')}</h2>
+              <h2 className="font-heading text-[15px] font-bold text-dp2-primary mb-2">{dt('doneTitle')}</h2>
               <p className="font-sans text-[15px] text-slate-500 leading-relaxed">{dt('doneBody')}</p>
             </div>
 
@@ -229,7 +229,7 @@ export default function PublicBloodPage() {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="bg-white border border-dp2-card-border rounded-2xl p-6">
-            <h2 className="font-heading text-[23px] font-bold text-dp2-primary mb-1">{dt('formTitle')}</h2>
+            <h2 className="font-heading text-[20px] md:text-[23px] font-bold text-dp2-primary mb-1">{dt('formTitle')}</h2>
             <p className="font-sans text-[14.5px] text-slate-500 mb-5 leading-relaxed">{dt('formIntro')}</p>
 
             <div className="mb-5 flex items-start gap-2 text-[13.5px] font-sans text-slate-500 bg-dp2-surface rounded-xl px-3 py-2.5">

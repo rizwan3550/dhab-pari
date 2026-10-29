@@ -24,7 +24,7 @@ function CopyRow({ label, value }: { label: string; value: string }) {
     <div className="bg-white border-2 border-dp2-gold/40 rounded-xl px-4 py-3 flex items-center justify-between gap-3">
       <div className="min-w-0">
         <p dir={isUrdu ? 'rtl' : 'ltr'} className="font-sans text-[12px] font-bold uppercase tracking-wide text-dp2-primary-dark mb-0.5">{label}</p>
-        <p className="font-mono text-[17px] font-bold text-slate-800 tracking-wide break-all">{value}</p>
+        <p className="font-mono text-[15px] font-bold text-slate-800 tracking-wide break-all">{value}</p>
       </div>
       <button onClick={copy} title={t('p.copy')} className="shrink-0 flex items-center gap-1.5 px-3 py-2 bg-dp2-primary-dark text-white rounded-xl hover:brightness-110 transition-colors cursor-pointer">
         <Copy size={14} />
@@ -62,8 +62,8 @@ export function BankAccountCard({ account }: { account: PaymentAccount }) {
       <div className="w-16 h-16 mb-6 flex items-center justify-center bg-dp2-surface rounded-xl">
         <Building2 size={32} className="text-dp2-primary-dark" />
       </div>
-      <h3 className="font-sans text-[21px] font-semibold leading-[29px] mb-1">{account.bankName}</h3>
-      <p className="text-slate-500 mb-4 font-sans text-[17px]">
+      <h3 className="font-sans text-[17px] font-semibold leading-[29px] mb-1">{account.bankName}</h3>
+      <p className="text-slate-500 mb-4 font-sans text-[15px]">
         <T k="x.directWire" />
       </p>
       <div className="w-full space-y-0.5 mb-4 text-start">

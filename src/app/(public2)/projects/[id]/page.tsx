@@ -167,51 +167,59 @@ export default function ProjectDetailPage() {
     setAnnounced(a ?? [])
     setVotes(voteRows ?? [])
     setComments(commentRows ?? [])
+    // Everything below depends only on the project row above, never on
+    // each other — run them all at once instead of one round trip after
+    // another. Before this the gallery photos (and the page itself, which
+    // waited for the last query) sat behind up to seven sequential
+    // requests, which is most of why this page felt slow to show images.
+    const tasks: Promise<unknown>[] = []
     if (expenseAcct) {
       // Narrow public view (migration 182) — project spending stays public
       // without the rest of the ledger coming with it.
-      const { data: legs } = await supabase.from('project_expenses_public').select('id, entry_date, particular, debit')
-        .eq('project_id', id).order('entry_date', { ascending: false })
-      setExpenses(legs ?? [])
+      tasks.push(Promise.resolve(supabase.from('project_expenses_public').select('id, entry_date, particular, debit')
+        .eq('project_id', id).order('entry_date', { ascending: false }))
+        .then(({ data: legs }) => setExpenses(legs ?? [])))
     }
     if (p?.funding_model === 'recurring_support') {
-      const { data: sponsored } = await supabase.rpc('project_monthly_sponsorship_pkr', { p_project_id: id })
-      setMonthlySponsored(Number(sponsored ?? 0))
+      tasks.push(Promise.resolve(supabase.rpc('project_monthly_sponsorship_pkr', { p_project_id: id }))
+        .then(({ data: sponsored }) => setMonthlySponsored(Number(sponsored ?? 0))))
     }
     if (p?.category === 'sports' || p?.category === 'training') {
-      const { count } = await supabase.from('training_batches').select('id', { count: 'exact', head: true })
-        .eq('project_id', id).eq('status', 'active')
-      setJoinableBatchCount(count ?? 0)
+      tasks.push(Promise.resolve(supabase.from('training_batches').select('id', { count: 'exact', head: true })
+        .eq('project_id', id).eq('status', 'active'))
+        .then(({ count }) => setJoinableBatchCount(count ?? 0)))
 
       // Public detail page didn't used to carry any of this — batches,
       // fees, sibling discount, slots, and the trainer's profile only
       // ever rendered on the portal's Academies catalog, which requires
       // logging in. A visitor deciding whether to join shouldn't have to
       // create an account first just to see what the fee is.
-      const [{ data: batchRows }, { data: trainerRows }] = await Promise.all([
+      tasks.push(Promise.all([
         supabase.rpc('training_batches_public'),
         supabase.rpc('academy_trainers_public'),
-      ])
-      setAcademyBatches(((batchRows ?? []) as AcademyBatch[]).filter((b) => b.project_id === id))
-      setTrainer(((trainerRows ?? []) as AcademyTrainer[]).find((tn) => tn.project_id === id) ?? null)
+      ]).then(([{ data: batchRows }, { data: trainerRows }]) => {
+        setAcademyBatches(((batchRows ?? []) as AcademyBatch[]).filter((b) => b.project_id === id))
+        setTrainer(((trainerRows ?? []) as AcademyTrainer[]).find((tn) => tn.project_id === id) ?? null)
+      }))
     }
     if (p?.intro_video_id) {
-      const { data: vid } = await supabase.from('video_content').select('video_url, title').eq('id', p.intro_video_id).maybeSingle()
-      setIntroVideo(vid ?? null)
+      tasks.push(Promise.resolve(supabase.from('video_content').select('video_url, title').eq('id', p.intro_video_id).maybeSingle())
+        .then(({ data: vid }) => setIntroVideo(vid ?? null)))
     }
     if (p?.testimonial_video_id) {
-      const { data: vid } = await supabase.from('video_content').select('video_url, title, title_ur').eq('id', p.testimonial_video_id).maybeSingle()
-      setTestimonialVideo(vid ?? null)
+      tasks.push(Promise.resolve(supabase.from('video_content').select('video_url, title, title_ur').eq('id', p.testimonial_video_id).maybeSingle())
+        .then(({ data: vid }) => setTestimonialVideo(vid ?? null)))
     }
     // Gallery — same rule as before/after: a health/medical project never
     // shows a real photo publicly, even one that's been uploaded.
     if (p?.category !== 'health') {
-      const { data: media } = await supabase.from('project_media').select('id, url, caption')
-        .eq('project_id', id).eq('type', 'photo').order('display_order')
-      setGalleryPhotos(media ?? [])
+      tasks.push(Promise.resolve(supabase.from('project_media').select('id, url, caption')
+        .eq('project_id', id).eq('type', 'photo').order('display_order'))
+        .then(({ data: media }) => setGalleryPhotos(media ?? [])))
     }
-    const { data: ch } = await supabase.rpc('project_donation_channels_pkr', { p_project_id: id })
-    setChannels(ch ?? [])
+    tasks.push(Promise.resolve(supabase.rpc('project_donation_channels_pkr', { p_project_id: id }))
+      .then(({ data: ch }) => setChannels(ch ?? [])))
+    await Promise.all(tasks)
     setLoading(false)
 
     const { data: { user: authUser } } = await supabase.auth.getUser()
@@ -394,9 +402,9 @@ export default function ProjectDetailPage() {
             isVotingOpen={project.status === 'upcoming'} isUrdu={isUrdu} variant="button"
           />
         </div>
-        <h1 className="font-heading text-[21px] md:text-[23px] font-bold text-dp2-primary mt-3">{project.display_name || project.title}</h1>
+        <h1 className="font-heading text-[20px] md:text-[23px] font-bold text-dp2-primary mt-3">{project.display_name || project.title}</h1>
         {project.location && <p className="flex items-center gap-1 text-slate-500 font-sans text-[16px] mt-1"><MapPin size={15} /> {isUrdu ? (project.location_ur || project.location) : project.location}</p>}
-        <p className="font-sans text-[17px] text-slate-500 mt-4 leading-[26px]">{project.description}</p>
+        <p dir="auto" className="font-sans text-[15px] text-slate-500 mt-4 leading-[26px] text-start whitespace-pre-line">{project.description}</p>
       </div>
 
       {/* Photos — a health/medical project always uses the fixed generic
@@ -409,7 +417,7 @@ export default function ProjectDetailPage() {
           thumbnail. */}
       {project.category === 'health' ? (
         <div className="mb-8 relative w-full h-64 rounded-xl overflow-hidden">
-          <Image src="/images/health-project-cover.jpg" alt="" fill sizes="1000px" className="object-cover" />
+          <Image src="/images/health-project-cover.jpg" alt="" fill priority sizes="(min-width: 1024px) 1000px, 100vw" className="object-cover" />
         </div>
       ) : (
         <>
@@ -418,7 +426,7 @@ export default function ProjectDetailPage() {
               {project.before_image_url && (
                 <div>
                   <button type="button" onClick={() => setLightboxIndex(beforeIndex)} className="relative w-full h-56 rounded-xl overflow-hidden bg-dp2-surface cursor-pointer block">
-                    <Image src={project.before_image_url} alt="" fill sizes="(min-width: 768px) 50vw, 100vw" className="object-cover" />
+                    <Image src={project.before_image_url} alt="" fill priority sizes={project.after_image_url ? '(min-width: 1024px) 500px, 50vw' : '(min-width: 1024px) 1000px, 100vw'} className="object-cover" />
                   </button>
                   {project.after_image_url && <p className="font-sans text-[12.5px] font-bold text-slate-500 uppercase tracking-wide mt-1.5">{tr('pj.beforePhoto')}</p>}
                 </div>
@@ -426,7 +434,7 @@ export default function ProjectDetailPage() {
               {project.after_image_url && (
                 <div>
                   <button type="button" onClick={() => setLightboxIndex(afterIndex)} className="relative w-full h-56 rounded-xl overflow-hidden bg-dp2-surface cursor-pointer block">
-                    <Image src={project.after_image_url} alt="" fill sizes="(min-width: 768px) 50vw, 100vw" className="object-cover" />
+                    <Image src={project.after_image_url} alt="" fill priority sizes={project.before_image_url ? '(min-width: 1024px) 500px, 50vw' : '(min-width: 1024px) 1000px, 100vw'} className="object-cover" />
                   </button>
                   {project.before_image_url && <p className="font-sans text-[12.5px] font-bold text-slate-500 uppercase tracking-wide mt-1.5">{tr('pj.afterPhoto')}</p>}
                 </div>
@@ -438,7 +446,7 @@ export default function ProjectDetailPage() {
               {galleryPhotos.map((g, i) => (
                 <button key={g.id} type="button" onClick={() => setLightboxIndex(galleryStartIndex + i)}
                   className="relative aspect-square rounded-xl overflow-hidden bg-dp2-surface cursor-pointer block hover:opacity-90 transition-opacity">
-                  <Image src={g.url} alt={g.caption ?? ''} fill sizes="200px" className="object-cover" />
+                  <Image src={g.url} alt={g.caption ?? ''} fill sizes="(min-width: 640px) 25vw, 33vw" loading={i < 8 ? 'eager' : 'lazy'} className="object-cover" />
                 </button>
               ))}
             </div>
@@ -451,7 +459,7 @@ export default function ProjectDetailPage() {
               to it. */}
           {showProposalFallback && (
             <button type="button" onClick={() => setLightboxIndex(proposalIndex)} className="relative w-full h-64 rounded-xl overflow-hidden bg-dp2-surface cursor-pointer block mb-8">
-              <Image src={project.proposal_image_url!} alt="" fill sizes="1000px" className="object-cover" />
+              <Image src={project.proposal_image_url!} alt="" fill priority sizes="(min-width: 1024px) 1000px, 100vw" className="object-cover" />
             </button>
           )}
         </>
@@ -470,24 +478,24 @@ export default function ProjectDetailPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <div className="bg-white border border-dp2-card-border rounded-2xl p-4">
           <p className="font-sans text-[12px] font-semibold text-slate-500 uppercase tracking-wide">{tr('home.budget')}</p>
-          <p className="font-heading text-[21px] font-bold text-dp2-primary">{fmt(project.budget_pkr ?? 0)}</p>
+          <p className="font-heading text-[17px] md:text-[21px] font-bold text-dp2-primary">{fmt(project.budget_pkr ?? 0)}</p>
         </div>
         <div className="bg-white border border-dp2-card-border rounded-2xl p-4">
           <p className="font-sans text-[12px] font-semibold text-slate-500 uppercase tracking-wide">{tr('x.verifiedRaised')}</p>
-          <p className="font-heading text-[21px] font-bold text-dp2-primary-dark">{fmt(totalVerified)}</p>
+          <p className="font-heading text-[17px] md:text-[21px] font-bold text-dp2-primary-dark">{fmt(totalVerified)}</p>
         </div>
         <div className="bg-white border border-dp2-card-border rounded-2xl p-4">
           <p className="font-sans text-[12px] font-semibold text-slate-500 uppercase tracking-wide">{tr('x.announced')}</p>
-          <p className="font-heading text-[21px] font-bold text-amber-600">{fmt(totalAnnounced)}</p>
+          <p className="font-heading text-[17px] md:text-[21px] font-bold text-amber-600">{fmt(totalAnnounced)}</p>
         </div>
         <div className="bg-white border border-dp2-card-border rounded-2xl p-4">
           <p className="font-sans text-[12px] font-semibold text-slate-500 uppercase tracking-wide">{tr('home.spent')}</p>
-          <p className="font-heading text-[21px] font-bold text-red-600">{fmt(totalExpenses)}</p>
+          <p className="font-heading text-[17px] md:text-[21px] font-bold text-red-600">{fmt(totalExpenses)}</p>
         </div>
         {stillNeeded !== null && (
           <div className="bg-white border border-dp2-card-border rounded-2xl p-4">
             <p className="font-sans text-[12px] font-semibold text-slate-500 uppercase tracking-wide">{tr('x.stillNeeded')}</p>
-            <p className="font-heading text-[21px] font-bold text-dp2-amber">{fmt(stillNeeded)}</p>
+            <p className="font-heading text-[17px] md:text-[21px] font-bold text-dp2-amber">{fmt(stillNeeded)}</p>
           </div>
         )}
       </div>
@@ -509,7 +517,7 @@ export default function ProjectDetailPage() {
         <div className="bg-slate-100 border border-slate-300 rounded-xl p-6 mb-8 flex items-center gap-3">
           <Clock size={22} className="text-slate-500 shrink-0" />
           <div>
-            <p className="font-heading text-[18px] font-bold text-slate-700">{tr('x.awaitingPledgeConfirm')}</p>
+            <p className="font-heading text-[15px] font-bold text-slate-700">{tr('x.awaitingPledgeConfirm')}</p>
             <p className="font-sans text-[14px] text-slate-600 mt-0.5">
               The proposer's self-commitment hasn't been confirmed yet — voting, donations, and pledges open automatically once staff confirm the payment.
             </p>
@@ -519,7 +527,7 @@ export default function ProjectDetailPage() {
         <div className="bg-blue-50 border border-blue-100 rounded-xl p-6 mb-8">
           <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
             <div>
-              <p className="font-heading text-[19px] font-bold text-blue-900">{votes.length} / {project.vote_target ?? '—'} Votes</p>
+              <p className="font-heading text-[15px] font-bold text-blue-900">{votes.length} / {project.vote_target ?? '—'} Votes</p>
               {project.minimum_monthly_commitment_pkr && (
                 <p className="font-sans text-[14px] text-blue-700 mt-1">Proposer committed {fmt(project.minimum_monthly_commitment_pkr)}/month once launched.</p>
               )}
@@ -556,7 +564,7 @@ export default function ProjectDetailPage() {
         <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-6 mb-8 flex items-center gap-3">
           <CheckCircle size={22} className="text-emerald-600 shrink-0" />
           <div>
-            <p className="font-heading text-[18px] font-bold text-emerald-800">{dt('completedNoMoreDonations')}</p>
+            <p className="font-heading text-[15px] font-bold text-emerald-800">{dt('completedNoMoreDonations')}</p>
             <p className="font-sans text-[14px] text-emerald-700 mt-0.5">{dt('completedNoMoreDonationsSub')}</p>
           </div>
         </div>
@@ -589,7 +597,7 @@ export default function ProjectDetailPage() {
           worth showing once there's something to react to. */}
       {testimonialVideo && (
         <div className="mb-8" dir={isUrdu ? 'rtl' : 'ltr'}>
-          <h2 className="font-heading text-[21px] font-bold text-dp2-primary mb-4">{tr('x.whatPeopleSay')}</h2>
+          <h2 className="font-heading text-[17px] md:text-[21px] font-bold text-dp2-primary mb-4">{tr('x.whatPeopleSay')}</h2>
           <VideoPlayer url={testimonialVideo.video_url} title={isUrdu && testimonialVideo.title_ur ? testimonialVideo.title_ur : testimonialVideo.title} />
         </div>
       )}
@@ -654,7 +662,7 @@ export default function ProjectDetailPage() {
               <Image src={trainer.trainer_photo_url} alt="" fill sizes="64px" className="object-cover" />
             </div>
           ) : (
-            <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 font-heading text-[23px] font-bold">
+            <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 font-heading text-[20px] md:text-[23px] font-bold">
               {trainer.trainer_name.charAt(0)}
             </div>
           )}
@@ -793,7 +801,7 @@ export default function ProjectDetailPage() {
       {showAnnounce && (
         <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4" onClick={() => setShowAnnounce(false)}>
           <div className="bg-white rounded-2xl p-6 w-full max-w-sm" onClick={(e) => e.stopPropagation()}>
-            <h2 className="font-heading text-[21px] font-bold text-dp2-primary mb-4">{tr('x.announcePledge')}</h2>
+            <h2 className="font-heading text-[17px] md:text-[21px] font-bold text-dp2-primary mb-4">{tr('x.announcePledge')}</h2>
             <p className="font-sans text-[14px] text-slate-500 mb-4">No payment needed now — your name shows in Announced until you pay. Pay anytime from your portal.</p>
             <input type="number" min={1} value={announceAmount || ''} onChange={(e) => setAnnounceAmount(+e.target.value)} placeholder="Amount (PKR)" className="input-field mb-4" />
             <button onClick={submitAnnounce} disabled={announcing} className="w-full bg-dp2-primary-dark text-white py-3 rounded-xl font-sans font-semibold cursor-pointer hover:bg-dp2-primary transition-all disabled:opacity-50">
@@ -807,7 +815,7 @@ export default function ProjectDetailPage() {
         <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4" onClick={() => setShowVolunteer(false)}>
           <div className="bg-white rounded-2xl p-6 w-full max-w-sm" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-heading text-[21px] font-bold text-dp2-primary">{tr('x.volunteerForProject')}</h2>
+              <h2 className="font-heading text-[17px] md:text-[21px] font-bold text-dp2-primary">{tr('x.volunteerForProject')}</h2>
               <button onClick={() => setShowVolunteer(false)} className="cursor-pointer text-slate-500"><X size={20} /></button>
             </div>
             <p className="font-sans text-[14px] text-slate-500 mb-4">Your name shows publicly as a volunteer for this project. The committee will reach out with details.</p>

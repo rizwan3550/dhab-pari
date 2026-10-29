@@ -53,7 +53,7 @@ export default function NoticeBoardPage() {
     <div className="max-w-[720px] mx-auto px-6 md:px-12 py-10" dir={isUrdu ? 'rtl' : 'ltr'} style={isUrdu ? { fontFamily: 'var(--font-urdu-ui)' } : undefined}>
       <div className="flex items-center gap-2.5 mb-1.5">
         <Megaphone size={24} className="text-dp2-primary-dark" />
-        <h1 className="font-heading text-[21px] font-bold text-dp2-primary">{t('nb.pageTitle')}</h1>
+        <h1 className="font-heading text-[20px] md:text-[21px] font-bold text-dp2-primary">{t('nb.pageTitle')}</h1>
       </div>
       <p className="font-sans text-[15px] text-slate-500 mb-8">{t('nb.pageIntro')}</p>
 
@@ -70,7 +70,7 @@ export default function NoticeBoardPage() {
               <div className="flex items-start gap-3">
                 <Pin size={16} className="text-dp2-primary-dark shrink-0 mt-1" />
                 <div className="min-w-0 flex-1">
-                  {item.title && <h3 className="font-sans text-[17px] font-bold text-slate-800 mb-1">{item.title}</h3>}
+                  {item.title && <h3 className="font-sans text-[15px] font-bold text-slate-800 mb-1">{item.title}</h3>}
                   <p className="font-sans text-[15px] text-slate-800 leading-[22px] whitespace-pre-line">{item.body}</p>
                   <div className="flex items-center justify-between gap-3 mt-3">
                     <p className="font-sans text-[12.5px] text-slate-500">

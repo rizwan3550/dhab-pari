@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
-import { Play, Eye } from 'lucide-react'
+import { Play, Eye, Clapperboard } from 'lucide-react'
+import { youtubeThumbnailUrl } from '@/lib/videoEmbed'
 import { useLocale } from '@/lib/i18n/LocaleProvider'
 
 interface Video {
@@ -110,32 +111,39 @@ export default function VideosPage() {
           (v) => v.category?.toLowerCase() === activeTab.toLowerCase()
         )
 
-  const featured = videos.filter((v) => v.is_featured)
-  const interviews = filtered.filter((v) => v.category === 'interview')
-  const otherVideos = filtered.filter((v) => v.category !== 'interview')
+  // Only offer the categories that actually have something in them — a
+  // row of tabs that each lead to "no videos" reads as a broken page.
+  const visibleTabs = loading
+    ? categoryTabs
+    : categoryTabs.filter((tab) => tab === 'All' || videos.some((v) => v.category?.toLowerCase() === tab.toLowerCase()))
+
+  const featured = activeTab === 'All' ? videos.filter((v) => v.is_featured) : []
+  const hero = featured[0] ?? null
+  const rest = filtered.filter((v) => v.id !== hero?.id)
 
   return (
-    <div className="max-w-[1200px] mx-auto px-6 md:px-12 py-10 min-h-screen" dir={isUrdu ? 'rtl' : 'ltr'} style={isUrdu ? { fontFamily: 'var(--font-urdu-ui)' } : undefined}>
+    <div className="max-w-[1200px] mx-auto px-4 sm:px-6 md:px-12 py-8 md:py-10 min-h-screen" dir={isUrdu ? 'rtl' : 'ltr'} style={isUrdu ? { fontFamily: 'var(--font-urdu-ui)' } : undefined}>
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="font-heading text-[23px] font-bold leading-[28px] text-dp2-primary section-title">
+      <div className="mb-5">
+        <h1 className="font-heading text-[20px] md:text-[23px] font-bold leading-snug text-dp2-primary section-title">
           {t('x.videoLibrary')}
         </h1>
-        <p className="text-slate-500 font-sans text-[19px] leading-[20px] mt-2">
+        <p className="text-slate-500 font-sans text-[15px] leading-relaxed mt-1.5">
           {t('x.videoLibrarySubtitle')}
         </p>
       </div>
 
-      {/* Category Tabs */}
-      <div className="flex flex-wrap gap-3 mb-10">
-        {categoryTabs.map((tab) => (
+      {/* Category chips — one swipeable row on a phone instead of three
+          wrapped rows of oversized pills. */}
+      <div className="-mx-4 sm:mx-0 px-4 sm:px-0 mb-6 flex gap-2 overflow-x-auto hide-scrollbar">
+        {visibleTabs.map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-5 py-2 rounded-full font-sans text-[15px] font-semibold tracking-[0.05em] transition-all cursor-pointer ${
+            className={`shrink-0 px-3.5 py-1.5 rounded-full font-sans text-[13px] font-semibold transition-colors cursor-pointer ${
               activeTab === tab
                 ? 'bg-dp2-primary text-white'
-                : 'bg-white border border-dp2-card-border text-slate-500 hover:border-dp2-primary hover:text-dp2-primary'
+                : 'bg-white border border-dp2-card-border text-slate-600 hover:border-dp2-primary hover:text-dp2-primary'
             }`}
           >
             {t(categoryTabKeys[tab])}
@@ -145,119 +153,37 @@ export default function VideosPage() {
 
       {/* Loading */}
       {loading && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {[1, 2, 3, 4].map((i) => (
-            <div
-              key={i}
-              className="aspect-video bg-dp2-surface rounded-xl animate-pulse"
-            />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-6">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i}>
+              <div className="aspect-video bg-slate-200/70 rounded-xl animate-pulse" />
+              <div className="h-3.5 bg-slate-200/70 rounded mt-3 w-4/5 animate-pulse" />
+              <div className="h-3 bg-slate-200/70 rounded mt-2 w-1/3 animate-pulse" />
+            </div>
           ))}
         </div>
       )}
 
       {!loading && filtered.length === 0 && (
-        <div className="text-center py-16 text-slate-500 font-sans text-[17px]">
+        <div className="flex flex-col items-center text-center py-16 text-slate-500 font-sans text-[15px] gap-3">
+          <Clapperboard size={36} className="text-slate-300" />
           {t('x.noVideosCategory')}
         </div>
       )}
 
       {!loading && filtered.length > 0 && (
         <div className="space-y-8">
+          {hero && <HeroVideo video={hero} />}
 
-          {/* Featured Videos (only show on "All" tab) */}
-          {activeTab === 'All' && featured.length > 0 && (
+          {rest.length > 0 && (
             <section>
-              <h2 className="font-heading text-[19px] font-bold leading-[24px] text-dp2-primary mb-6">
-                {t('x.featured')}
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {featured.map((video) => (
-                  <VideoCard key={video.id} video={video} large />
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* Interviews Section — horizontal cards */}
-          {interviews.length > 0 && (
-            <section>
-              <h2 className="font-heading text-[19px] font-bold leading-[24px] text-dp2-primary mb-6">
-                {t('x.interviews')}
-              </h2>
-              <div className="space-y-4">
-                {interviews.map((video) => (
-                  <Link
-                    key={video.id}
-                    href={`/videos/${video.id}`}
-                    className="bg-white border border-dp2-card-border rounded-2xl overflow-hidden flex flex-col sm:flex-row hover:border-dp2-primary-dark transition-all group cursor-pointer"
-                  >
-                    {/* Thumbnail — a real uploaded image when there is one, same
-                        gradient placeholder as before when there isn't. Real
-                        bug: thumbnail_url was fetched but never actually
-                        rendered anywhere on this page, so an admin-uploaded
-                        cover photo never showed up here no matter what. */}
-                    <div className="w-full sm:w-48 md:w-64 aspect-video sm:aspect-auto shrink-0 relative bg-black">
-                      {video.thumbnail_url ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={video.thumbnail_url} alt="" className="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:opacity-70 transition-opacity" />
-                      ) : (
-                        <div className="w-full h-full min-h-[120px] bg-gradient-to-br from-dp2-primary to-amber-100 opacity-60 group-hover:opacity-40 transition-opacity" />
-                      )}
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-10 h-10 bg-white/20 backdrop-blur rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                          <Play size={18} className="text-white ms-0.5" fill="white" />
-                        </div>
-                      </div>
-                      <div className="absolute bottom-2 end-2 bg-black/60 text-white text-[11px] px-2 py-0.5 rounded font-sans">
-                        {formatDuration(video.duration_seconds)}
-                      </div>
-                    </div>
-                    {/* Info */}
-                    <div className="p-5 flex flex-col justify-center min-w-0">
-                      <span className={`text-[11px] font-bold uppercase tracking-widest font-sans text-white px-2 py-0.5 rounded w-fit mb-2 ${categoryBadgeColors[video.category ?? ''] ?? 'bg-dp2-primary'}`}>
-                        {video.category && t(categoryBadgeKeys[video.category.toLowerCase()] ?? '', video.category)}
-                      </span>
-                      {/* dir="ltr" pinned here deliberately — video.title has no
-                          _ur column (it's always an English string, see the
-                          detail page's own note on this), and truncating LTR
-                          text inside an RTL-direction ancestor clips from the
-                          wrong end: this is what showed "sheed - Village
-                          Elder" instead of "Interview with Haji Rasheed -
-                          Village Elder" live on an Urdu phone. */}
-                      <h3 dir="ltr" className="text-start font-bold text-dp2-primary text-[17px] font-sans leading-[24px] group-hover:text-dp2-primary-dark transition-colors truncate">
-                        {video.title}
-                      </h3>
-                      {video.title_ur && (
-                        <p className="text-slate-500 text-[14px] mt-0.5 truncate" style={{ fontFamily: 'var(--font-urdu-ui)' }}>
-                          {video.title_ur}
-                        </p>
-                      )}
-                      {video.description && (
-                        <p className="text-slate-500 text-[15px] font-sans mt-1 line-clamp-1">
-                          {video.description}
-                        </p>
-                      )}
-                      <div className="flex items-center gap-2 mt-2 text-slate-500 text-[13px] font-sans">
-                        <Eye size={12} />
-                        <span>{video.views.toLocaleString()} {t('x.views')}</span>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* Other videos — grid */}
-          {otherVideos.length > 0 && (
-            <section>
-              {interviews.length > 0 && (
-                <h2 className="font-heading text-[19px] font-bold leading-[24px] text-dp2-primary mb-6">
-                  {activeTab === 'All' ? t('x.allVideos') : t(categoryTabKeys[activeTab])}
+              {hero && (
+                <h2 className="font-heading text-[17px] font-bold leading-snug text-dp2-primary mb-4">
+                  {t('x.allVideos')}
                 </h2>
               )}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {otherVideos.map((video) => (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-6">
+                {rest.map((video) => (
                   <VideoCard key={video.id} video={video} />
                 ))}
               </div>
@@ -269,59 +195,93 @@ export default function VideosPage() {
   )
 }
 
-function VideoCard({ video, large }: { video: Video; large?: boolean }) {
-  const { t } = useLocale()
-  return (
-    <Link
-      href={`/videos/${video.id}`}
-      className="group relative rounded-xl overflow-hidden aspect-video bg-black cursor-pointer block"
-    >
-      {/* Thumbnail — real uploaded image when there is one, same gradient
-          placeholder as before when there isn't (see the Interviews card
-          above for the bug this fixes: thumbnail_url was never rendered
-          anywhere on this page before). */}
-      {video.thumbnail_url ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={video.thumbnail_url} alt="" className="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:opacity-70 transition-opacity" />
-      ) : (
-        <div className="w-full h-full bg-gradient-to-br from-dp2-primary to-amber-100 opacity-60 group-hover:opacity-40 transition-opacity" />
-      )}
+function thumbnailOf(video: Video) {
+  return video.thumbnail_url || youtubeThumbnailUrl(video.video_url)
+}
 
-      {/* Play button */}
+function CategoryBadge({ video }: { video: Video }) {
+  const { t } = useLocale()
+  if (!video.category) return null
+  return (
+    <span className={`text-[10.5px] font-bold uppercase tracking-wider font-sans text-white px-2 py-0.5 rounded ${categoryBadgeColors[video.category] ?? 'bg-dp2-primary'}`}>
+      {t(categoryBadgeKeys[video.category.toLowerCase()] ?? '', video.category)}
+    </span>
+  )
+}
+
+function Thumb({ video, large }: { video: Video; large?: boolean }) {
+  const src = thumbnailOf(video)
+  return (
+    <div className="relative aspect-video rounded-xl overflow-hidden bg-slate-900">
+      {src ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={src} alt="" loading={large ? 'eager' : 'lazy'} decoding="async" className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500" />
+      ) : (
+        <div className="absolute inset-0 bg-gradient-to-br from-dp2-primary to-dp2-primary-dark" />
+      )}
+      <div className="absolute inset-0 bg-black/10 group-hover:bg-black/25 transition-colors" />
       <div className="absolute inset-0 flex items-center justify-center">
-        <div className={`${large ? 'w-16 h-16' : 'w-12 h-12'} bg-white/20 backdrop-blur rounded-full flex items-center justify-center group-hover:scale-110 transition-transform`}>
-          <Play size={large ? 28 : 22} className="text-white ms-1" fill="white" />
+        <div className={`${large ? 'w-16 h-16' : 'w-12 h-12'} bg-black/45 backdrop-blur-sm rounded-full flex items-center justify-center ring-1 ring-white/30 group-hover:scale-110 group-hover:bg-red-600 transition-all`}>
+          <Play size={large ? 26 : 20} className="text-white ms-0.5" fill="white" />
         </div>
       </div>
+      {video.duration_seconds ? (
+        <div dir="ltr" className="absolute bottom-2 end-2 bg-black/75 text-white text-[11.5px] font-semibold px-1.5 py-0.5 rounded font-sans">
+          {formatDuration(video.duration_seconds)}
+        </div>
+      ) : null}
+    </div>
+  )
+}
 
-      {/* Duration */}
-      <div className="absolute bottom-2 end-2 bg-black/60 text-white text-[11px] px-2 py-1 rounded font-sans">
-        {formatDuration(video.duration_seconds)}
+function VideoTitle({ video, className }: { video: Video; className: string }) {
+  const { isUrdu } = useLocale()
+  // title is always English (no _ur column for it); title_ur is optional.
+  // Show the visitor's own language first — dir pinned per string so a
+  // clamp never cuts an English title from the wrong end under Urdu.
+  if (isUrdu && video.title_ur) {
+    return <h3 dir="rtl" className={`${className} text-start`} style={{ fontFamily: 'var(--font-urdu-ui)' }}>{video.title_ur}</h3>
+  }
+  return <h3 dir="ltr" className={`${className} text-start`}>{video.title}</h3>
+}
+
+function HeroVideo({ video }: { video: Video }) {
+  const { t } = useLocale()
+  return (
+    <Link href={`/videos/${video.id}`} className="group block">
+      <div className="relative">
+        <Thumb video={video} large />
+        <div className="absolute top-3 start-3 flex items-center gap-1.5">
+          <span className="text-[10.5px] font-bold uppercase tracking-wider font-sans text-dp2-primary-dark bg-dp2-amber px-2 py-0.5 rounded">{t('x.featured')}</span>
+          <CategoryBadge video={video} />
+        </div>
       </div>
-
-      {/* Category badge */}
-      <div className="absolute top-3 start-3">
-        <span className={`text-[11px] font-bold uppercase tracking-widest font-sans text-white px-2 py-1 rounded ${categoryBadgeColors[video.category ?? ''] ?? 'bg-dp2-primary'}`}>
-          {video.category && t(categoryBadgeKeys[video.category.toLowerCase()] ?? '', video.category)}
-        </span>
-      </div>
-
-      {/* Bottom info */}
-      <div className="absolute bottom-0 inset-x-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
-        {/* dir="ltr" — video.title has no _ur column, always English; see
-            the Interviews card's note on why truncating it inside an RTL
-            ancestor clips from the wrong end otherwise. */}
-        <p dir="ltr" className="text-start text-white font-bold text-[15px] font-sans tracking-[0.05em] truncate">
-          {video.title}
-        </p>
-        {video.title_ur && (
-          <p className="text-white/80 text-[13.5px] truncate" style={{ fontFamily: 'var(--font-urdu-ui)' }}>
-            {video.title_ur}
-          </p>
+      <div className="mt-3">
+        <VideoTitle video={video} className="font-sans font-bold text-[17px] md:text-[19px] leading-snug text-slate-900 line-clamp-2 group-hover:text-dp2-primary transition-colors" />
+        {video.description && (
+          <p dir="auto" className="text-slate-500 text-[14px] font-sans leading-relaxed mt-1 line-clamp-2 text-start">{video.description}</p>
         )}
-        <div className="flex items-center gap-2 mt-1 text-white/70 text-[13px] font-sans">
-          <Eye size={12} />
+        <div className="flex items-center gap-1.5 mt-1.5 text-slate-500 text-[12.5px] font-sans">
+          <Eye size={13} />
           <span>{video.views.toLocaleString()} {t('x.views')}</span>
+        </div>
+      </div>
+    </Link>
+  )
+}
+
+function VideoCard({ video }: { video: Video }) {
+  const { t } = useLocale()
+  return (
+    <Link href={`/videos/${video.id}`} className="group block">
+      <Thumb video={video} />
+      <div className="mt-2.5 flex gap-2.5">
+        <div className="min-w-0 flex-1">
+          <VideoTitle video={video} className="font-sans font-semibold text-[15px] leading-snug text-slate-900 line-clamp-2 group-hover:text-dp2-primary transition-colors" />
+          <div className="flex items-center flex-wrap gap-x-2 gap-y-1 mt-1.5 text-slate-500 text-[12.5px] font-sans">
+            <CategoryBadge video={video} />
+            <span className="inline-flex items-center gap-1"><Eye size={12} /> {video.views.toLocaleString()} {t('x.views')}</span>
+          </div>
         </div>
       </div>
     </Link>

@@ -47,7 +47,7 @@ export default function LivestockPage() {
       <Link href="/agriculture" className="inline-flex items-center gap-1.5 font-sans text-[14px] text-dp2-primary-dark hover:underline mb-4"><ArrowLeft size={14} className={isUrdu ? 'rotate-180' : ''} /> {t('ag.pageTitle')}</Link>
       <div className="flex items-center gap-2.5 mb-1.5">
         <PawPrint size={26} className="text-amber-700" />
-        <h1 className="font-heading text-[21px] font-bold text-dp2-primary">{t('agh.livestockTitle')}</h1>
+        <h1 className="font-heading text-[20px] md:text-[21px] font-bold text-dp2-primary">{t('agh.livestockTitle')}</h1>
       </div>
       <p className="font-sans text-[15px] text-slate-500 mb-6">{t('agh.livestockIntro')}</p>
 
@@ -80,7 +80,7 @@ export default function LivestockPage() {
               {filtered.map((g) => (
                 <div key={g.id} className="bg-white border border-dp2-card-border rounded-2xl p-5">
                   <span className="text-[11.5px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 uppercase">{isUrdu ? g.animal_ur : g.animal}</span>
-                  <h3 className="font-heading text-[19px] font-bold text-slate-800 mt-1.5 mb-3">{isUrdu ? g.topic_name_ur : g.topic_name}</h3>
+                  <h3 className="font-heading text-[15px] font-bold text-slate-800 mt-1.5 mb-3">{isUrdu ? g.topic_name_ur : g.topic_name}</h3>
                   {(isUrdu ? g.details_ur : g.details) && (
                     <div className="mb-3">
                       <p className="font-sans text-[13px] font-bold text-slate-500 uppercase tracking-wide mb-1">{t('agh.detailsLabel')}</p>
@@ -110,14 +110,14 @@ export default function LivestockPage() {
             </div>
           )}
 
-          <h2 className="font-heading text-[21px] font-bold text-slate-800 mb-4">{t('agh.centersTitle')}</h2>
+          <h2 className="font-heading text-[17px] md:text-[21px] font-bold text-slate-800 mb-4">{t('agh.centersTitle')}</h2>
           {centers.length === 0 ? (
             <p className="text-center py-12 text-slate-500 font-sans text-[15px] bg-white border border-dp2-card-border rounded-2xl">{t('agh.noneFound')}</p>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {centers.map((c) => (
                 <div key={c.id} className="bg-white border border-dp2-card-border rounded-2xl p-5">
-                  <h3 className="font-heading text-[17px] font-bold text-slate-800 mb-1.5">{isUrdu ? c.name_ur : c.name}</h3>
+                  <h3 className="font-heading text-[15px] font-bold text-slate-800 mb-1.5">{isUrdu ? c.name_ur : c.name}</h3>
                   {(isUrdu ? c.what_they_offer_ur : c.what_they_offer) && <p className="font-sans text-[14.5px] text-slate-500 leading-relaxed mb-3">{isUrdu ? c.what_they_offer_ur : c.what_they_offer}</p>}
                   {c.address && <p className="font-sans text-[13.5px] text-slate-500 flex items-start gap-1.5 mb-1.5"><MapPin size={13} className="shrink-0 mt-0.5" /> {isUrdu && c.address_ur ? c.address_ur : c.address}</p>}
                   {c.phone && (

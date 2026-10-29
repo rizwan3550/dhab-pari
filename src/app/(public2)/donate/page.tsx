@@ -99,11 +99,11 @@ export default async function DonatePage() {
           <div className="mb-4 inline-flex items-center justify-center p-3 bg-emerald-100 rounded-full text-emerald-700">
             <Heart size={32} />
           </div>
-          <h1 className="font-heading text-[19px] md:text-[23px] font-bold leading-[24px] md:leading-[28px] mb-6 text-dp2-primary section-title">
+          <h1 className="font-heading text-[20px] md:text-[23px] font-bold leading-[24px] md:leading-[28px] mb-6 text-dp2-primary section-title">
             <T k="x.supportVillageGrowth" />
           </h1>
           <div className="relative px-8 py-4 border-s-4 border-dp2-primary-dark w-full">
-            <p className="font-sans text-[19px] leading-[20px] italic text-slate-500">
+            <p className="font-sans text-[15px] leading-[20px] italic text-slate-500">
               <T k="x.donateHeroQuote" fallback="&ldquo;The best of people are those who are most beneficial to others. Your contribution today is the seed for a prosperous Dhab Pari tomorrow.&rdquo;" />
             </p>
           </div>
@@ -112,7 +112,7 @@ export default async function DonatePage() {
 
       {/* Payment Channels */}
       <section className="mb-10">
-        <h2 className="font-heading text-[21px] font-bold leading-[20px] mb-8 text-dp2-primary border-b border-dp2-card-border pb-4">
+        <h2 className="font-heading text-[17px] md:text-[21px] font-bold leading-snug mb-8 text-dp2-primary border-b border-dp2-card-border pb-4">
           <T k="x.securePayment" />
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -123,9 +123,9 @@ export default async function DonatePage() {
             <div className="w-16 h-16 mb-6 flex items-center justify-center bg-red-500/10 rounded-xl">
               <Smartphone size={32} className="text-red-500" />
             </div>
-            <h3 className="font-sans text-[21px] font-semibold leading-[20px] mb-2"><T k="w.jazzcash" /></h3>
+            <h3 className="font-sans text-[17px] font-semibold leading-snug mb-2"><T k="w.jazzcash" /></h3>
             <div className="w-full bg-dp2-surface p-4 rounded-xl mb-4">
-              <span className="font-bold text-slate-500 font-sans text-[19px] tracking-wider">
+              <span className="font-bold text-slate-500 font-sans text-[15px] tracking-wider">
                 000000000
               </span>
             </div>
@@ -139,9 +139,9 @@ export default async function DonatePage() {
             <div className="w-16 h-16 mb-6 flex items-center justify-center bg-emerald-500/10 rounded-xl">
               <Wallet size={32} className="text-emerald-500" />
             </div>
-            <h3 className="font-sans text-[21px] font-semibold leading-[20px] mb-2"><T k="w.easypaisa" /></h3>
+            <h3 className="font-sans text-[17px] font-semibold leading-snug mb-2"><T k="w.easypaisa" /></h3>
             <div className="w-full bg-dp2-surface p-4 rounded-xl mb-4">
-              <span className="font-bold text-slate-500 font-sans text-[19px] tracking-wider">
+              <span className="font-bold text-slate-500 font-sans text-[15px] tracking-wider">
                 000000000
               </span>
             </div>
@@ -158,7 +158,7 @@ export default async function DonatePage() {
       {/* How to Contribute */}
       <section className="mb-10 grid grid-cols-1 md:grid-cols-2 gap-12 items-center bg-dp2-surface p-8 md:p-12 rounded-xl">
         <div>
-          <h2 className="font-heading text-[21px] font-bold leading-[20px] mb-6 text-dp2-primary">
+          <h2 className="font-heading text-[17px] md:text-[21px] font-bold leading-snug mb-6 text-dp2-primary">
             <T k="x.howToContribute" />
           </h2>
           <div className="space-y-8">
@@ -172,8 +172,8 @@ export default async function DonatePage() {
                   {step.n}
                 </div>
                 <div>
-                  <h4 className="font-sans text-[19px] font-semibold leading-[20px] mb-1"><T k={step.titleKey} /></h4>
-                  <p className="text-slate-500 font-sans text-[17px]"><T k={step.descKey} /></p>
+                  <h4 className="font-sans text-[15px] font-semibold leading-[20px] mb-1"><T k={step.titleKey} /></h4>
+                  <p className="text-slate-500 font-sans text-[15px]"><T k={step.descKey} /></p>
                 </div>
               </div>
             ))}
@@ -202,10 +202,10 @@ export default async function DonatePage() {
       <section className="mb-10">
         <div className="flex flex-col md:flex-row justify-between items-end mb-8 gap-4">
           <div>
-            <h2 className="font-heading text-[21px] font-bold leading-[20px] text-dp2-primary">
+            <h2 className="font-heading text-[17px] md:text-[21px] font-bold leading-snug text-dp2-primary">
               <T k="x.donorsHonorWall" />
             </h2>
-            <p className="text-slate-500 font-sans text-[17px]">
+            <p className="text-slate-500 font-sans text-[15px]">
               <T k="x.transparentRecord" />
             </p>
           </div>
@@ -263,10 +263,10 @@ export default async function DonatePage() {
       {announcedDonors.length > 0 && (
         <section className="mb-10">
           <div className="mb-6">
-            <h2 className="font-heading text-[21px] font-bold leading-[20px] text-dp2-primary">
+            <h2 className="font-heading text-[17px] md:text-[21px] font-bold leading-snug text-dp2-primary">
               <T k="x.announcedFunds" />
             </h2>
-            <p className="text-slate-500 font-sans text-[17px]">
+            <p className="text-slate-500 font-sans text-[15px]">
               <T k="x.pendingVerification" />
             </p>
           </div>

@@ -66,8 +66,8 @@ export default function VolunteerPage() {
     <div className="max-w-[1000px] mx-auto px-6 md:px-12 py-10 min-h-screen">
       <div className="mb-8 flex items-start justify-between flex-wrap gap-4">
         <div>
-          <h1 className="font-heading text-[23px] font-bold leading-[28px] text-slate-800 flex items-center gap-3"><HeartHandshake size={28} className="text-dp2-primary-dark" /> {t('p.volunteer')}</h1>
-          <p className="text-slate-500 font-sans text-[17px] leading-[26px] max-w-2xl mt-2">
+          <h1 className="font-heading text-[20px] md:text-[23px] font-bold leading-[28px] text-slate-800 flex items-center gap-3"><HeartHandshake size={28} className="text-dp2-primary-dark" /> {t('p.volunteer')}</h1>
+          <p className="text-slate-500 font-sans text-[15px] leading-[26px] max-w-2xl mt-2">
             Offer your time for a specific project, or sign up generally and the committee will reach out when help is needed.
           </p>
         </div>
@@ -79,7 +79,7 @@ export default function VolunteerPage() {
       {loading ? (
         <p className="font-sans text-[15px] text-slate-500 text-center py-16"><LoadingDots /></p>
       ) : volunteers.length === 0 ? (
-        <div className="text-center py-16 text-slate-500 font-sans text-[17px]">{t('x.noVolunteersYet')}</div>
+        <div className="text-center py-16 text-slate-500 font-sans text-[15px]">{t('x.noVolunteersYet')}</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {volunteers.map((v) => (
@@ -102,7 +102,7 @@ export default function VolunteerPage() {
         <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4" onClick={() => setShowForm(false)}>
           <div className="bg-white rounded-2xl p-6 w-full max-w-sm" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-heading text-[21px] font-bold text-dp2-primary">{t('p.volunteer')}</h2>
+              <h2 className="font-heading text-[17px] md:text-[21px] font-bold text-dp2-primary">{t('p.volunteer')}</h2>
               <button onClick={() => setShowForm(false)} className="cursor-pointer text-slate-500"><X size={20} /></button>
             </div>
             <div className="space-y-4">

@@ -167,7 +167,7 @@ export default function TermsPage() {
     <div className="max-w-[820px] mx-auto px-6 md:px-12 py-10" dir={isUrdu ? 'rtl' : 'ltr'} style={isUrdu ? { fontFamily: 'var(--font-urdu-ui)' } : undefined}>
       <div className="flex items-center gap-2.5 mb-1.5">
         <FileText size={24} className="text-dp2-primary-dark" />
-        <h1 className="font-heading text-[21px] font-bold text-dp2-primary">{t('y.termsService')}</h1>
+        <h1 className="font-heading text-[20px] md:text-[21px] font-bold text-dp2-primary">{t('y.termsService')}</h1>
       </div>
       <p className="font-sans text-[14.5px] text-slate-500 mb-8">
         {isUrdu ? 'آخری تازہ کاری: ستمبر 2026' : 'Last updated: September 2026'}
@@ -176,7 +176,7 @@ export default function TermsPage() {
       <div className="space-y-8">
         {sections.map((s, i) => (
           <div key={i}>
-            <h2 className="font-heading text-[19px] font-bold text-dp2-primary mb-2.5">{isUrdu ? s.ur.h : s.en.h}</h2>
+            <h2 className="font-heading text-[15px] font-bold text-dp2-primary mb-2.5">{isUrdu ? s.ur.h : s.en.h}</h2>
             <div className="space-y-2.5">
               {(isUrdu ? s.ur.p : s.en.p).map((para, j) => (
                 <p key={j} className="font-sans text-[15.5px] leading-relaxed text-slate-500">{para}</p>
@@ -186,7 +186,7 @@ export default function TermsPage() {
         ))}
 
         <div className="bg-dp2-surface rounded-xl p-5 border border-dp2-card-border">
-          <h2 className="font-heading text-[19px] font-bold text-dp2-primary mb-2">
+          <h2 className="font-heading text-[15px] font-bold text-dp2-primary mb-2">
             {isUrdu ? 'سوالات؟' : 'Questions?'}
           </h2>
           <p className="font-sans text-[15.5px] leading-relaxed text-slate-500">

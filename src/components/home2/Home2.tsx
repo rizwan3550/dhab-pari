@@ -264,7 +264,7 @@ export function Home2(props: Home2Props) {
               </div>
               <Link href={cur.href} className="relative block h-[172px] rounded-2xl overflow-hidden border border-dp2-gold/20 shadow-[0_4px_8px_rgba(0,0,0,.08)]"
                 style={{ background: 'linear-gradient(135deg,#005A36,#166534)' }}>
-                <ImageSlot2 src={props.cardImages[cur.key]} placeholder="" />
+                <ImageSlot2 src={props.cardImages[cur.key]} placeholder="" priority />
                 <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to top, rgba(3,58,34,.96) 0%, rgba(3,58,34,.75) 38%, transparent 62%)' }} />
                 <div className="absolute inset-3.5 flex flex-col gap-1 text-white">
                   <span className="text-[23px] font-extrabold tracking-tight">{cur.value}</span>
@@ -368,7 +368,7 @@ export function Home2(props: Home2Props) {
                 render={(w) => (
                   <Card2 className="h-[172px] flex flex-row overflow-hidden">
                     <div className="flex-none w-[36%] relative" style={{ background: 'linear-gradient(160deg,#005A36,#166534)' }}>
-                      <ImageSlot2 src={props.cardImages[w.key]} placeholder="" />
+                      <ImageSlot2 src={props.cardImages[w.key]} placeholder="" sizes="(min-width: 1024px) 20vw, 36vw" />
                     </div>
                     <div className="flex-1 min-w-0 p-3 flex flex-col gap-1.5">
                       <div className="flex items-center gap-2">
@@ -409,7 +409,7 @@ export function Home2(props: Home2Props) {
                 render={(m) => (
                   <Card2 className="h-[172px] flex flex-row overflow-hidden">
                     <div className="flex-none w-[36%] relative" style={{ background: 'linear-gradient(160deg,#005A36,#166534)' }}>
-                      <ImageSlot2 src={props.cardImages[m.key]} placeholder={ub('Photo', 'تصویر لگائیں')} />
+                      <ImageSlot2 src={props.cardImages[m.key]} sizes="(min-width: 1024px) 20vw, 36vw" placeholder={ub('Photo', 'تصویر لگائیں')} />
                     </div>
                     <div className="flex-1 min-w-0 p-3 flex flex-col gap-1.5">
                       <span className="text-[10px] font-bold uppercase text-emerald-600">{m.kicker}{m.count ? ` · ${m.count}` : ''}</span>
@@ -494,7 +494,7 @@ export function Home2(props: Home2Props) {
                     <Link key={c.id} href="/classifieds">
                       <Card2 className="overflow-hidden flex flex-col">
                         <div className="relative h-24" style={{ background: 'linear-gradient(135deg,#166534,#005A36)' }}>
-                          <ImageSlot2 src={c.photo_url} placeholder={ub('Photo', 'تصویر')} />
+                          <ImageSlot2 src={c.photo_url} sizes="200px" placeholder={ub('Photo', 'تصویر')} />
                           <span className="absolute top-1.5 end-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-dp2-gold text-slate-900">{t(`cl.cat.${c.category}`, c.category)}</span>
                         </div>
                         <div className="p-2.5 flex flex-col gap-0.5">

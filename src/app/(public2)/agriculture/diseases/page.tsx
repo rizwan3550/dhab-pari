@@ -37,7 +37,7 @@ export default function CropDiseasesPage() {
       <Link href="/agriculture" className="inline-flex items-center gap-1.5 font-sans text-[14px] text-dp2-primary-dark hover:underline mb-4"><ArrowLeft size={14} className={isUrdu ? 'rotate-180' : ''} /> {t('ag.pageTitle')}</Link>
       <div className="flex items-center gap-2.5 mb-1.5">
         <Bug size={26} className="text-amber-700" />
-        <h1 className="font-heading text-[21px] font-bold text-dp2-primary">{t('agh.diseasesTitle')}</h1>
+        <h1 className="font-heading text-[20px] md:text-[21px] font-bold text-dp2-primary">{t('agh.diseasesTitle')}</h1>
       </div>
       <p className="font-sans text-[15px] text-slate-500 mb-6">{t('agh.diseasesIntro')}</p>
 
@@ -64,7 +64,7 @@ export default function CropDiseasesPage() {
           {filtered.map((g) => (
             <div key={g.id} className="bg-white border border-dp2-card-border rounded-2xl p-5">
               <span className="text-[11.5px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 uppercase">{isUrdu ? g.crop_ur : g.crop}</span>
-              <h3 className="font-heading text-[19px] font-bold text-slate-800 mt-1.5 mb-3">{isUrdu ? g.disease_name_ur : g.disease_name}</h3>
+              <h3 className="font-heading text-[15px] font-bold text-slate-800 mt-1.5 mb-3">{isUrdu ? g.disease_name_ur : g.disease_name}</h3>
               {(isUrdu ? g.symptoms_ur : g.symptoms) && (
                 <div className="mb-3">
                   <p className="font-sans text-[13px] font-bold text-slate-500 uppercase tracking-wide mb-1">{t('agh.symptomsLabel')}</p>

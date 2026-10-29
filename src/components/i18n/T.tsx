@@ -58,3 +58,16 @@ export function LocaleDir({
   const { isUrdu } = useLocale()
   return <div dir={isUrdu ? 'rtl' : 'ltr'} className={className}>{children}</div>
 }
+
+/**
+ * Database/computed content that exists in both languages (about_text and
+ * about_text_ur, a member's position and position_ur, ...) — the server
+ * renders both and the reader's own toggle picks one, same reason as <T>.
+ * An Urdu reader with no Urdu value yet gets the English one pinned LTR,
+ * so its trailing punctuation doesn't jump to the wrong end.
+ */
+export function Bi({ en, ur }: { en: string; ur?: string | null }) {
+  const { isUrdu } = useLocale()
+  if (isUrdu && ur) return <span dir="rtl">{ur}</span>
+  return <span dir={isUrdu ? 'ltr' : undefined}>{en}</span>
+}

@@ -59,7 +59,7 @@ export default function SadqaJariyaPage() {
   return (
     <div className="max-w-[1000px] mx-auto px-6 md:px-12 py-10 min-h-screen">
       <div className="mb-8">
-        <h1 className="font-heading text-[23px] font-bold leading-[28px] text-dp2-primary flex items-center gap-3">
+        <h1 className="font-heading text-[20px] md:text-[23px] font-bold leading-[28px] text-dp2-primary flex items-center gap-3">
           <Gift size={30} className="text-dp2-primary-dark" /> {t('sj.title')}
         </h1>
         <p className="font-sans text-[16px] text-slate-500 mt-2 leading-relaxed max-w-2xl">{t('sj.blurb')}</p>
@@ -69,11 +69,11 @@ export default function SadqaJariyaPage() {
         <div className="flex flex-wrap gap-3 mb-8">
           <div className="bg-white border border-dp2-card-border rounded-2xl px-5 py-3">
             <p className="font-sans text-[13px] font-semibold text-slate-500">{t('sj.installed')}</p>
-            <p className="font-heading text-[27px] font-bold text-dp2-primary">{items.length}</p>
+            <p className="font-heading text-[22px] md:text-[27px] font-bold text-dp2-primary">{items.length}</p>
           </div>
           <div className="bg-white border border-dp2-card-border rounded-2xl px-5 py-3">
             <p className="font-sans text-[13px] font-semibold text-slate-500">{t('sj.working')}</p>
-            <p className="font-heading text-[27px] font-bold text-emerald-700">{working}</p>
+            <p className="font-heading text-[22px] md:text-[27px] font-bold text-emerald-700">{working}</p>
           </div>
         </div>
       )}
@@ -95,7 +95,7 @@ export default function SadqaJariyaPage() {
             )}
             <div className="p-5">
               <div className="flex items-start justify-between gap-2 mb-2">
-                <h2 className="font-heading text-[20px] font-bold text-dp2-primary">
+                <h2 className="font-heading text-[17px] font-bold text-dp2-primary">
                   {isUrdu && i.item_name_ur ? i.item_name_ur : i.item_name}
                 </h2>
                 {['installed', 'in_service'].includes(i.status) ? (
@@ -148,7 +148,7 @@ export default function SadqaJariyaPage() {
       {/* ── What it costs to give one ───────────────────────────────────── */}
       {catalogue.length > 0 && (
         <div>
-          <h2 className="font-heading text-[19px] font-bold text-dp2-primary mb-2">{t('sj.giveOne')}</h2>
+          <h2 className="font-heading text-[15px] font-bold text-dp2-primary mb-2">{t('sj.giveOne')}</h2>
           <p className="font-sans text-[14.5px] text-slate-500 mb-5 max-w-2xl">{t('sj.giveOneHelp')}</p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -157,7 +157,7 @@ export default function SadqaJariyaPage() {
                 <p className="font-sans text-[15.5px] font-bold text-slate-800">
                   {isUrdu && c.name_ur ? c.name_ur : c.name}
                 </p>
-                <p className="font-heading text-[21px] font-bold text-dp2-primary mt-1">{fmt(c.capital_cost_pkr)}</p>
+                <p className="font-heading text-[17px] md:text-[21px] font-bold text-dp2-primary mt-1">{fmt(c.capital_cost_pkr)}</p>
                 {c.annual_running_cost_pkr > 0 && (
                   <p className="font-sans text-[13px] text-slate-500 mt-0.5">
                     {t('pes.runningCost')} {fmt(c.annual_running_cost_pkr)}/{t('es.year')}

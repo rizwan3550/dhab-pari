@@ -25,8 +25,8 @@ export default function AchievementsPage() {
   return (
     <div className="max-w-[900px] mx-auto px-6 md:px-12 py-10 min-h-screen">
       <div className="mb-10">
-        <h1 className="font-heading text-[23px] font-bold leading-[28px] text-slate-800 flex items-center gap-3"><Trophy size={28} className="text-dp2-primary-dark" /> {t('x.ourAchievements')}</h1>
-        <p className="text-slate-500 font-sans text-[17px] leading-[26px] max-w-2xl mt-2">
+        <h1 className="font-heading text-[20px] md:text-[23px] font-bold leading-[28px] text-slate-800 flex items-center gap-3"><Trophy size={28} className="text-dp2-primary-dark" /> {t('x.ourAchievements')}</h1>
+        <p className="text-slate-500 font-sans text-[15px] leading-[26px] max-w-2xl mt-2">
           Completed work by the committee and its members — a running record for the village, and for everyone watching from overseas.
         </p>
       </div>
@@ -34,7 +34,7 @@ export default function AchievementsPage() {
       {loading ? (
         <p className="font-sans text-[15px] text-slate-500 text-center py-16"><LoadingDots /></p>
       ) : items.length === 0 ? (
-        <div className="text-center py-16 text-slate-500 font-sans text-[17px]">{t('x.nothingCompletedYet')}</div>
+        <div className="text-center py-16 text-slate-500 font-sans text-[15px]">{t('x.nothingCompletedYet')}</div>
       ) : (
         <div className="space-y-3">
           {items.map((a) => (
