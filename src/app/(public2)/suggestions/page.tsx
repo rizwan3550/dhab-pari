@@ -13,7 +13,8 @@ const tabs = [
 ]
 
 export default function SuggestionsPage() {
-  const { t } = useLocale()
+  const { t, isUrdu } = useLocale()
+  const ub = (en: string, ur: string) => (isUrdu ? ur : en)
   const [activeTab, setActiveTab] = useState('suggestion')
   const [name, setName] = useState('')
   const [mobile, setMobile] = useState('')
@@ -71,14 +72,8 @@ export default function SuggestionsPage() {
           <h1 className="font-heading text-[20px] md:text-[23px] font-bold leading-[28px] text-dp2-primary mb-2">
             {t('x.communityInput')}
           </h1>
-          <p className="text-slate-500 font-sans text-[15px] leading-[20px]">
-            Share your suggestions, complaints, or volunteer for village initiatives.
-          </p>
-          <p
-            className="text-slate-500 text-[15px] mt-2"
-            style={{ fontFamily: 'var(--font-urdu-ui)', lineHeight: '1.6' }}
-          >
-            اپنی تجاویز، شکایات یا رضاکارانہ خدمات کے لیے رابطہ کریں
+          <p className="text-slate-500 font-sans text-[15px] leading-relaxed">
+            {ub('Share your suggestions, complaints, or volunteer for village initiatives.', 'اپنی تجاویز، شکایات یا رضاکارانہ خدمات کے لیے رابطہ کریں۔')}
           </p>
         </div>
 
@@ -88,13 +83,13 @@ export default function SuggestionsPage() {
             <button
               key={tab.key}
               onClick={() => { setActiveTab(tab.key); setSubmitted(false); setError('') }}
-              className={`px-5 py-2 rounded-full font-sans text-[15px] font-semibold tracking-[0.05em] transition-all cursor-pointer ${
+              className={`px-4 py-1.5 rounded-full font-sans text-[13.5px] font-semibold transition-colors cursor-pointer ${
                 activeTab === tab.key
                   ? 'bg-dp2-primary text-white'
                   : 'bg-white border border-dp2-card-border text-slate-500 hover:border-dp2-primary hover:text-dp2-primary'
               }`}
             >
-              {tab.label}
+              {ub(tab.label, tab.labelUr)}
             </button>
           ))}
         </div>
@@ -106,14 +101,10 @@ export default function SuggestionsPage() {
             <h2 className="font-heading text-[15px] font-bold leading-[24px] text-dp2-primary mb-2">
               {t('p.thankYou')}
             </h2>
-            <p className="text-slate-500 font-sans text-[15px] mb-2">
-              Your {activeTab} has been submitted successfully.
-            </p>
-            <p
-              className="text-slate-500 text-[15px] mb-6"
-              style={{ fontFamily: 'var(--font-urdu-ui)', lineHeight: '1.6' }}
-            >
-              آپ کی {tabs.find((t) => t.key === activeTab)?.labelUr} کامیابی سے جمع ہو گئی ہے۔
+            <p className="text-slate-500 font-sans text-[15px] mb-6">
+              {isUrdu
+                ? `آپ کی ${tabs.find((tb) => tb.key === activeTab)?.labelUr} کامیابی سے جمع ہو گئی ہے۔`
+                : `Your ${activeTab} has been submitted successfully.`}
             </p>
             <button
               onClick={reset}
@@ -129,21 +120,21 @@ export default function SuggestionsPage() {
           <div className="bg-white border border-dp2-card-border rounded-2xl p-6 md:p-8">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label className="block font-sans text-[15px] font-semibold tracking-[0.05em] text-slate-500 mb-2">
-                  NAME (Optional) / نام
+                <label className="block font-sans text-[13.5px] font-semibold text-slate-600 mb-1.5">
+                  {ub('Name (optional)', 'نام (اختیاری)')}
                 </label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Your name"
+                  placeholder={ub('Your name', 'آپ کا نام')}
                   className="w-full px-4 py-3 bg-white border-2 border-dp2-card-border rounded-2xl focus:border-dp2-primary-dark focus:ring-0 transition-all font-sans text-[15px] text-slate-800"
                 />
               </div>
 
               <div>
-                <label className="block font-sans text-[15px] font-semibold tracking-[0.05em] text-slate-500 mb-2">
-                  MOBILE * / موبائل نمبر
+                <label className="block font-sans text-[13.5px] font-semibold text-slate-600 mb-1.5">
+                  {ub('Mobile *', 'موبائل نمبر *')}
                 </label>
                 <input
                   type="tel"
@@ -157,8 +148,8 @@ export default function SuggestionsPage() {
               </div>
 
               <div>
-                <label className="block font-sans text-[15px] font-semibold tracking-[0.05em] text-slate-500 mb-2">
-                  MESSAGE * / پیغام
+                <label className="block font-sans text-[13.5px] font-semibold text-slate-600 mb-1.5">
+                  {ub('Message *', 'پیغام *')}
                 </label>
                 <textarea
                   value={message}
@@ -167,10 +158,10 @@ export default function SuggestionsPage() {
                   rows={5}
                   placeholder={
                     activeTab === 'volunteer'
-                      ? 'Tell us how you would like to help...'
+                      ? ub('Tell us how you would like to help...', 'بتائیں آپ کس طرح مدد کرنا چاہتے ہیں...')
                       : activeTab === 'complaint'
-                        ? 'Describe your concern in detail...'
-                        : 'Share your thoughts with the committee...'
+                        ? ub('Describe your concern in detail...', 'اپنی شکایت تفصیل سے لکھیں...')
+                        : ub('Share your thoughts with the committee...', 'کمیٹی کے ساتھ اپنے خیالات شیئر کریں...')
                   }
                   className="w-full px-4 py-3 bg-white border-2 border-dp2-card-border rounded-2xl focus:border-dp2-primary-dark focus:ring-0 transition-all font-sans text-[15px] text-slate-800 resize-none"
                 />
@@ -188,7 +179,7 @@ export default function SuggestionsPage() {
                 className="w-full bg-dp2-primary-dark text-white py-4 rounded-xl font-sans text-[15px] font-semibold hover:bg-dp2-primary transition-all active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-50 cursor-pointer"
               >
                 <Send size={18} />
-                {loading ? 'Submitting...' : 'Submit / جمع کرائیں'}
+                {loading ? ub('Submitting...', 'جمع ہو رہا ہے...') : ub('Submit', 'جمع کرائیں')}
               </button>
             </form>
           </div>

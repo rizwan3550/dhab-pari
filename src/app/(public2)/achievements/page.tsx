@@ -14,7 +14,7 @@ interface Achievement { id: string; done_at: string; is_private: boolean; text_u
 // but with the detail withheld, only who completed it — matches the
 // stated privacy direction exactly.
 export default function AchievementsPage() {
-  const { t } = useLocale()
+  const { t, isUrdu } = useLocale()
   const [items, setItems] = useState<Achievement[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -27,7 +27,9 @@ export default function AchievementsPage() {
       <div className="mb-10">
         <h1 className="font-heading text-[20px] md:text-[23px] font-bold leading-[28px] text-slate-800 flex items-center gap-3"><Trophy size={28} className="text-dp2-primary-dark" /> {t('x.ourAchievements')}</h1>
         <p className="text-slate-500 font-sans text-[15px] leading-[26px] max-w-2xl mt-2">
-          Completed work by the committee and its members — a running record for the village, and for everyone watching from overseas.
+          {isUrdu
+            ? 'کمیٹی اور اس کے اراکین کے مکمل کیے گئے کام — گاؤں کے لیے، اور بیرونِ ملک سے دیکھنے والوں کے لیے ایک جاری ریکارڈ۔'
+            : 'Completed work by the committee and its members — a running record for the village, and for everyone watching from overseas.'}
         </p>
       </div>
 

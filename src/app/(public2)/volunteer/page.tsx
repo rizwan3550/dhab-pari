@@ -68,7 +68,9 @@ export default function VolunteerPage() {
         <div>
           <h1 className="font-heading text-[20px] md:text-[23px] font-bold leading-[28px] text-slate-800 flex items-center gap-3"><HeartHandshake size={28} className="text-dp2-primary-dark" /> {t('p.volunteer')}</h1>
           <p className="text-slate-500 font-sans text-[15px] leading-[26px] max-w-2xl mt-2">
-            Offer your time for a specific project, or sign up generally and the committee will reach out when help is needed.
+            {isUrdu
+              ? 'کسی خاص منصوبے کے لیے وقت دیں، یا عمومی طور پر نام لکھوائیں — ضرورت پڑنے پر کمیٹی خود رابطہ کرے گی۔'
+              : 'Offer your time for a specific project, or sign up generally and the committee will reach out when help is needed.'}
           </p>
         </div>
         <button onClick={() => (user ? setShowForm(true) : toast.error('Log in to sign up as a volunteer'))} className="shrink-0 flex items-center gap-2 px-5 py-2.5 bg-dp2-primary-dark text-white rounded-xl font-sans text-[15px] font-semibold hover:bg-dp2-primary transition-all cursor-pointer">
@@ -127,7 +129,7 @@ export default function VolunteerPage() {
 
       {!user && (
         <p className="text-center font-sans text-[14px] text-slate-500 mt-8">
-          <Link href="/portal/login?next=/volunteer" className="text-dp2-primary-dark font-semibold hover:underline">{t('p.logIn')}</Link> to volunteer.
+          <Link href="/portal/login?next=/volunteer" className="text-dp2-primary-dark font-semibold hover:underline">{t('p.logIn')}</Link>{isUrdu ? ' کریں تاکہ رضاکار بن سکیں۔' : ' to volunteer.'}
         </p>
       )}
     </div>

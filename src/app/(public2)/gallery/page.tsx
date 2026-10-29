@@ -34,6 +34,15 @@ const categoryColors: Record<string, string> = {
   interviews: 'from-amber-500 to-amber-700',
 }
 
+const categoryLabels: Record<string, { en: string; ur: string }> = {
+  projects: { en: 'Projects', ur: 'منصوبے' },
+  sports: { en: 'Sports', ur: 'کھیل' },
+  kids: { en: 'Kids', ur: 'بچے' },
+  events: { en: 'Events', ur: 'تقریبات' },
+  weddings: { en: 'Weddings', ur: 'شادیاں' },
+  interviews: { en: 'Interviews', ur: 'انٹرویوز' },
+}
+
 export default function GalleryPage() {
   const { t, isUrdu } = useLocale()
   const [albums, setAlbums] = useState<Album[]>([])
@@ -128,7 +137,7 @@ export default function GalleryPage() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/15 to-transparent" />
                 {album.category && (
                   <span className="absolute top-2.5 start-2.5 text-[10.5px] font-sans font-bold tracking-wide uppercase text-white bg-black/35 backdrop-blur-sm px-2 py-0.5 rounded-full">
-                    {album.category}
+                    {categoryLabels[album.category] ? categoryLabels[album.category][isUrdu ? 'ur' : 'en'] : album.category}
                   </span>
                 )}
                 <div className="absolute inset-x-0 bottom-0 p-3">

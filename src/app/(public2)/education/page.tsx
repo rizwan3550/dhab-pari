@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { getPublicSiteContext } from '@/lib/publicSite'
 import { getCookieTenantId } from '@/lib/tenant'
-import { T } from '@/components/i18n/T'
+import { T, Bi } from '@/components/i18n/T'
 
 export async function generateMetadata(): Promise<Metadata> {
   const site = await getPublicSiteContext(await createClient(), await getCookieTenantId())
@@ -34,8 +34,11 @@ export default async function EducationPage() {
         <h1 className="font-heading text-[20px] md:text-[23px] font-bold leading-[28px] text-dp2-primary mb-2">
           <T k="x.educationCorner" />
         </h1>
-        <p className="text-slate-500 font-sans text-[15px] leading-[20px]">
-          Supporting the next generation of {site.name} through sponsorship, stipends, and community support.
+        <p className="text-slate-500 font-sans text-[15px] leading-relaxed">
+          <Bi
+            en={`Supporting the next generation of ${site.name} through sponsorship, stipends, and community support.`}
+            ur={`کفالت، وظائف اور برادری کے تعاون سے ${site.nameUrdu || site.name} کی اگلی نسل کی مدد۔`}
+          />
         </p>
       </div>
 
@@ -45,13 +48,18 @@ export default async function EducationPage() {
             <HeartHandshake size={28} />
           </div>
           <div className="flex-1">
-            <h2 className="font-heading text-[20px] md:text-[23px] font-bold leading-snug text-dp2-primary mb-1.5">Kafalat, Wazifa &amp; Zakat</h2>
-            <p className="text-slate-500 font-sans text-[15.5px] leading-[22px]">
-              Sponsor an orphan or student directly (Kafalat), support ongoing education stipends (Taleemi Wazifa), or contribute to the pooled Zakat &amp; Ushr fund. Every program here is run and tracked by the committee — real sponsors, real recipients.
+            <h2 className="font-heading text-[20px] md:text-[23px] font-bold leading-snug text-dp2-primary mb-1.5">
+              <Bi en="Kafalat, Wazifa & Zakat" ur="کفالت، وظیفہ اور زکوٰۃ" />
+            </h2>
+            <p className="text-slate-500 font-sans text-[15px] leading-relaxed">
+              <Bi
+                en="Sponsor an orphan or student directly (Kafalat), support ongoing education stipends (Taleemi Wazifa), or contribute to the pooled Zakat & Ushr fund. Every program here is run and tracked by the committee — real sponsors, real recipients."
+                ur="کسی یتیم یا طالب علم کی براہِ راست کفالت کریں، جاری تعلیمی وظائف میں حصہ ڈالیں، یا زکوٰۃ و عشر کے مشترکہ فنڈ میں عطیہ دیں۔ ہر پروگرام کمیٹی چلاتی اور اس کا ریکارڈ رکھتی ہے — حقیقی کفیل، حقیقی مستحقین۔"
+              />
             </p>
           </div>
           <Link href="/welfare" className="shrink-0 inline-flex items-center gap-1.5 bg-dp2-primary text-white px-5 py-2.5 rounded-xl font-sans text-[15px] font-semibold hover:brightness-110 transition-all">
-            Explore Welfare Programs <ArrowRight size={15} />
+            <Bi en="Explore Welfare Programs" ur="فلاحی پروگرام دیکھیں" /> <ArrowRight size={15} />
           </Link>
         </div>
       </section>
@@ -60,15 +68,17 @@ export default async function EducationPage() {
         <div className="inline-flex items-center justify-center p-2.5 bg-white rounded-full text-blue-600 mb-3">
           <MessageSquarePlus size={22} />
         </div>
-        <h3 className="font-heading text-[20px] md:text-[23px] font-bold leading-snug text-blue-900 mb-2">Have an idea for education in {site.name}?</h3>
-        <p className="text-blue-700 font-sans text-[16px] mb-6 max-w-xl mx-auto">
-          A tuition center, a book drive, a tutoring program — suggest it directly to the committee.
+        <h3 className="font-heading text-[20px] md:text-[23px] font-bold leading-snug text-blue-900 mb-2">
+          <Bi en={`Have an idea for education in ${site.name}?`} ur={`${site.nameUrdu || site.name} میں تعلیم کے لیے کوئی خیال ہے؟`} />
+        </h3>
+        <p className="text-blue-700 font-sans text-[15px] leading-relaxed mb-6 max-w-xl mx-auto">
+          <Bi en="A tuition center, a book drive, a tutoring program — suggest it directly to the committee." ur="ٹیوشن سینٹر، کتابوں کی مہم، پڑھائی میں مدد کا پروگرام — براہِ راست کمیٹی کو تجویز دیں۔" />
         </p>
         <Link
           href="/suggestions"
           className="inline-block bg-blue-600 text-white px-8 py-3 rounded-xl font-sans font-semibold hover:bg-blue-700 transition-all"
         >
-          Submit a Suggestion
+          <Bi en="Submit a Suggestion" ur="تجویز دیں" />
         </Link>
       </div>
     </div>

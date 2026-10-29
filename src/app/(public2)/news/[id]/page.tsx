@@ -7,6 +7,7 @@ export const revalidate = 300
 import Link from 'next/link'
 import { Calendar, User, Eye, ArrowLeft } from 'lucide-react'
 import { T } from '@/components/i18n/T'
+import { ImageSlot2 } from '@/components/design2/ImageSlot2'
 import { DonorBadge } from '@/components/public/DonorBadge'
 import { NewsComments } from '@/components/public/NewsComments'
 import type { DonorBadgeTier } from '@/lib/donorBadges'
@@ -84,11 +85,15 @@ export default async function NewsDetailPage({
       <article className="max-w-3xl mx-auto">
         {/* Cover area */}
         <div
-          className={`w-full h-48 md:h-64 rounded-xl flex items-center justify-center mb-8 ${colors.bg}`}
+          className={`relative w-full h-48 md:h-80 rounded-xl overflow-hidden flex items-center justify-center mb-6 md:mb-8 ${colors.bg}`}
         >
-          <span className="text-[80px]">
-            {categoryEmojis[post.category ?? ''] ?? '📰'}
-          </span>
+          {post.cover_image_url ? (
+            <ImageSlot2 src={post.cover_image_url} sizes="(min-width: 768px) 800px, 100vw" priority />
+          ) : (
+            <span className="text-[64px] md:text-[80px]">
+              {categoryEmojis[post.category ?? ''] ?? '📰'}
+            </span>
+          )}
         </div>
 
         {/* Category badge */}
@@ -99,14 +104,14 @@ export default async function NewsDetailPage({
         </span>
 
         {/* Title */}
-        <h1 className="font-heading text-[20px] md:text-[40px] font-bold leading-[28px] md:leading-[28px] text-dp2-primary mb-4">
+        <h1 dir="auto" className="text-start font-heading text-[22px] md:text-[34px] font-bold leading-snug text-dp2-primary mb-3">
           {post.title}
         </h1>
 
         {/* Urdu title */}
         {post.title_ur && (
           <p
-            className="text-slate-500 text-[20px] mb-6"
+            className="text-slate-500 text-[18px] mb-5"
             style={{ fontFamily: 'var(--font-urdu-ui)', lineHeight: '1.6', direction: 'rtl' }}
           >
             {post.title_ur}
@@ -114,7 +119,7 @@ export default async function NewsDetailPage({
         )}
 
         {/* Meta */}
-        <div className="flex flex-wrap items-center gap-4 text-slate-500 text-[15px] font-sans font-semibold tracking-[0.05em] mb-8 pb-8 border-b border-dp2-card-border">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-slate-500 text-[13px] font-sans font-semibold mb-6 pb-6 md:mb-8 md:pb-8 border-b border-dp2-card-border">
           <span className="flex items-center gap-1">
             <Calendar size={16} />
             {formatDate(post.published_at)}
@@ -135,7 +140,8 @@ export default async function NewsDetailPage({
           {post.content.split('\n').map((paragraph: string, i: number) => (
             <p
               key={i}
-              className="text-slate-800 font-sans text-[15px] leading-[20px] mb-4"
+              dir="auto"
+              className="text-start text-slate-800 font-sans text-[16px] leading-relaxed mb-4"
             >
               {paragraph}
             </p>

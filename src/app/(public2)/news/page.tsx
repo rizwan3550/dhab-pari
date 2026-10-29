@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { Calendar, User, Eye } from 'lucide-react'
+import { ImageSlot2 } from '@/components/design2/ImageSlot2'
 import { useLocale } from '@/lib/i18n/LocaleProvider'
 import { DonorBadge } from '@/components/public/DonorBadge'
 import type { DonorBadgeTier } from '@/lib/donorBadges'
@@ -61,6 +62,10 @@ function formatDate(dateStr: string | null) {
 
 export default function NewsPage() {
   const { t, isUrdu } = useLocale()
+  // The reader's own language when the post has it (title_ur/content_ur,
+  // written in the admin's post editor), else whichever exists.
+  const postTitle = (p: NewsPost) => (isUrdu && p.title_ur) || p.title
+  const postContent = (p: NewsPost) => (isUrdu && p.content_ur) || p.content
   const [posts, setPosts] = useState<NewsPost[]>([])
   const [activeFilter, setActiveFilter] = useState('All')
   const [categories, setCategories] = useState<PostCategory[]>([])
@@ -157,22 +162,26 @@ export default function NewsPage() {
           {/* Featured Post */}
           <Link href={`/news/${featured.id}`} className="mb-10 bg-white border border-dp2-card-border rounded-2xl overflow-hidden grid grid-cols-1 md:grid-cols-2 hover:border-dp2-primary-dark transition-all group cursor-pointer block">
             {/* Left: colored area */}
-            <div className={`min-h-[240px] flex items-center justify-center ${categoryColors[featured.category ?? '']?.bg ?? 'bg-dp2-surface'}`}>
-              <span className="text-[80px]">
-                {categoryEmojis[featured.category ?? ''] ?? '📰'}
-              </span>
+            <div className={`relative min-h-[180px] md:min-h-[240px] flex items-center justify-center ${categoryColors[featured.category ?? '']?.bg ?? 'bg-dp2-surface'}`}>
+              {featured.cover_image_url ? (
+                <ImageSlot2 src={featured.cover_image_url} sizes="(min-width: 768px) 50vw, 100vw" priority />
+              ) : (
+                <span className="text-[56px] md:text-[80px]">
+                  {categoryEmojis[featured.category ?? ''] ?? '📰'}
+                </span>
+              )}
             </div>
             {/* Right: content */}
-            <div className="p-8 flex flex-col justify-between">
+            <div className="p-5 md:p-8 flex flex-col justify-between">
               <div>
                 <span className={`text-[11px] font-bold uppercase tracking-widest font-sans ${categoryColors[featured.category ?? '']?.text ?? 'text-dp2-primary-dark'}`}>
                   {featured.category}
                 </span>
-                <h2 className="font-heading text-[15px] font-bold leading-[24px] text-dp2-primary mt-2 group-hover:text-dp2-primary-dark transition-colors">
-                  {featured.title}
+                <h2 dir="auto" className="text-start font-heading text-[17px] md:text-[21px] font-bold leading-snug text-dp2-primary mt-2 group-hover:text-dp2-primary-dark transition-colors">
+                  {postTitle(featured)}
                 </h2>
-                <p className={`text-slate-500 font-sans text-[15px] mt-3 line-clamp-3 ${isUrdu ? 'leading-[26px]' : 'leading-[24px]'}`}>
-                  {featured.content}
+                <p dir="auto" className={`text-start text-slate-500 font-sans text-[15px] mt-3 line-clamp-3 ${isUrdu ? 'leading-[26px]' : 'leading-[24px]'}`}>
+                  {postContent(featured)}
                 </p>
               </div>
               <div className="flex items-center gap-4 mt-6 text-slate-500 text-[15px] font-sans font-semibold tracking-[0.05em]">
@@ -208,21 +217,25 @@ export default function NewsPage() {
                   className="bg-white border border-dp2-card-border rounded-2xl overflow-hidden hover:border-dp2-primary-dark transition-all group cursor-pointer block"
                 >
                   {/* Colored cover */}
-                  <div className={`h-32 flex items-center justify-center ${colors.bg}`}>
-                    <span className="text-[48px]">
-                      {categoryEmojis[post.category ?? ''] ?? '📰'}
-                    </span>
+                  <div className={`relative h-40 flex items-center justify-center ${colors.bg}`}>
+                    {post.cover_image_url ? (
+                      <ImageSlot2 src={post.cover_image_url} sizes="(min-width: 768px) 33vw, 100vw" />
+                    ) : (
+                      <span className="text-[48px]">
+                        {categoryEmojis[post.category ?? ''] ?? '📰'}
+                      </span>
+                    )}
                   </div>
                   {/* Content */}
                   <div className="p-5">
                     <span className={`text-[11px] font-bold uppercase tracking-widest font-sans ${colors.text}`}>
                       {post.category}
                     </span>
-                    <h3 className="font-bold text-dp2-primary text-[15px] font-sans leading-[24px] mt-1 group-hover:text-dp2-primary-dark transition-colors line-clamp-2">
-                      {post.title}
+                    <h3 dir="auto" className="text-start font-bold text-dp2-primary text-[15px] font-sans leading-snug mt-1 group-hover:text-dp2-primary-dark transition-colors line-clamp-2">
+                      {postTitle(post)}
                     </h3>
-                    <p className="text-slate-500 text-[15px] font-sans tracking-[0.05em] mt-2 line-clamp-2">
-                      {post.content?.slice(0, 100)}...
+                    <p dir="auto" className="text-start text-slate-500 text-[14px] font-sans leading-relaxed mt-1.5 line-clamp-2">
+                      {postContent(post)}
                     </p>
                     <div className="flex items-center gap-3 mt-4 text-slate-500 text-[13px] font-sans">
                       <span className="flex items-center gap-1">

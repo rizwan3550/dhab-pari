@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { getPublicSiteContext } from '@/lib/publicSite'
 import { getCookieTenantId } from '@/lib/tenant'
-import { T } from '@/components/i18n/T'
+import { T, Bi } from '@/components/i18n/T'
 
 export async function generateMetadata(): Promise<Metadata> {
   const site = await getPublicSiteContext(await createClient(), await getCookieTenantId())
@@ -30,8 +30,8 @@ export default function EntertainmentPage() {
         <h1 className="font-heading text-[20px] md:text-[23px] font-bold leading-[28px] text-dp2-primary mb-2">
           <T k="x.communityCorner" />
         </h1>
-        <p className="text-slate-500 font-sans text-[15px] leading-[20px]">
-          Sports, talent, and community life from the village.
+        <p className="text-slate-500 font-sans text-[15px] leading-relaxed">
+          <Bi en="Sports, talent, and community life from the village." ur="گاؤں کے کھیل، ہنر اور اجتماعی زندگی۔" />
         </p>
       </div>
 
@@ -44,12 +44,12 @@ export default function EntertainmentPage() {
             <h2 className="font-heading text-[20px] md:text-[23px] font-bold leading-snug text-dp2-primary mb-1.5">
               <T k="x.sportsUpdates" />
             </h2>
-            <p className="text-slate-500 font-sans text-[15.5px] leading-[22px]">
-              Tournaments, matches, and athletics days — the same village events calendar the committee keeps up to date, filtered to sports.
+            <p className="text-slate-500 font-sans text-[15px] leading-relaxed">
+              <Bi en="Tournaments, matches, and athletics days — the same village events calendar the committee keeps up to date, filtered to sports." ur="ٹورنامنٹ، میچ اور کھیلوں کے دن — کمیٹی کا وہی تقریبات کا کیلنڈر، صرف کھیلوں کے لیے۔" />
             </p>
           </div>
           <Link href="/sports" className="shrink-0 inline-flex items-center gap-1.5 bg-dp2-primary text-white px-5 py-2.5 rounded-xl font-sans text-[15px] font-semibold hover:brightness-110 transition-all">
-            View Sports Calendar <ArrowRight size={15} />
+            <Bi en="View Sports Calendar" ur="کھیلوں کا کیلنڈر دیکھیں" /> <ArrowRight size={15} />
           </Link>
         </div>
       </section>
@@ -60,13 +60,13 @@ export default function EntertainmentPage() {
             <Sparkles size={28} />
           </div>
           <div className="flex-1">
-            <h2 className="font-heading text-[20px] md:text-[23px] font-bold leading-snug text-dp2-primary mb-1.5">Talent Showcase</h2>
-            <p className="text-slate-500 font-sans text-[15.5px] leading-[22px]">
-              Poetry, art, Quran recitation, and other talent submitted by villagers themselves — admin-reviewed before it goes up.
+            <h2 className="font-heading text-[20px] md:text-[23px] font-bold leading-snug text-dp2-primary mb-1.5"><Bi en="Talent Showcase" ur="ٹیلنٹ شو کیس" /></h2>
+            <p className="text-slate-500 font-sans text-[15px] leading-relaxed">
+              <Bi en="Poetry, art, Quran recitation, and other talent submitted by villagers themselves — admin-reviewed before it goes up." ur="شاعری، فن، تلاوتِ قرآن اور دیگر ہنر جو گاؤں والے خود بھیجتے ہیں — شائع ہونے سے پہلے انتظامیہ جائزہ لیتی ہے۔" />
             </p>
           </div>
           <Link href="/talent" className="shrink-0 inline-flex items-center gap-1.5 bg-dp2-primary text-white px-5 py-2.5 rounded-xl font-sans text-[15px] font-semibold hover:brightness-110 transition-all">
-            View Talent Showcase <ArrowRight size={15} />
+            <Bi en="View Talent Showcase" ur="ٹیلنٹ شو کیس دیکھیں" /> <ArrowRight size={15} />
           </Link>
         </div>
       </section>
@@ -78,8 +78,8 @@ export default function EntertainmentPage() {
         <h3 className="font-heading text-[20px] md:text-[23px] font-bold leading-snug mb-2">
           <T k="x.talentToShare" />
         </h3>
-        <p className="opacity-90 font-sans text-[16px] mb-6 max-w-xl mx-auto">
-          Have an idea for a community event or activity? Suggest it to the committee.
+        <p className="opacity-90 font-sans text-[15px] leading-relaxed mb-6 max-w-xl mx-auto">
+          <Bi en="Have an idea for a community event or activity? Suggest it to the committee." ur="کسی اجتماعی تقریب یا سرگرمی کا خیال ہے؟ کمیٹی کو تجویز دیں۔" />
         </p>
         <Link
           href="/suggestions"

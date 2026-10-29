@@ -12,7 +12,8 @@ const systems = [
 ]
 
 export default function ComplaintsPage() {
-  const { t } = useLocale()
+  const { t, isUrdu } = useLocale()
+  const ub = (en: string, ur: string) => (isUrdu ? ur : en)
   const supabase = createClient()
   const [system, setSystem] = useState<'water_supply' | 'donors_projects'>('water_supply')
   const [name, setName] = useState('')
@@ -63,11 +64,8 @@ export default function ComplaintsPage() {
           <h1 className="font-heading text-[20px] md:text-[23px] font-bold leading-[28px] text-dp2-primary mb-2">
             {t('x.fileComplaint')}
           </h1>
-          <p className="text-slate-500 font-sans text-[15px] leading-[20px]">
-            Tell us what went wrong — a committee member will be assigned to look into it.
-          </p>
-          <p className="text-slate-500 text-[15px] mt-2" style={{ fontFamily: 'var(--font-urdu-ui)', lineHeight: '1.6' }}>
-            اپنی شکایت درج کروائیں — کمیٹی کا ایک رکن اس پر کام کرے گا
+          <p className="text-slate-500 font-sans text-[15px] leading-relaxed">
+            {ub('Tell us what went wrong — a committee member will be assigned to look into it.', 'اپنی شکایت درج کروائیں — کمیٹی کا ایک رکن اس پر کام کرے گا۔')}
           </p>
           <p className="font-sans text-[14px] text-slate-500 mt-3">
             {t('x.generalSuggestion')} <Link href="/suggestions" className="text-dp2-primary-dark hover:underline">{t('x.goCommunityInput')}</Link>
@@ -96,25 +94,25 @@ export default function ComplaintsPage() {
                   key={s.key}
                   type="button"
                   onClick={() => setSystem(s.key as 'water_supply' | 'donors_projects')}
-                  className={`px-5 py-2 rounded-full font-sans text-[15px] font-semibold tracking-[0.05em] transition-all cursor-pointer ${system === s.key ? 'bg-dp2-primary text-white' : 'bg-white border border-dp2-card-border text-slate-500 hover:border-dp2-primary hover:text-dp2-primary'}`}
+                  className={`px-4 py-1.5 rounded-full font-sans text-[13.5px] font-semibold transition-colors cursor-pointer ${system === s.key ? 'bg-dp2-primary text-white' : 'bg-white border border-dp2-card-border text-slate-500 hover:border-dp2-primary hover:text-dp2-primary'}`}
                 >
-                  {s.label}
+                  {ub(s.label, s.labelUr)}
                 </button>
               ))}
             </div>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label className="block font-sans text-[15px] font-semibold tracking-[0.05em] text-slate-500 mb-2">NAME (Optional) / نام</label>
-                <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" className="w-full px-4 py-3 bg-white border-2 border-dp2-card-border rounded-2xl focus:border-dp2-primary-dark focus:ring-0 transition-all font-sans text-[15px] text-slate-800" />
+                <label className="block font-sans text-[13.5px] font-semibold text-slate-600 mb-1.5">{ub('Name (optional)', 'نام (اختیاری)')}</label>
+                <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder={ub('Your name', 'آپ کا نام')} className="w-full px-4 py-3 bg-white border-2 border-dp2-card-border rounded-2xl focus:border-dp2-primary-dark focus:ring-0 transition-all font-sans text-[15px] text-slate-800" />
               </div>
               <div>
-                <label className="block font-sans text-[15px] font-semibold tracking-[0.05em] text-slate-500 mb-2">MOBILE (Optional) / موبائل نمبر</label>
+                <label className="block font-sans text-[13.5px] font-semibold text-slate-600 mb-1.5">{ub('Mobile (optional)', 'موبائل نمبر (اختیاری)')}</label>
                 <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="0300-1234567" className="w-full px-4 py-3 bg-white border-2 border-dp2-card-border rounded-2xl focus:border-dp2-primary-dark focus:ring-0 transition-all font-sans text-[15px] text-slate-800" />
-                <p className="font-sans text-[13px] text-slate-500 mt-1.5">We&apos;ll message you here on WhatsApp once it&apos;s resolved.</p>
+                <p className="font-sans text-[13px] text-slate-500 mt-1.5">{ub('We\'ll message you here on WhatsApp once it\'s resolved.', 'مسئلہ حل ہونے پر ہم آپ کو اسی نمبر پر واٹس ایپ کریں گے۔')}</p>
               </div>
               {system === 'water_supply' && (
                 <div>
-                  <label className="block font-sans text-[15px] font-semibold tracking-[0.05em] text-slate-500 mb-2">SECTOR (Optional) / سیکٹر</label>
+                  <label className="block font-sans text-[13.5px] font-semibold text-slate-600 mb-1.5">{ub('Sector (optional)', 'سیکٹر (اختیاری)')}</label>
                   <select value={sector} onChange={(e) => setSector(e.target.value)} className="w-full px-4 py-3 bg-white border-2 border-dp2-card-border rounded-2xl focus:border-dp2-primary-dark focus:ring-0 transition-all font-sans text-[15px] text-slate-800">
                     <option value="">{t('w.selectSector')}</option>
                     {sectors.map((s) => <option key={s.id} value={s.name}>{s.name}</option>)}
@@ -122,10 +120,10 @@ export default function ComplaintsPage() {
                 </div>
               )}
               <div>
-                <label className="block font-sans text-[15px] font-semibold tracking-[0.05em] text-slate-500 mb-2">COMPLAINT * / شکایت</label>
+                <label className="block font-sans text-[13.5px] font-semibold text-slate-600 mb-1.5">{ub('Complaint *', 'شکایت *')}</label>
                 <textarea
                   value={complaintText} onChange={(e) => setComplaintText(e.target.value)} required rows={5}
-                  placeholder="Describe the issue in detail..."
+                  placeholder={ub('Describe the issue in detail...', 'مسئلہ تفصیل سے لکھیں...')}
                   className="w-full px-4 py-3 bg-white border-2 border-dp2-card-border rounded-2xl focus:border-dp2-primary-dark focus:ring-0 transition-all font-sans text-[15px] text-slate-800 resize-none"
                 />
               </div>
@@ -137,7 +135,7 @@ export default function ComplaintsPage() {
                 className="w-full bg-dp2-primary-dark text-white py-4 rounded-xl font-sans text-[15px] font-semibold hover:bg-dp2-primary transition-all active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-50 cursor-pointer"
               >
                 <Send size={18} />
-                {loading ? 'Submitting...' : 'Submit Complaint / جمع کرائیں'}
+                {loading ? ub('Submitting...', 'جمع ہو رہا ہے...') : ub('Submit Complaint', 'شکایت جمع کرائیں')}
               </button>
             </form>
           </div>
