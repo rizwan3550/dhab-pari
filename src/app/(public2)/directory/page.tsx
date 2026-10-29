@@ -90,7 +90,7 @@ export default function DirectoryPage() {
 
       <div className="flex flex-wrap gap-2 mb-6">
         {CATEGORIES.map((c) => (
-          <button key={c} onClick={() => changeTab(c)} className={`px-5 py-2 rounded-full font-sans text-[14.5px] font-semibold cursor-pointer transition-all ${tab === c ? 'bg-dp2-primary text-white' : 'bg-white border border-dp2-card-border text-slate-500 hover:border-dp2-primary'}`}>
+          <button key={c} onClick={() => changeTab(c)} className={`px-4 py-1.5 rounded-full font-sans text-[13.5px] font-semibold cursor-pointer transition-colors ${tab === c ? 'bg-dp2-primary text-white' : 'bg-white border border-dp2-card-border text-slate-500 hover:border-dp2-primary'}`}>
             {t(`dir.cat.${c}`)}
           </button>
         ))}

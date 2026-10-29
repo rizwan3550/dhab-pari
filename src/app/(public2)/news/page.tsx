@@ -118,7 +118,7 @@ export default function NewsPage() {
       </div>
 
       {/* Category Filters */}
-      <div className="flex flex-wrap gap-3 mb-10">
+      <div className="flex flex-wrap gap-2 mb-6 md:mb-8">
         {/* cat.label_en is a database value (post_categories has no Urdu
             label column yet) — every OTHER category still shows in
             English regardless of site language, a real gap this "All"
@@ -128,7 +128,7 @@ export default function NewsPage() {
           <button
             key={cat.key}
             onClick={() => setActiveFilter(cat.key)}
-            className={`px-5 py-2 rounded-full font-sans text-[15px] font-semibold tracking-[0.05em] transition-all cursor-pointer ${
+            className={`px-4 py-1.5 rounded-full font-sans text-[13.5px] font-semibold transition-colors cursor-pointer ${
               activeFilter === cat.key
                 ? 'bg-dp2-primary text-white'
                 : 'bg-white border border-dp2-card-border text-slate-500 hover:border-dp2-primary hover:text-dp2-primary'

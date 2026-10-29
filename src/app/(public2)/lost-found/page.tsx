@@ -53,11 +53,11 @@ export default function LostFoundPage() {
         </p>
       </div>
 
-      <div className="flex flex-wrap gap-3 mb-8">
+      <div className="flex flex-wrap gap-2 mb-6">
         <div className="flex gap-2">
           {(['all', 'lost', 'found'] as const).map((tb) => (
             <button key={tb} onClick={() => setTab(tb)}
-              className={`px-5 py-2 rounded-full font-sans text-[14.5px] font-semibold cursor-pointer transition-all ${tab === tb ? 'bg-dp2-primary text-white' : 'bg-white border border-dp2-card-border text-slate-500 hover:border-dp2-primary'}`}>
+              className={`px-4 py-1.5 rounded-full font-sans text-[13.5px] font-semibold cursor-pointer transition-colors ${tab === tb ? 'bg-dp2-primary text-white' : 'bg-white border border-dp2-card-border text-slate-500 hover:border-dp2-primary'}`}>
               {tb === 'all' ? t('lf.all') : tb === 'lost' ? t('lf.lost') : t('lf.found')}
             </button>
           ))}

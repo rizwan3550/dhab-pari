@@ -40,10 +40,17 @@ const inter = Inter({
   weight: ["400", "500", "600", "700", "800"],
 });
 
+// preload: false on the three faces below -- each is used on only a few
+// screens (Nastaliq: printed receipts/documents; Naskh: the homepage ayah;
+// mono: account codes), but by default next/font preloads every font on
+// every page, so a phone on a slow connection downloaded all of them
+// before anything rendered. They still load (font-display: swap) the
+// moment a page actually uses them.
 const notoNastaliq = Noto_Nastaliq_Urdu({
   variable: "--font-noto-nastaliq",
   subsets: ["latin"],
   weight: ["400", "700"],
+  preload: false,
 });
 
 // Quranic Arabic uses a Naskh-style script (proper for a Mushaf quotation),
@@ -53,6 +60,7 @@ const notoNaskhArabic = Noto_Naskh_Arabic({
   variable: "--font-noto-naskh",
   subsets: ["arabic"],
   weight: ["400", "700"],
+  preload: false,
 });
 
 // Real report (2026-09-24), with screenshots: Urdu buttons/headings/labels
@@ -74,6 +82,7 @@ const notoSansArabic = Noto_Sans_Arabic({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  preload: false,
 });
 
 // SITE.domain stays a deployment-wide constant deliberately — every

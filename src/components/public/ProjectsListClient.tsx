@@ -270,7 +270,7 @@ export function ProjectsListClient({ projects, voteCounts, commentCounts, receiv
           <button
             key={f}
             onClick={() => setActiveFilter(f)}
-            className={`px-6 py-2 rounded-full font-sans text-[15px] font-semibold tracking-[0.05em] transition-all cursor-pointer ${
+            className={`px-4 py-1.5 rounded-full font-sans text-[13.5px] font-semibold transition-colors cursor-pointer ${
               activeFilter === f
                 ? 'bg-dp2-primary-dark text-white shadow-sm'
                 : 'bg-white border border-dp2-card-border text-slate-500 hover:border-dp2-primary hover:text-dp2-primary'
@@ -295,7 +295,7 @@ export function ProjectsListClient({ projects, voteCounts, commentCounts, receiv
         <div className="flex flex-wrap items-center gap-2.5 mb-8 -mt-3">
           <button
             onClick={() => setCategoryFilter('All')}
-            className={`px-4 py-1.5 rounded-full font-sans text-[14px] font-semibold tracking-[0.03em] transition-all cursor-pointer ${
+            className={`px-3.5 py-1 rounded-full font-sans text-[12.5px] font-semibold transition-colors cursor-pointer ${
               categoryFilter === 'All'
                 ? 'bg-dp2-primary-dark text-white shadow-sm'
                 : 'bg-dp2-surface text-slate-500 hover:bg-dp2-card-border/40'
@@ -308,7 +308,7 @@ export function ProjectsListClient({ projects, voteCounts, commentCounts, receiv
             <button
               key={c}
               onClick={() => setCategoryFilter(c)}
-              className={`px-4 py-1.5 rounded-full font-sans text-[14px] font-semibold tracking-[0.03em] transition-all cursor-pointer ${
+              className={`px-3.5 py-1 rounded-full font-sans text-[12.5px] font-semibold transition-colors cursor-pointer ${
                 categoryFilter === c
                   ? 'bg-dp2-primary-dark text-white shadow-sm'
                   : 'bg-dp2-surface text-slate-500 hover:bg-dp2-card-border/40'
