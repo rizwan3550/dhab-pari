@@ -196,7 +196,7 @@ export default function DispatchCallDetailPage() {
           {call.status === 'priced' && (
             <div className="mt-3 flex items-center justify-between gap-2">
               <p className="font-sans text-[11.5px] text-dp-on-surface-variant">{t('vp.approveBeforeDepartNote')}</p>
-              <button onClick={approve} disabled={busy} className="shrink-0 px-3.5 py-1.5 bg-dp-secondary text-white rounded-lg font-sans text-[12.5px] font-semibold cursor-pointer hover:bg-dp-primary disabled:opacity-50">{t('vp.approvePriceBtn')}</button>
+              <button onClick={approve} disabled={busy} className="shrink-0 px-3.5 py-1.5 bg-dp-secondary text-white rounded-lg font-sans text-[12.5px] font-semibold active:scale-[0.98] cursor-pointer hover:bg-dp-primary disabled:opacity-50 disabled:cursor-not-allowed">{t('vp.approvePriceBtn')}</button>
             </div>
           )}
           {call.status === 'approved' && myVehicle && myVehicle.id === call.accepted_vehicle_id && (

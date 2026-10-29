@@ -99,7 +99,7 @@ export default function PortalWaterPage() {
     return (
       <div className="bg-white border border-dp-outline-variant rounded-lg p-8 text-center">
         <p className="font-sans text-[14px] text-dp-on-surface-variant mb-3">{t('p.noWaterConnection')}</p>
-        <Link href="/portal/profile" className="inline-block bg-dp-secondary text-white px-5 py-2.5 rounded-lg font-sans text-[13.5px] font-semibold hover:bg-dp-primary transition-all">
+        <Link href="/portal/profile" className="inline-block bg-dp-secondary text-white px-5 py-2.5 rounded-lg font-sans text-[13.5px] font-semibold hover:bg-dp-primary transition-colors">
           {t('p.waterConnection')}
         </Link>
       </div>
@@ -111,7 +111,7 @@ export default function PortalWaterPage() {
   return (
     <div dir={isUrdu ? 'rtl' : 'ltr'}>
       <div className="mb-6">
-        <h1 className="font-heading text-[26px] font-bold text-dp-primary flex items-center gap-2">{t('p.waterBillsPayments')} <PortalHelp pageKey="water" /></h1>
+        <h1 className="font-heading text-[22px] sm:text-[26px] font-bold text-dp-primary flex items-center gap-2">{t('p.waterBillsPayments')} <PortalHelp pageKey="water" /></h1>
         <p className="font-sans text-[14px] text-dp-on-surface-variant mt-1">{t('p.consumerNo')}{user.consumer_id}</p>
       </div>
 
@@ -145,7 +145,7 @@ export default function PortalWaterPage() {
                           {claim.status === 'approved' ? t('p.verified') : t('p.pendingVerification')}
                         </span>
                       ) : (
-                        <button onClick={() => openClaim(b)} className="flex items-center gap-1.5 ms-auto px-3 py-1.5 bg-dp-secondary text-white rounded-lg font-sans text-[12px] font-semibold cursor-pointer hover:bg-dp-primary transition-all">
+                        <button onClick={() => openClaim(b)} className="flex items-center gap-1.5 ms-auto px-3 py-1.5 bg-dp-secondary text-white rounded-lg font-sans text-[12px] font-semibold active:scale-[0.98] cursor-pointer hover:bg-dp-primary transition-colors">
                           <UploadCloud size={13} /> {t('p.ivePaid')}
                         </button>
                       )}
@@ -203,7 +203,7 @@ export default function PortalWaterPage() {
                 <PaymentAccountDetails system="water_supply" method={claimMethod} />
               </div>
               <DonationReceiptUpload bucket="bill_payment_proofs" label={t('p.uploadPaymentSlipLabel')} onUpload={setClaimProof} />
-              <button onClick={submitClaim} disabled={saving} className="w-full bg-dp-secondary text-white py-3 rounded-lg font-sans font-semibold cursor-pointer hover:bg-dp-primary transition-all disabled:opacity-50">
+              <button onClick={submitClaim} disabled={saving} className="w-full bg-dp-secondary text-white py-3 rounded-lg font-sans font-semibold active:scale-[0.98] cursor-pointer hover:bg-dp-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                 {saving ? t('p.submitting') : t('p.submitForVerification')}
               </button>
             </div>

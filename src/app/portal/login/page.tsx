@@ -112,7 +112,7 @@ function PortalLoginInner() {
         <div className="w-14 h-14 rounded-full flex items-center justify-center text-white mb-4" style={{ background: 'linear-gradient(135deg,#005A36,#166534)' }}>
           <HeartHandshake size={26} />
         </div>
-        <h1 className="font-heading text-[25px] font-bold text-dp2-primary">{t('p.portalTitle')}</h1>
+        <h1 className="font-heading text-[22px] sm:text-[26px] font-bold text-dp2-primary">{t('p.portalTitle')}</h1>
         <p className="font-sans text-[15px] text-slate-500 mt-1">{committeeLabel}</p>
       </div>
 

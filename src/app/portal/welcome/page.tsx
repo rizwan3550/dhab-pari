@@ -68,7 +68,7 @@ export default function PortalWelcomePage() {
         <div className="w-14 h-14 rounded-full bg-dp-primary flex items-center justify-center text-white mb-4">
           <HeartHandshake size={26} />
         </div>
-        <h1 className="font-heading text-[24px] font-bold text-dp-primary">{t('p.welcomeTitle').replace('{name}', user.full_name)}</h1>
+        <h1 className="font-heading text-[22px] sm:text-[24px] font-bold text-dp-primary">{t('p.welcomeTitle').replace('{name}', user.full_name)}</h1>
         <p className="font-sans text-[14px] text-dp-on-surface-variant mt-1 max-w-sm">{t('p.welcomeSubtitle')}</p>
       </div>
 
@@ -83,7 +83,7 @@ export default function PortalWelcomePage() {
         <MentorshipProfileFields value={mentorship} onChange={(patch) => setMentorship({ ...mentorship, ...patch })} />
 
         <div className="flex flex-col gap-2 mt-5">
-          <button onClick={save} disabled={saving} className="w-full bg-dp-secondary text-white py-3 rounded-lg font-sans font-semibold text-[15px] cursor-pointer hover:bg-dp-primary transition-all disabled:opacity-50">
+          <button onClick={save} disabled={saving} className="w-full bg-dp-secondary text-white py-3 rounded-lg font-sans font-semibold active:scale-[0.98] text-[15px] cursor-pointer hover:bg-dp-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
             {saving ? t('action.saving') : t('p.saveAndContinue')}
           </button>
           <button onClick={finish} className="w-full text-dp-on-surface-variant py-2.5 rounded-lg font-sans text-[13.5px] font-semibold cursor-pointer hover:bg-dp-surface-container-low transition-all">

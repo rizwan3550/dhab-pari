@@ -95,7 +95,7 @@ export default function MyVehicleDeliveryPage() {
 
   return (
     <div className="flex flex-col gap-3">
-      <h1 className="font-bold text-[20px] text-[#005A36] flex items-center gap-2"><Package size={19} /> {t('vp.deliverySettingsHeading')}</h1>
+      <h1 className="font-bold text-[20px] sm:text-[22px] text-dp-primary flex items-center gap-2"><Package size={19} /> {t('vp.deliverySettingsHeading')}</h1>
 
       <div className="bg-white border border-[#e5e2d0] rounded-2xl p-3.5">
         {!deliveryEligible ? (

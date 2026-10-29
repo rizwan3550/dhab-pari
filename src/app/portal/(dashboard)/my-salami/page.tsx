@@ -36,7 +36,7 @@ export default function MySalamiPage() {
 
   return (
     <div dir={isUrdu ? 'rtl' : 'ltr'}>
-      <h1 className="font-heading text-[26px] font-bold text-dp-primary flex items-center gap-2 mb-6"><Gift size={22} className="text-dp-secondary" /> {t('sl.myPledges')}</h1>
+      <h1 className="font-heading text-[22px] sm:text-[26px] font-bold text-dp-primary flex items-center gap-2 mb-6"><Gift size={22} className="text-dp-secondary" /> {t('sl.myPledges')}</h1>
       {loading ? (
         <p className="font-sans text-[14px] text-dp-on-surface-variant"><LoadingDots /></p>
       ) : pledges.length === 0 ? (

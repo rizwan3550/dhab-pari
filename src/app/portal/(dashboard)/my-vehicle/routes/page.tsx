@@ -380,7 +380,7 @@ export default function MyVehicleRoutesPage() {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between gap-2">
-        <h1 className="font-bold text-[20px] text-[#005A36] flex items-center gap-2"><Signpost size={19} /> {t('mp.myRoutesHeading')}</h1>
+        <h1 className="font-bold text-[20px] sm:text-[22px] text-dp-primary flex items-center gap-2"><Signpost size={19} /> {t('mp.myRoutesHeading')}</h1>
         <button onClick={() => setShowForm((v) => !v)} className="shrink-0 flex items-center gap-1 px-3 py-2 rounded-lg bg-[#166534] text-white font-sans text-[12.5px] font-semibold cursor-pointer">
           <Plus size={14} /> {t('mv.postRouteBtn')}
         </button>

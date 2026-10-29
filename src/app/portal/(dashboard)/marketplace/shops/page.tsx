@@ -34,7 +34,7 @@ export default function MarketplaceShopsPage() {
   return (
     <div dir={isUrdu ? 'rtl' : 'ltr'} className="shop-ink-theme pb-16">
       <div className="mb-6">
-        <h1 className="font-heading text-[26px] font-bold" style={{ color: INK }}>{t('mp.shopsHeading')}</h1>
+        <h1 className="font-heading text-[22px] sm:text-[26px] font-bold" style={{ color: INK }}>{t('mp.shopsHeading')}</h1>
       </div>
       {shops === null && <p className="font-sans text-[13.5px] text-[#7a736d]"><LoadingDots /></p>}
       {shops !== null && shops.length === 0 && <p className="font-sans text-[13.5px] text-[#7a736d]">{t('mp.noShopsListed')}</p>}

@@ -166,7 +166,7 @@ function PortalStatementInner() {
   return (
     <div dir={isUrdu ? 'rtl' : 'ltr'}>
       <div className="mb-6">
-        <h1 className="font-heading text-[26px] font-bold text-dp-primary flex items-center gap-2">{t('p.givingStatement')} <PortalHelp pageKey="statement" /></h1>
+        <h1 className="font-heading text-[22px] sm:text-[26px] font-bold text-dp-primary flex items-center gap-2">{t('p.givingStatement')} <PortalHelp pageKey="statement" /></h1>
         <p className="font-sans text-[14px] text-dp-on-surface-variant mt-1">{account?.donor_account_no ? `${t('p.donorAccountLabel')}: ${account.donor_account_no}` : t('p.noConfirmedDonationsYet')}</p>
       </div>
 
@@ -260,7 +260,7 @@ function PortalStatementInner() {
         <div className="bg-white border border-dp-outline-variant rounded-lg p-8 text-center">
           <HeartHandshake size={32} className="mx-auto text-dp-on-surface-variant mb-3" />
           <p className="font-sans text-[14px] text-dp-on-surface-variant">{t('p.statementAppearsHere')}</p>
-          <a href="/donate/submit" className="inline-block mt-4 bg-dp-secondary text-white px-5 py-2.5 rounded-lg font-sans text-[13.5px] font-semibold hover:bg-dp-primary transition-all">{t('p.makeDonation')}</a>
+          <a href="/donate/submit" className="inline-block mt-4 bg-dp-secondary text-white px-5 py-2.5 rounded-lg font-sans text-[13.5px] font-semibold hover:bg-dp-primary transition-colors">{t('p.makeDonation')}</a>
         </div>
       ) : (
         <>
@@ -325,7 +325,7 @@ function PortalStatementInner() {
                 <PaymentAccountDetails system="donors_projects" method={payMethod} international={international} />
               </div>
               <DonationReceiptUpload onUpload={setPayProof} />
-              <button onClick={payPledge} disabled={submitting} className="w-full bg-dp-secondary text-white py-3 rounded-lg font-sans font-semibold cursor-pointer hover:bg-dp-primary transition-all disabled:opacity-50">
+              <button onClick={payPledge} disabled={submitting} className="w-full bg-dp-secondary text-white py-3 rounded-lg font-sans font-semibold active:scale-[0.98] cursor-pointer hover:bg-dp-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                 {submitting ? t('p.submitting') : t('p.submitPayment')}
               </button>
             </div>

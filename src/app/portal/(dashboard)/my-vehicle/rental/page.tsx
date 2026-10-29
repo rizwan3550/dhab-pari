@@ -127,7 +127,7 @@ export default function MyRentalBookingsPage() {
   return (
     <div className="flex flex-col gap-3">
       <div>
-        <h1 className="font-bold text-[20px] text-[#005A36] flex items-center gap-2"><Navigation size={19} /> {t('vp.myRentalBookingsHeading')}</h1>
+        <h1 className="font-bold text-[20px] sm:text-[22px] text-dp-primary flex items-center gap-2"><Navigation size={19} /> {t('vp.myRentalBookingsHeading')}</h1>
         <p className="text-[12.5px] text-[#64748b] mt-0.5">{t('vp.myRentalBookingsSubtitle')}</p>
       </div>
 

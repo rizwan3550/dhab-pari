@@ -108,7 +108,7 @@ export default function FundManagementPage() {
 
   return (
     <div dir={isUrdu ? 'rtl' : 'ltr'}>
-      <h1 className="font-heading text-[26px] font-bold text-dp-primary flex items-center gap-2 mb-2"><Landmark size={22} className="text-dp-secondary" /> {t('fnd.pageTitle')}</h1>
+      <h1 className="font-heading text-[22px] sm:text-[26px] font-bold text-dp-primary flex items-center gap-2 mb-2"><Landmark size={22} className="text-dp-secondary" /> {t('fnd.pageTitle')}</h1>
       <p className="font-sans text-[14px] text-dp-on-surface-variant mb-6">{t('fnd.pageIntro')}</p>
 
       {hasNothing ? (

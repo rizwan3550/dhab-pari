@@ -186,7 +186,7 @@ export default function MyVehicleAddaPage() {
 
   return (
     <div className="flex flex-col gap-3">
-      <h1 className="font-bold text-[20px] text-[#005A36] flex items-center gap-2"><Signpost size={19} /> {t('af.atTheAddaHeading')}</h1>
+      <h1 className="font-bold text-[20px] sm:text-[22px] text-dp-primary flex items-center gap-2"><Signpost size={19} /> {t('af.atTheAddaHeading')}</h1>
 
       {!myEntry && !rideEligible ? (
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3.5">

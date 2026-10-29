@@ -73,7 +73,7 @@ export default function MyVehicleEarningsPage() {
 
   return (
     <div className="flex flex-col gap-3">
-      <h1 className="font-bold text-[20px] text-[#005A36]">{t('mb.navEarnings')}</h1>
+      <h1 className="font-bold text-[20px] sm:text-[22px] text-dp-primary">{t('mb.navEarnings')}</h1>
 
       <div className="flex items-center gap-2 bg-white border border-[#e5e2d0] rounded-xl p-2.5 w-fit">
         <Lock size={13} className="text-[#64748b] shrink-0" />

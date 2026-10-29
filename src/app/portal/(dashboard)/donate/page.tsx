@@ -177,7 +177,7 @@ function PortalDonatePageInner() {
         </p>
         <div className="flex gap-3 justify-center">
           <button onClick={() => { setSubmitted(false); setAmount(0); setReceiptPath(''); setSelectedPending(new Set()) }} className="px-5 py-2.5 border border-dp-outline-variant rounded-lg font-sans text-[13.5px] font-semibold cursor-pointer hover:bg-dp-surface-container">{t('p.donateAgain')}</button>
-          <button onClick={() => router.push('/portal/statement')} className="px-5 py-2.5 bg-dp-secondary text-white rounded-lg font-sans text-[13.5px] font-semibold cursor-pointer hover:bg-dp-primary">{t('p.viewMyStatement')}</button>
+          <button onClick={() => router.push('/portal/statement')} className="px-5 py-2.5 bg-dp-secondary text-white rounded-lg font-sans text-[13.5px] font-semibold active:scale-[0.98] cursor-pointer hover:bg-dp-primary">{t('p.viewMyStatement')}</button>
         </div>
       </div>
     )
@@ -186,7 +186,7 @@ function PortalDonatePageInner() {
   return (
     <div>
       <div dir={isUrdu ? 'rtl' : 'ltr'} className="mb-6">
-        <h1 className="font-heading text-[26px] font-bold text-dp-primary flex items-center gap-2"><HeartHandshake size={22} className="text-dp-secondary" /> {t('p.makeDonation')} <PortalHelp pageKey="donate" /></h1>
+        <h1 className="font-heading text-[22px] sm:text-[26px] font-bold text-dp-primary flex items-center gap-2"><HeartHandshake size={22} className="text-dp-secondary" /> {t('p.makeDonation')} <PortalHelp pageKey="donate" /></h1>
         <p className="font-sans text-[14px] text-dp-on-surface-variant mt-1">{t('p.donatingAs')} {user?.full_name} · <span className="ltr-num">{user?.mobile}</span></p>
       </div>
 
@@ -256,7 +256,7 @@ function PortalDonatePageInner() {
           </div>
         )}
 
-        <button onClick={submit} disabled={saving || grandTotal <= 0} className="w-full bg-dp-secondary text-white py-3 rounded-lg font-sans font-semibold cursor-pointer hover:bg-dp-primary transition-all disabled:opacity-50">
+        <button onClick={submit} disabled={saving || grandTotal <= 0} className="w-full bg-dp-secondary text-white py-3 rounded-lg font-sans font-semibold active:scale-[0.98] cursor-pointer hover:bg-dp-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
           {saving ? t('p.submitting') : t('p.submitDonation')}
         </button>
       </div>

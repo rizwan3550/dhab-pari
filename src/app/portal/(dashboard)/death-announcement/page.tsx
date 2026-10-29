@@ -81,10 +81,10 @@ export default function DeathAnnouncementPage() {
     <div>
       <div dir={isUrdu ? 'rtl' : 'ltr'} className="mb-6 flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="font-heading text-[26px] font-bold text-dp-primary flex items-center gap-2"><HeartCrack size={22} className="text-dp-secondary" /> {t('da.myAnnouncements')}</h1>
+          <h1 className="font-heading text-[22px] sm:text-[26px] font-bold text-dp-primary flex items-center gap-2"><HeartCrack size={22} className="text-dp-secondary" /> {t('da.myAnnouncements')}</h1>
           <p className="font-sans text-[14px] text-dp-on-surface-variant mt-1">{t('da.pageIntro')}</p>
         </div>
-        <button onClick={openAdd} className="flex items-center gap-2 px-4 py-2.5 bg-dp-secondary text-white rounded-lg font-sans text-[13.5px] font-semibold hover:bg-dp-primary transition-all cursor-pointer">
+        <button onClick={openAdd} className="flex items-center gap-2 px-4 py-2.5 bg-dp-secondary text-white rounded-lg font-sans text-[13.5px] font-semibold active:scale-[0.98] hover:bg-dp-primary transition-colors cursor-pointer">
           <PlusCircle size={16} /> {t('da.newAnnouncement')}
         </button>
       </div>
@@ -176,7 +176,7 @@ export default function DeathAnnouncementPage() {
                   </div>
                 </div>
               </div>
-              <button onClick={save} disabled={saving} className="w-full bg-dp-secondary text-white py-3 rounded-lg font-sans font-semibold cursor-pointer hover:bg-dp-primary transition-all disabled:opacity-50">
+              <button onClick={save} disabled={saving} className="w-full bg-dp-secondary text-white py-3 rounded-lg font-sans font-semibold active:scale-[0.98] cursor-pointer hover:bg-dp-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                 {saving ? t('p.saving') : t('da.submitAnnouncement')}
               </button>
             </div>

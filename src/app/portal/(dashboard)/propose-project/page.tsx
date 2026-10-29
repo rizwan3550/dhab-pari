@@ -256,9 +256,9 @@ export default function ProposeProjectPage() {
       <div className="max-w-lg" dir={isUrdu ? 'rtl' : 'ltr'} style={isUrdu ? { fontFamily: 'var(--font-urdu-ui)' } : undefined}>
         <div className="bg-white border border-dp-outline-variant rounded-lg p-8 text-center">
           <Lock size={28} className="text-dp-on-surface-variant mx-auto mb-3" />
-          <h1 className="font-heading text-[20px] font-bold text-dp-primary mb-2">{dt('badgeRequiredTitle')}</h1>
+          <h1 className="font-heading text-[20px] sm:text-[22px] font-bold text-dp-primary mb-2">{dt('badgeRequiredTitle')}</h1>
           <p className="font-sans text-[14px] text-dp-on-surface-variant leading-relaxed mb-5">{dt('badgeRequiredBody')}</p>
-          <Link href="/portal/statement" className="inline-block px-5 py-2.5 bg-dp-secondary text-white rounded-lg font-sans text-[14px] font-semibold hover:bg-dp-primary transition-all">
+          <Link href="/portal/statement" className="inline-block px-5 py-2.5 bg-dp-secondary text-white rounded-lg font-sans text-[14px] font-semibold hover:bg-dp-primary transition-colors">
             {dt('badgeRequiredCta')}
           </Link>
         </div>
@@ -269,7 +269,7 @@ export default function ProposeProjectPage() {
   return (
     <div>
       <div className="mb-6" dir={isUrdu ? 'rtl' : 'ltr'} style={isUrdu ? { fontFamily: 'var(--font-urdu-ui)' } : undefined}>
-        <h1 className="font-heading text-[26px] font-bold text-dp-primary flex items-center gap-2"><Vote size={22} className="text-dp-secondary" /> {dt('heading')} <PortalHelp pageKey="proposeProject" /></h1>
+        <h1 className="font-heading text-[22px] sm:text-[26px] font-bold text-dp-primary flex items-center gap-2"><Vote size={22} className="text-dp-secondary" /> {dt('heading')} <PortalHelp pageKey="proposeProject" /></h1>
         <p className="font-sans text-[14px] text-dp-on-surface-variant mt-1">{dt('subtitle')}</p>
         <div className="mt-2 flex items-center gap-2">
           <DonorBadge tier={tier} isUrdu={isUrdu} />
@@ -347,19 +347,19 @@ export default function ProposeProjectPage() {
               {aiWaitingForAnswer && aiStage < 2 && (
                 <div className="flex gap-2">
                   <input value={aiReply} onChange={(e) => setAiReply(e.target.value)} placeholder={dt('yourAnswer')} className="input-field flex-1" />
-                  <button onClick={sendAiReply} disabled={aiBusy} className="px-4 py-2 bg-dp-secondary text-white rounded-lg font-sans text-[13px] font-semibold cursor-pointer hover:bg-dp-primary transition-all disabled:opacity-50">{tr('p.send')}</button>
+                  <button onClick={sendAiReply} disabled={aiBusy} className="px-4 py-2 bg-dp-secondary text-white rounded-lg font-sans text-[13px] font-semibold active:scale-[0.98] cursor-pointer hover:bg-dp-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed">{tr('p.send')}</button>
                 </div>
               )}
               {modernEstimate && <p className="font-sans text-[13.5px] font-bold text-dp-secondary">{dt('modernEstimateLabel')} {modernEstimate.toLocaleString()}</p>}
               {cheapestEstimate && <p className="font-sans text-[13.5px] font-bold text-dp-primary">{dt('cheapestEstimateLabel')} {cheapestEstimate.toLocaleString()}</p>}
               <div className="flex gap-2">
                 {aiStage === 0 && !aiWaitingForAnswer && (
-                  <button onClick={startModernEstimate} disabled={aiBusy} className="px-4 py-2 border-2 border-dp-secondary text-dp-secondary rounded-lg font-sans text-[13px] font-semibold cursor-pointer hover:bg-dp-secondary hover:text-white transition-all disabled:opacity-50">
+                  <button onClick={startModernEstimate} disabled={aiBusy} className="px-4 py-2 border-2 border-dp-secondary text-dp-secondary rounded-lg font-sans text-[13px] font-semibold active:scale-[0.98] cursor-pointer hover:bg-dp-secondary hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                     {aiBusy ? dt('thinking') : dt('generateModern')}
                   </button>
                 )}
                 {aiStage === 1 && !aiWaitingForAnswer && (
-                  <button onClick={startCheapestEstimate} disabled={aiBusy} className="px-4 py-2 border-2 border-dp-primary text-dp-primary rounded-lg font-sans text-[13px] font-semibold cursor-pointer hover:bg-dp-primary hover:text-white transition-all disabled:opacity-50">
+                  <button onClick={startCheapestEstimate} disabled={aiBusy} className="px-4 py-2 border-2 border-dp-primary text-dp-primary rounded-lg font-sans text-[13px] font-semibold active:scale-[0.98] cursor-pointer hover:bg-dp-primary hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                     {aiBusy ? dt('thinking') : dt('calculateCheapest')}
                   </button>
                 )}
@@ -423,7 +423,7 @@ export default function ProposeProjectPage() {
           )}
         </div>
 
-        <button onClick={openConfirm} disabled={saving} className="w-full bg-dp-secondary text-white py-3 rounded-lg font-sans font-semibold cursor-pointer hover:bg-dp-primary transition-all disabled:opacity-50">
+        <button onClick={openConfirm} disabled={saving} className="w-full bg-dp-secondary text-white py-3 rounded-lg font-sans font-semibold active:scale-[0.98] cursor-pointer hover:bg-dp-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
           {saving ? dt('submitting') : dt('submit')}
         </button>
       </div>
@@ -438,7 +438,7 @@ export default function ProposeProjectPage() {
             <p className="font-sans text-[13px] text-dp-on-surface-variant mb-5">{dt('confirmBody2')}</p>
             <div className="flex gap-2">
               <button onClick={() => setShowConfirm(false)} className="flex-1 py-2.5 border border-dp-outline-variant rounded-lg font-sans text-[13px] font-semibold cursor-pointer hover:bg-dp-surface-container transition-all">{dt('confirmCancel')}</button>
-              <button onClick={submit} disabled={saving} className="flex-1 py-2.5 bg-dp-secondary text-white rounded-lg font-sans text-[13px] font-semibold cursor-pointer hover:bg-dp-primary transition-all disabled:opacity-50">
+              <button onClick={submit} disabled={saving} className="flex-1 py-2.5 bg-dp-secondary text-white rounded-lg font-sans text-[13px] font-semibold active:scale-[0.98] cursor-pointer hover:bg-dp-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                 {saving ? dt('submitting') : dt('confirmProceed')}
               </button>
             </div>

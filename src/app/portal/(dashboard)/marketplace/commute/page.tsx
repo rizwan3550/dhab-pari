@@ -86,7 +86,7 @@ export default function CommutePage() {
       </div>
       <div className="flex items-center gap-1.5 shrink-0">
         {o.owner_mobile && <a href={`tel:${o.owner_mobile}`} className="flex items-center justify-center w-8 h-8 rounded-full bg-dp-secondary-container/50 text-dp-secondary hover:bg-dp-secondary hover:text-white transition-colors"><Phone size={13} /></a>}
-        <button onClick={() => requestSeat(o.offer_id)} disabled={requestingOfferId === o.offer_id} className="flex items-center gap-1 px-3 py-1.5 bg-dp-secondary text-white rounded-lg font-sans text-[12.5px] font-semibold cursor-pointer hover:bg-dp-primary disabled:opacity-50">
+        <button onClick={() => requestSeat(o.offer_id)} disabled={requestingOfferId === o.offer_id} className="flex items-center gap-1 px-3 py-1.5 bg-dp-secondary text-white rounded-lg font-sans text-[12.5px] font-semibold active:scale-[0.98] cursor-pointer hover:bg-dp-primary disabled:opacity-50 disabled:cursor-not-allowed">
           <Send size={12} /> {requestingOfferId === o.offer_id ? t('action.saving') : t('vp.requestSeatBtn')}
         </button>
       </div>
@@ -96,7 +96,7 @@ export default function CommutePage() {
   return (
     <div dir={isUrdu ? 'rtl' : 'ltr'} className="shop-ink-theme pb-16 max-w-lg mx-auto">
       <div className="mb-6">
-        <h1 className="font-heading text-[26px] font-bold text-dp-primary flex items-center gap-2"><CalendarClock size={22} className="text-dp-secondary" /> {t('vp.commutePageTitle')}</h1>
+        <h1 className="font-heading text-[22px] sm:text-[26px] font-bold text-dp-primary flex items-center gap-2"><CalendarClock size={22} className="text-dp-secondary" /> {t('vp.commutePageTitle')}</h1>
         <p className="font-sans text-[13.5px] text-dp-on-surface-variant mt-1">{t('vp.commutePageSubtitle')}</p>
       </div>
 
@@ -128,7 +128,7 @@ export default function CommutePage() {
               </select>
             </div>
           </div>
-          <button onClick={saveSchedule} disabled={saving} className="w-full bg-dp-secondary text-white py-2.5 rounded-lg font-sans text-[13.5px] font-semibold cursor-pointer hover:bg-dp-primary disabled:opacity-50">{saving ? t('action.saving') : t('vp.saveScheduleBtn')}</button>
+          <button onClick={saveSchedule} disabled={saving} className="w-full bg-dp-secondary text-white py-2.5 rounded-lg font-sans text-[13.5px] font-semibold active:scale-[0.98] cursor-pointer hover:bg-dp-primary disabled:opacity-50 disabled:cursor-not-allowed">{saving ? t('action.saving') : t('vp.saveScheduleBtn')}</button>
         </div>
       )}
 

@@ -225,7 +225,7 @@ export default function ShopReportsPage() {
  return (
  <div dir={isUrdu ? 'rtl' : 'ltr'} className="shop-ink-theme pb-16">
  <Link href="/portal/my-shop" className="inline-flex items-center gap-1.5 font-sans text-[13px] font-semibold text-[#ec3013] hover:underline mb-3"><ArrowLeft size={14} /> {isUrdu && shop.name_ur ? shop.name_ur : shop.name}</Link>
- <h1 className="font-heading text-[24px] font-bold leading-[32px] text-[#201e1d] mb-1">{t('cm.reportsBtn')}</h1>
+ <h1 className="font-heading text-[22px] sm:text-[24px] font-bold leading-[32px] text-[#201e1d] mb-1">{t('cm.reportsBtn')}</h1>
  <p className="font-sans text-[13px] text-[#7a736d] mb-5">{t('cm.reportsSubtitle')}</p>
 
  {/* Summary cards */}

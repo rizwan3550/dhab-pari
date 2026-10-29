@@ -218,7 +218,7 @@ export default function JoinAcademyPage({ params }: { params: Promise<{ projectI
             </p>
           )}
 
-          <button onClick={submit} disabled={saving || isFull} className="w-full bg-dp-secondary text-white py-2.5 rounded-lg font-sans text-[14px] font-semibold cursor-pointer hover:bg-dp-primary disabled:opacity-50">
+          <button onClick={submit} disabled={saving || isFull} className="w-full bg-dp-secondary text-white py-2.5 rounded-lg font-sans text-[14px] font-semibold active:scale-[0.98] cursor-pointer hover:bg-dp-primary disabled:opacity-50 disabled:cursor-not-allowed">
             {saving ? t('af.saving') : t('tp.submitRequestBtn')}
           </button>
         </div>

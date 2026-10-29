@@ -314,7 +314,7 @@ export default function PortalEsalESawabPage() {
   return (
     <div dir={isUrdu ? 'rtl' : 'ltr'} className="max-w-3xl">
       <div className="mb-6">
-        <h1 className="font-heading text-[28px] font-bold leading-[36px] text-dp-primary flex items-center gap-2.5">
+        <h1 className="font-heading text-[22px] sm:text-[26px] font-bold leading-[36px] text-dp-primary flex items-center gap-2.5">
           <Gift size={24} className="text-dp-secondary" /> {t('pes.title')} <PortalHelp pageKey="esalESawab" />
         </h1>
         <p className="font-sans text-[14px] text-dp-on-surface-variant mt-1.5 leading-relaxed">{t('pes.blurb')}</p>

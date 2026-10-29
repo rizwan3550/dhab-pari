@@ -71,7 +71,7 @@ export default function MarketplaceNotificationsPage() {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between gap-3">
-        <h1 className="font-extrabold text-[20px] text-[#005A36] flex items-center gap-2"><Bell size={19} /> {t('g.notifications')}</h1>
+        <h1 className="font-bold text-[20px] sm:text-[22px] text-dp-primary flex items-center gap-2"><Bell size={19} /> {t('g.notifications')}</h1>
         {unreadCount > 0 && (
           <div className="flex items-center gap-2">
             <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-[#166534] text-white">{t('mp.newCountBadge').replace('{n}', String(unreadCount))}</span>

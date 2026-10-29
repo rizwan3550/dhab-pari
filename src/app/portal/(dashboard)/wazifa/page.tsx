@@ -736,7 +736,7 @@ export default function PortalWazifaPage() {
     <div dir={isUrdu ? 'rtl' : 'ltr'} className="max-w-3xl">
       <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="font-heading text-[28px] font-bold leading-[36px] text-dp-primary flex items-center gap-2.5">
+          <h1 className="font-heading text-[22px] sm:text-[26px] font-bold leading-[36px] text-dp-primary flex items-center gap-2.5">
             <BookOpen size={24} className="text-dp-secondary" /> {t('pwz.title')} <PortalHelp pageKey="wazifa" />
           </h1>
           <p className="font-sans text-[14px] text-dp-on-surface-variant mt-1.5 leading-relaxed">{t('pwz.blurb')}</p>
@@ -1250,7 +1250,7 @@ export default function PortalWazifaPage() {
             {statement.entries.length === 0 ? (
               <p className="px-5 py-8 text-center font-sans text-[13.5px] text-dp-on-surface-variant">{t('pwz.stmt.empty')}</p>
             ) : (
-              <table className="w-full text-[13px]">
+              <div className="overflow-x-auto"><table className="w-full text-[13px]">
                 <thead>
                   <tr className="border-b border-dp-outline-variant bg-dp-surface-container-low">
                     <th className="text-start font-sans font-bold text-dp-on-surface-variant px-4 py-2.5 text-[11.5px] uppercase tracking-[0.04em]">{t('pwz.stmt.date')}</th>
@@ -1273,7 +1273,7 @@ export default function PortalWazifaPage() {
                     </tr>
                   ))}
                 </tbody>
-              </table>
+              </table></div>
             )}
           </div>
         </div>

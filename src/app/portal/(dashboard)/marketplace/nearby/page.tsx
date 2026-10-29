@@ -370,7 +370,7 @@ export default function NearbyOpenTripsPage() {
                     <div onClick={(e) => e.stopPropagation()} className="flex flex-wrap items-center gap-1.5 mt-2.5 pt-2.5 border-t border-dp-outline-variant/60">
                       <input type="number" min={1} max={tr.seats_available} value={seats[tr.trip_offer_id] ?? 1} onChange={(e) => setSeats((s) => ({ ...s, [tr.trip_offer_id]: +e.target.value }))} className="input-field !w-16 !py-1.5" />
                       <input type="number" value={fare[tr.trip_offer_id] ?? ''} onChange={(e) => setFare((s) => ({ ...s, [tr.trip_offer_id]: +e.target.value }))} placeholder={t('cm.counterPlaceholder')} className="input-field !w-24 !py-1.5" />
-                      <button onClick={() => proposeFare(tr)} disabled={actionId === tr.trip_offer_id} className="px-3 py-1.5 bg-dp-secondary text-white rounded-lg font-sans text-[12.5px] font-semibold cursor-pointer hover:bg-dp-primary disabled:opacity-50">{t('af.proposeFareBtn')}</button>
+                      <button onClick={() => proposeFare(tr)} disabled={actionId === tr.trip_offer_id} className="px-3 py-1.5 bg-dp-secondary text-white rounded-lg font-sans text-[12.5px] font-semibold active:scale-[0.98] cursor-pointer hover:bg-dp-primary disabled:opacity-50 disabled:cursor-not-allowed">{t('af.proposeFareBtn')}</button>
                     </div>
                   )}
                 </div>

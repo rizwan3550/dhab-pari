@@ -81,7 +81,7 @@ export default function PortalForgotPasswordPage() {
           <div className="text-center py-4">
             <CheckCircle size={40} className="text-dp-secondary mx-auto mb-3" />
             <p className="font-sans font-semibold text-dp-on-surface mb-2">{t('p.passwordResetSuccess')}</p>
-            <button onClick={() => router.push('/portal/login')} className="w-full mt-4 bg-dp-secondary text-white py-3 rounded-lg font-sans font-semibold cursor-pointer hover:bg-dp-primary transition-all">
+            <button onClick={() => router.push('/portal/login')} className="w-full mt-4 bg-dp-secondary text-white py-3 rounded-lg font-sans font-semibold active:scale-[0.98] cursor-pointer hover:bg-dp-primary transition-colors">
               {t('g.backToSignIn')}
             </button>
           </div>
@@ -127,7 +127,7 @@ export default function PortalForgotPasswordPage() {
                 </div>
               )}
 
-              <button type="submit" disabled={loading} className="w-full bg-dp-secondary text-white py-3 rounded-lg font-sans font-semibold text-[16px] hover:bg-dp-primary transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+              <button type="submit" disabled={loading} className="w-full bg-dp-secondary text-white py-3 rounded-lg font-sans font-semibold active:scale-[0.98] text-[16px] hover:bg-dp-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                 {loading ? t('ap.sending') : t('y.chooseNewPassword')}
               </button>
               <button type="button" onClick={() => requestCode()} disabled={loading} className="w-full text-center font-sans text-[13px] font-semibold text-dp-secondary hover:underline cursor-pointer">

@@ -92,7 +92,7 @@ export default function MyVehicleVehiclePage() {
 
   return (
     <div className="flex flex-col gap-3">
-      <h1 className="font-bold text-[20px] text-[#005A36]">{t('mb.navVehicle')}</h1>
+      <h1 className="font-bold text-[20px] sm:text-[22px] text-dp-primary">{t('mb.navVehicle')}</h1>
 
       <div className="bg-white border border-[#e5e2d0] rounded-2xl overflow-hidden">
         <div className="relative h-[150px]" style={{ background: 'linear-gradient(135deg,#005A36,#166534)' }}>

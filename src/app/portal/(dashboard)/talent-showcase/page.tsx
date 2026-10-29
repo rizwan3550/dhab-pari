@@ -60,7 +60,7 @@ export default function PortalTalentShowcasePage() {
   return (
     <div dir={isUrdu ? 'rtl' : 'ltr'} className="max-w-xl">
       <div className="mb-6">
-        <h1 className="font-heading text-[26px] font-bold text-dp-primary flex items-center gap-2"><Sparkles size={22} className="text-dp-secondary" /> {t('ts.title')} <PortalHelp pageKey="talentShowcase" /></h1>
+        <h1 className="font-heading text-[22px] sm:text-[26px] font-bold text-dp-primary flex items-center gap-2"><Sparkles size={22} className="text-dp-secondary" /> {t('ts.title')} <PortalHelp pageKey="talentShowcase" /></h1>
         <p className="font-sans text-[14px] text-dp-on-surface-variant mt-1">{t('ts.portalBlurb')}</p>
       </div>
 
@@ -116,7 +116,7 @@ export default function PortalTalentShowcasePage() {
           <ImageUpload bucket="images" currentUrl={form.photo_url} onUpload={(url) => setForm({ ...form, photo_url: url })} label={t('ts.photo')} />
           <VideoUpload currentUrl={form.video_url} onUpload={(url) => setForm({ ...form, video_url: url })} />
           <p className="font-sans text-[11.5px] text-dp-on-surface-variant leading-relaxed">{t('ts.reviewNotice')}</p>
-          <button onClick={submit} disabled={saving} className="w-full bg-dp-secondary text-white py-2.5 rounded-lg font-sans font-semibold cursor-pointer hover:bg-dp-primary transition-all disabled:opacity-50">
+          <button onClick={submit} disabled={saving} className="w-full bg-dp-secondary text-white py-2.5 rounded-lg font-sans font-semibold active:scale-[0.98] cursor-pointer hover:bg-dp-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
             {saving ? t('action.saving') : t('ts.submitForReview')}
           </button>
         </div>

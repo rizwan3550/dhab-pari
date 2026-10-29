@@ -127,10 +127,10 @@ export default function PortalMyVolunteeringPage() {
     <div dir={isUrdu ? 'rtl' : 'ltr'}>
       <div className="mb-6 flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="font-heading text-[26px] font-bold text-dp-primary flex items-center gap-2"><HeartHandshake size={22} className="text-dp-secondary" /> {tr('p.myVolunteering')} <PortalHelp pageKey="myVolunteering" /></h1>
+          <h1 className="font-heading text-[22px] sm:text-[26px] font-bold text-dp-primary flex items-center gap-2"><HeartHandshake size={22} className="text-dp-secondary" /> {tr('p.myVolunteering')} <PortalHelp pageKey="myVolunteering" /></h1>
           <p className="font-sans text-[14px] text-dp-on-surface-variant mt-1">{tr('p.signupsBlurb')}</p>
         </div>
-        <button onClick={() => setShowForm(true)} className="flex items-center gap-2 px-4 py-2.5 bg-dp-secondary text-white rounded-lg font-sans text-[13.5px] font-semibold hover:bg-dp-primary transition-all cursor-pointer">
+        <button onClick={() => setShowForm(true)} className="flex items-center gap-2 px-4 py-2.5 bg-dp-secondary text-white rounded-lg font-sans text-[13.5px] font-semibold active:scale-[0.98] hover:bg-dp-primary transition-colors cursor-pointer">
           <PlusCircle size={16} /> {tr('p.newSignup')}
         </button>
       </div>
@@ -254,7 +254,7 @@ export default function PortalMyVolunteeringPage() {
                 <label className="block font-sans text-[13px] font-semibold text-dp-on-surface-variant mb-1.5">{tr('p.anythingElse')}</label>
                 <textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={2} className="input-field resize-none" />
               </div>
-              <button onClick={submit} disabled={saving} className="w-full bg-dp-secondary text-white py-3 rounded-lg font-sans font-semibold cursor-pointer hover:bg-dp-primary transition-all disabled:opacity-50">
+              <button onClick={submit} disabled={saving} className="w-full bg-dp-secondary text-white py-3 rounded-lg font-sans font-semibold active:scale-[0.98] cursor-pointer hover:bg-dp-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                 {saving ? tr('p.submitting') : tr('p.submit')}
               </button>
             </div>

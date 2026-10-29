@@ -152,7 +152,7 @@ export default function PortalBloodDonorPage() {
   return (
     <div>
       <div dir={isUrdu ? 'rtl' : 'ltr'} className="mb-6">
-        <h1 className="font-heading text-[26px] font-bold text-dp-primary flex items-center gap-2"><Droplet size={22} className="text-dp-error" /> {t('p.bloodRegistration')} <PortalHelp pageKey="bloodDonor" /></h1>
+        <h1 className="font-heading text-[22px] sm:text-[26px] font-bold text-dp-primary flex items-center gap-2"><Droplet size={22} className="text-dp-error" /> {t('p.bloodRegistration')} <PortalHelp pageKey="bloodDonor" /></h1>
         <p className="font-sans text-[14px] text-dp-on-surface-variant mt-1">{t('p.bloodRegBlurb')}</p>
       </div>
 
@@ -319,7 +319,7 @@ export default function PortalBloodDonorPage() {
           </div>
         )}
 
-        <button onClick={save} disabled={saving} className="w-full bg-dp-secondary text-white py-3 rounded-lg font-sans font-semibold cursor-pointer hover:bg-dp-primary transition-all disabled:opacity-50 mb-2">
+        <button onClick={save} disabled={saving} className="w-full bg-dp-secondary text-white py-3 rounded-lg font-sans font-semibold active:scale-[0.98] cursor-pointer hover:bg-dp-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed mb-2">
           {saving ? t('p.saving') : registered ? t('p.update') : t('p.registerAsBloodDonor')}
         </button>
         {registered && (

@@ -54,7 +54,7 @@ export default function NotificationPreferencesPage() {
 
   return (
     <div dir={isUrdu ? 'rtl' : 'ltr'} className="max-w-xl">
-      <h1 className="font-heading text-[26px] font-bold text-dp-primary flex items-center gap-2 mb-2"><Bell size={22} className="text-dp-secondary" /> {t('np.pageTitle')}</h1>
+      <h1 className="font-heading text-[22px] sm:text-[26px] font-bold text-dp-primary flex items-center gap-2 mb-2"><Bell size={22} className="text-dp-secondary" /> {t('np.pageTitle')}</h1>
       <p className="font-sans text-[14px] text-dp-on-surface-variant mb-6">{t('np.pageIntro')}</p>
 
       {permission !== 'granted' && permission !== 'unsupported' && (
@@ -63,7 +63,7 @@ export default function NotificationPreferencesPage() {
             <BellRing size={18} className="text-amber-700 shrink-0" />
             <p className="font-sans text-[13px] text-amber-900">{t('np.enablePushHint')}</p>
           </div>
-          <button onClick={subscribe} disabled={subscribing} className="px-4 py-2 bg-dp-secondary text-white rounded-lg font-sans text-[13px] font-semibold cursor-pointer hover:bg-dp-primary transition-all disabled:opacity-50 shrink-0">
+          <button onClick={subscribe} disabled={subscribing} className="px-4 py-2 bg-dp-secondary text-white rounded-lg font-sans text-[13px] font-semibold active:scale-[0.98] cursor-pointer hover:bg-dp-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0">
             {subscribing ? t('p.saving') : t('np.enablePush')}
           </button>
         </div>

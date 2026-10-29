@@ -88,7 +88,7 @@ export default function MyDeliveriesPage() {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between gap-3">
-        <h1 className="font-bold text-[20px] text-[#005A36] flex items-center gap-2"><Truck size={19} /> {t('mv.deliveriesHeading')}</h1>
+        <h1 className="font-bold text-[20px] sm:text-[22px] text-dp-primary flex items-center gap-2"><Truck size={19} /> {t('mv.deliveriesHeading')}</h1>
         <button onClick={() => loadInvitations(vehicle.id)} className="p-2 rounded-lg border border-[#e5e2d0] text-[#64748b] cursor-pointer">
           <RefreshCw size={15} />
         </button>

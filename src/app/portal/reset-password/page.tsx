@@ -21,7 +21,7 @@ export default function PortalResetPasswordPage() {
             <Lock size={18} className="text-white" />
           </div>
           <div>
-            <h1 className="font-heading text-[24px] font-bold leading-[32px] text-white">{site.name}</h1>
+            <h1 className="font-heading text-[22px] sm:text-[24px] font-bold leading-[32px] text-white">{site.name}</h1>
             <p className="text-white/60 text-[12px] font-sans">{t('p.resetTitle')}</p>
           </div>
         </div>
@@ -31,7 +31,7 @@ export default function PortalResetPasswordPage() {
           <AlertTriangle size={40} className="text-dp-error mx-auto mb-3" />
           <p className="font-sans font-semibold text-dp-on-surface mb-2">{t('g.resetLinkInvalid')}</p>
           <p className="font-sans text-[13px] text-dp-on-surface-variant mb-6">{t('y.requestNewOne')}</p>
-          <Link href="/portal/forgot-password" className="inline-block w-full bg-dp-secondary text-white py-3 rounded-lg font-sans font-semibold hover:bg-dp-primary transition-all">
+          <Link href="/portal/forgot-password" className="inline-block w-full bg-dp-secondary text-white py-3 rounded-lg font-sans font-semibold hover:bg-dp-primary transition-colors">
             {t('g.resetPassword')}
           </Link>
         </div>

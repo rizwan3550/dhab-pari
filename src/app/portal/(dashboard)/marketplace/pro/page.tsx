@@ -116,7 +116,7 @@ export default function ProServicePage() {
               </div>
               <div className="flex items-center gap-1.5 shrink-0">
                 {eligible && v.owner_mobile && <a href={`tel:${v.owner_mobile}`} className="flex items-center justify-center w-8 h-8 rounded-full bg-dp-secondary-container/50 text-dp-secondary hover:bg-dp-secondary hover:text-white transition-colors"><Phone size={13} /></a>}
-                <button onClick={() => request(v.vehicle_id, eligible)} disabled={requestingId === v.vehicle_id || !eligible} className="flex items-center gap-1 px-3 py-1.5 bg-dp-secondary text-white rounded-lg font-sans text-[12.5px] font-semibold cursor-pointer hover:bg-dp-primary disabled:opacity-50">
+                <button onClick={() => request(v.vehicle_id, eligible)} disabled={requestingId === v.vehicle_id || !eligible} className="flex items-center gap-1 px-3 py-1.5 bg-dp-secondary text-white rounded-lg font-sans text-[12.5px] font-semibold active:scale-[0.98] cursor-pointer hover:bg-dp-primary disabled:opacity-50 disabled:cursor-not-allowed">
                   <Send size={12} /> {requestingId === v.vehicle_id ? t('action.saving') : t('vp.requestBtn')}
                 </button>
               </div>
@@ -132,7 +132,7 @@ export default function ProServicePage() {
   return (
     <div dir={isUrdu ? 'rtl' : 'ltr'} className="shop-ink-theme pb-16 max-w-lg mx-auto">
       <div className="mb-6">
-        <h1 className="font-heading text-[26px] font-bold text-dp-primary flex items-center gap-2"><Truck size={22} className="text-dp-secondary" /> {t('vp.proPageTitle')}</h1>
+        <h1 className="font-heading text-[22px] sm:text-[26px] font-bold text-dp-primary flex items-center gap-2"><Truck size={22} className="text-dp-secondary" /> {t('vp.proPageTitle')}</h1>
         <p className="font-sans text-[13.5px] text-dp-on-surface-variant mt-1">{t('vp.proPageSubtitle')}</p>
       </div>
 

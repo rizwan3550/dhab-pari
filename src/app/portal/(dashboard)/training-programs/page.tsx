@@ -165,7 +165,7 @@ export default function PortalTrainingProgramsPage() {
   return (
     <div dir={isUrdu ? 'rtl' : 'ltr'}>
       <div className="mb-6">
-        <h1 className="font-heading text-[26px] font-bold text-dp-primary flex items-center gap-2"><Layers size={22} className="text-dp-secondary" /> {t('tp.academiesTitle')} <PortalHelp pageKey="trainingPrograms" /></h1>
+        <h1 className="font-heading text-[22px] sm:text-[26px] font-bold text-dp-primary flex items-center gap-2"><Layers size={22} className="text-dp-secondary" /> {t('tp.academiesTitle')} <PortalHelp pageKey="trainingPrograms" /></h1>
         <p className="font-sans text-[14px] text-dp-on-surface-variant mt-1">{t('tp.portalBlurb')}</p>
       </div>
 
@@ -285,7 +285,7 @@ export default function PortalTrainingProgramsPage() {
                           <FeeStatus f={f} t={t} />
                         </div>
                         {f.status === 'active' && (f.due_soon ?? []).length > 0 && f.due_soon[0].status !== 'announced' && (
-                          <button onClick={() => openPayModal(f)} className="px-3 py-1.5 bg-dp-secondary text-white rounded-lg font-sans text-[11.5px] font-semibold hover:bg-dp-primary transition-colors shrink-0 cursor-pointer">
+                          <button onClick={() => openPayModal(f)} className="px-3 py-1.5 bg-dp-secondary text-white rounded-lg font-sans text-[11.5px] font-semibold active:scale-[0.98] hover:bg-dp-primary transition-colors shrink-0 cursor-pointer">
                             {t('tp.payFeeBtn')}
                           </button>
                         )}
@@ -321,7 +321,7 @@ export default function PortalTrainingProgramsPage() {
                   <FeeStatus f={f} t={t} />
                 </div>
                 {f.status === 'active' && (f.due_soon ?? []).length > 0 && f.due_soon[0].status !== 'announced' && (
-                  <button onClick={() => openPayModal(f)} className="px-4 py-2 bg-dp-secondary text-white rounded-lg font-sans text-[13px] font-semibold hover:bg-dp-primary transition-colors cursor-pointer">
+                  <button onClick={() => openPayModal(f)} className="px-4 py-2 bg-dp-secondary text-white rounded-lg font-sans text-[13px] font-semibold active:scale-[0.98] hover:bg-dp-primary transition-colors cursor-pointer">
                     {t('tp.payFeeBtn')}
                   </button>
                 )}
@@ -354,7 +354,7 @@ export default function PortalTrainingProgramsPage() {
                 <option value="easypaisa">Easypaisa</option>
               </select>
               <DonationReceiptUpload onUpload={setReceiptPath} />
-              <button onClick={submitPayment} disabled={submittingPayment || payAmount <= 0 || !receiptPath} className="w-full bg-dp-secondary text-white py-2.5 rounded-lg font-sans text-[14px] font-semibold cursor-pointer hover:bg-dp-primary disabled:opacity-50">
+              <button onClick={submitPayment} disabled={submittingPayment || payAmount <= 0 || !receiptPath} className="w-full bg-dp-secondary text-white py-2.5 rounded-lg font-sans text-[14px] font-semibold active:scale-[0.98] cursor-pointer hover:bg-dp-primary disabled:opacity-50 disabled:cursor-not-allowed">
                 {submittingPayment ? t('p.submitting') : t('tp.submitPaymentBtn')}
               </button>
             </div>

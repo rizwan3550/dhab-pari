@@ -90,7 +90,7 @@ export default function WeeklyCommutePage() {
       <button onClick={() => router.push('/portal/marketplace/travel')} className="inline-flex items-center gap-1.5 font-sans text-[13px] font-semibold text-[#166534] cursor-pointer self-start">
         <ArrowLeft size={14} className={isUrdu ? 'rotate-180' : ''} /> {t('mb.whereToHeading')}
       </button>
-      <h1 className="font-extrabold text-[20px] text-[#005A36] flex items-center gap-2"><Briefcase size={19} /> {t('wc.pageTitle')}</h1>
+      <h1 className="font-bold text-[20px] sm:text-[22px] text-dp-primary flex items-center gap-2"><Briefcase size={19} /> {t('wc.pageTitle')}</h1>
       <p className="font-sans text-[13px] text-[#64748b]">{t('wc.pageSubtitle')}</p>
 
       {!editing && mySchedule ? (

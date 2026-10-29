@@ -80,7 +80,7 @@ export default function MyVehicleWeekendPage() {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
-        <h1 className="font-bold text-[20px] text-[#005A36] flex items-center gap-2"><CalendarClock size={19} /> {t('vp.weekendOffersHeading')}</h1>
+        <h1 className="font-bold text-[20px] sm:text-[22px] text-dp-primary flex items-center gap-2"><CalendarClock size={19} /> {t('vp.weekendOffersHeading')}</h1>
         <button onClick={() => setShowAddWeekendOffer(true)} className="flex items-center gap-1 font-sans text-[12.5px] font-semibold text-[#166534] cursor-pointer"><PlusCircle size={14} /> {t('action.add')}</button>
       </div>
       {weekendOffers.length === 0 && <p className="font-sans text-[14px] text-[#94a3b8] text-center py-10">{t('vp.noWeekendOffersYet')}</p>}

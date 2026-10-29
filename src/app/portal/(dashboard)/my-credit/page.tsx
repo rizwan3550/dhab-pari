@@ -153,7 +153,7 @@ export default function MyCreditPage() {
   return (
     <div dir={isUrdu ? 'rtl' : 'ltr'}>
       <div className="flex items-center justify-between mb-1">
-        <h1 className="font-heading text-[24px] font-bold text-dp-primary flex items-center gap-2"><Wallet size={22} /> {t('sk.myCreditHeading')}</h1>
+        <h1 className="font-heading text-[22px] sm:text-[24px] font-bold text-dp-primary flex items-center gap-2"><Wallet size={22} /> {t('sk.myCreditHeading')}</h1>
       </div>
       <p className="font-sans text-[13px] text-dp-on-surface-variant mb-4">{t('sk.myCreditSubtitle')}</p>
 

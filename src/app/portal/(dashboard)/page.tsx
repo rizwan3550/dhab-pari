@@ -161,7 +161,7 @@ export default function PortalDashboardPage() {
   return (
     <div dir={isUrdu ? 'rtl' : 'ltr'}>
       <div className="mb-8">
-        <h1 className="font-heading text-[27px] font-bold text-dp2-primary flex items-center gap-2">{t('p.welcome')}, {user.full_name} <PortalHelp pageKey="dashboard" /></h1>
+        <h1 className="font-heading text-[22px] sm:text-[26px] font-bold text-dp2-primary flex items-center gap-2">{t('p.welcome')}, {user.full_name} <PortalHelp pageKey="dashboard" /></h1>
         <p className="font-sans text-[15px] text-slate-500 mt-1">
           {user.consumer_id ? <>{t('p.consumerNo')}<span className="ltr-num">{user.consumer_id}</span></> : t('p.noLinkedWaterConnection')} · {t('p.mobileLabel')} <span className="ltr-num">{user.mobile}</span>
         </p>

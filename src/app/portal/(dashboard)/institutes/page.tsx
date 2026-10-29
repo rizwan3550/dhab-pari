@@ -28,7 +28,7 @@ export default function PortalInstitutesPage() {
   return (
     <div dir={isUrdu ? 'rtl' : 'ltr'}>
       <div className="mb-6">
-        <h1 className="font-heading text-[26px] font-bold text-dp-primary flex items-center gap-2"><School size={22} className="text-dp-secondary" /> {t('in.title')} <PortalHelp pageKey="institutes" /></h1>
+        <h1 className="font-heading text-[22px] sm:text-[26px] font-bold text-dp-primary flex items-center gap-2"><School size={22} className="text-dp-secondary" /> {t('in.title')} <PortalHelp pageKey="institutes" /></h1>
         <p className="font-sans text-[14px] text-dp-on-surface-variant mt-1">{t('in.portalBlurb')}</p>
       </div>
 

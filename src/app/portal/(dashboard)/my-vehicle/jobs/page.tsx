@@ -185,7 +185,7 @@ export default function MyVehicleJobsPage() {
 
   return (
     <div className="flex flex-col gap-3">
-      <h1 className="font-bold text-[20px] text-[#005A36]">{t('mb.navJobs')}</h1>
+      <h1 className="font-bold text-[20px] sm:text-[22px] text-dp-primary">{t('mb.navJobs')}</h1>
 
       <div className="flex items-center gap-1 bg-white border border-[#e5e2d0] rounded-full p-1 w-fit">
         {(['new', 'active', 'done'] as const).map((k) => (

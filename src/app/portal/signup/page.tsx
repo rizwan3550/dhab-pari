@@ -142,7 +142,7 @@ export default function PortalSignupPage() {
         <div className="w-14 h-14 rounded-full bg-dp-primary flex items-center justify-center text-white mb-4">
           <HeartHandshake size={26} />
         </div>
-        <h1 className="font-heading text-[24px] font-bold text-dp-primary">{t('p.createAccount')}</h1>
+        <h1 className="font-heading text-[22px] sm:text-[24px] font-bold text-dp-primary">{t('p.createAccount')}</h1>
         <p className="font-sans text-[14px] text-dp-on-surface-variant mt-1">{t('p.oneAccount')}</p>
       </div>
 

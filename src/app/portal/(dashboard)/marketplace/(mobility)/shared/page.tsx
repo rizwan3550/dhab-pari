@@ -176,7 +176,7 @@ export default function SharedRidePage() {
           <button onClick={() => setCityKey(null)} className="cursor-pointer text-[#166534]"><ChevronLeft size={18} /></button>
         )}
         <div>
-          <h1 className="font-sans text-[16px] font-extrabold text-[#1e293b]">{t('vp.sharedRideHeading')}</h1>
+          <h1 className="font-sans text-[16px] font-bold text-[#1e293b]">{t('vp.sharedRideHeading')}</h1>
           <p className="text-[11px] text-[#64748b]">
             {tab === 'bookings' ? t('vp.myBookingsTab') : cityKey ? nm(trips[0]?.destination ?? '', trips[0]?.destination_ur ?? null) : t('vp.sharedRideCitiesHint')}
           </p>

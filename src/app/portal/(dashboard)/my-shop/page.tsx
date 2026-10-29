@@ -666,7 +666,7 @@ function MyShopPageInner() {
       {view ? (
         <>
           <div className="flex items-center justify-between gap-3 flex-wrap mb-2">
-            <h1 className="font-heading text-[26px] font-bold leading-[34px] flex items-center gap-2" style={{ color: INK }}><Store size={22} /> {isUrdu && shop.name_ur ? shop.name_ur : shop.name}</h1>
+            <h1 className="font-heading text-[22px] sm:text-[26px] font-bold leading-[34px] flex items-center gap-2" style={{ color: INK }}><Store size={22} /> {isUrdu && shop.name_ur ? shop.name_ur : shop.name}</h1>
             <div className="flex items-center gap-1.5 flex-wrap">
               {shop.commission_mode === 'per_order' && (
                 <button onClick={() => setShowTopup(true)} className="flex items-center gap-1 px-2.5 py-1.5 border border-[#dcd8d4] font-sans text-[11px] whitespace-nowrap font-semibold cursor-pointer hover:border-[#201e1d] transition-colors" style={{ color: INK }}>

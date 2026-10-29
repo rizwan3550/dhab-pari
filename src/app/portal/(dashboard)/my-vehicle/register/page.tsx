@@ -134,7 +134,7 @@ export default function VehicleRegisterPage() {
     return (
       <div dir={isUrdu ? 'rtl' : 'ltr'} className="max-w-lg mx-auto text-center py-10">
         <Clock size={32} className="text-amber-600 mx-auto mb-3" />
-        <h1 className="font-bold text-[20px] text-[#005A36] mb-1.5">{t('vr.pendingTitle')}</h1>
+        <h1 className="font-bold text-[20px] sm:text-[22px] text-dp-primary mb-1.5">{t('vr.pendingTitle')}</h1>
         <p className="font-sans text-[13.5px] text-[#64748b]">{t('vr.pendingBody')}</p>
       </div>
     )
@@ -145,7 +145,7 @@ export default function VehicleRegisterPage() {
       <button onClick={() => router.push('/portal/my-vehicle')} className="inline-flex items-center gap-1.5 font-sans text-[13px] font-semibold text-[#166534] mb-4 cursor-pointer">
         <ArrowLeft size={14} className={isUrdu ? 'rotate-180' : ''} /> {t('mp.pageTitle')}
       </button>
-      <h1 className="font-bold text-[22px] text-[#005A36] flex items-center gap-2 mb-1"><Car size={20} /> {t('vr.pageTitle')}</h1>
+      <h1 className="font-bold text-[22px] text-dp-primary flex items-center gap-2 mb-1"><Car size={20} /> {t('vr.pageTitle')}</h1>
       <p className="font-sans text-[13px] text-[#64748b] mb-5">{t('vr.pageSubtitle')}</p>
 
       {status?.status === 'rejected' && (

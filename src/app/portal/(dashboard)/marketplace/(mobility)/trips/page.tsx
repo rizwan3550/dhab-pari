@@ -173,7 +173,7 @@ export default function TripsPage() {
 
   return (
     <div className="flex flex-col gap-3">
-      <h1 className="font-extrabold text-[20px] text-[#005A36] flex items-center gap-2"><Receipt size={19} /> {t('mb.myBookingsHeading')}</h1>
+      <h1 className="font-bold text-[20px] sm:text-[22px] text-dp-primary flex items-center gap-2"><Receipt size={19} /> {t('mb.myBookingsHeading')}</h1>
 
       <div className="grid grid-cols-2 gap-1 p-1 rounded-xl bg-[#f2f1e8]">
         {(['active', 'past'] as const).map((k) => (

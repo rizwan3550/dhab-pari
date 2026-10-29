@@ -273,7 +273,7 @@ export default function PortalKafalatPage() {
   return (
     <div dir={isUrdu ? 'rtl' : 'ltr'} className="max-w-4xl">
       <div className="mb-6">
-        <h1 className="font-heading text-[28px] font-bold leading-[36px] text-dp-primary flex items-center gap-2.5">
+        <h1 className="font-heading text-[22px] sm:text-[26px] font-bold leading-[36px] text-dp-primary flex items-center gap-2.5">
           <GraduationCap size={24} className="text-dp-secondary" /> {t('pkf.title')} <PortalHelp pageKey="kafalat" />
         </h1>
         <p className="font-sans text-[14px] text-dp-on-surface-variant mt-1.5 leading-relaxed">{t('pkf.blurb')}</p>

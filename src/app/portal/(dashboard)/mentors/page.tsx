@@ -83,7 +83,7 @@ export default function MentorsHubPage() {
   return (
     <div dir={isUrdu ? 'rtl' : 'ltr'}>
       <div className="mb-6">
-        <h1 className="font-heading text-[26px] font-bold text-dp-primary flex items-center gap-2"><Users size={22} className="text-dp-secondary" /> {t('mn.title')} <PortalHelp pageKey="mentors" /></h1>
+        <h1 className="font-heading text-[22px] sm:text-[26px] font-bold text-dp-primary flex items-center gap-2"><Users size={22} className="text-dp-secondary" /> {t('mn.title')} <PortalHelp pageKey="mentors" /></h1>
         <p className="font-sans text-[14px] text-dp-on-surface-variant mt-1">{t('mn.subtitle')}</p>
       </div>
 
@@ -132,7 +132,7 @@ export default function MentorsHubPage() {
             </select>
             <input value={expertise} onChange={(e) => setExpertise(e.target.value)} placeholder={t('mn.expertisePlaceholder')} className="input-field" />
             <textarea value={bio} onChange={(e) => setBio(e.target.value)} placeholder={t('mn.bioPlaceholder')} rows={3} className="input-field resize-none" />
-            <button onClick={requestMentor} disabled={submitting} className="bg-dp-secondary text-white px-4 py-2.5 rounded-lg font-sans text-[13.5px] font-semibold cursor-pointer hover:bg-dp-primary transition-all disabled:opacity-50">
+            <button onClick={requestMentor} disabled={submitting} className="bg-dp-secondary text-white px-4 py-2.5 rounded-lg font-sans text-[13.5px] font-semibold active:scale-[0.98] cursor-pointer hover:bg-dp-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
               {submitting ? t('action.saving') : t('mn.submitRequest')}
             </button>
           </div>

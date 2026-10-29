@@ -65,7 +65,7 @@ export default function PortalSuggestionsPage() {
   return (
     <div dir={isUrdu ? 'rtl' : 'ltr'}>
       <div className="mb-6">
-        <h1 className="font-heading text-[26px] font-bold text-dp-primary flex items-center gap-2">{t('g.suggestions')} <PortalHelp pageKey="suggestions" /></h1>
+        <h1 className="font-heading text-[22px] sm:text-[26px] font-bold text-dp-primary flex items-center gap-2">{t('g.suggestions')} <PortalHelp pageKey="suggestions" /></h1>
         <p className="font-sans text-[14px] text-dp-on-surface-variant mt-1">{t('p.suggestionsBlurb')}</p>
       </div>
 
@@ -81,7 +81,7 @@ export default function PortalSuggestionsPage() {
           </div>
         )}
         <textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={4} placeholder={t('p.yourSuggestionPlaceholder')} className="input-field resize-none mb-4" />
-        <button onClick={submit} disabled={saving} className="w-full flex items-center justify-center gap-2 bg-dp-secondary text-white py-3 rounded-lg font-sans font-semibold cursor-pointer hover:bg-dp-primary transition-all disabled:opacity-50">
+        <button onClick={submit} disabled={saving} className="w-full flex items-center justify-center gap-2 bg-dp-secondary text-white py-3 rounded-lg font-sans font-semibold active:scale-[0.98] cursor-pointer hover:bg-dp-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
           <Send size={16} /> {saving ? t('ap.sending') : t('p.submitSuggestion')}
         </button>
       </div>

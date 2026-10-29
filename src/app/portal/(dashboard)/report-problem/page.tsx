@@ -71,10 +71,10 @@ export default function ReportProblemPage() {
     <div>
       <div dir={isUrdu ? 'rtl' : 'ltr'} className="mb-6 flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="font-heading text-[26px] font-bold text-dp-primary flex items-center gap-2"><AlertTriangle size={22} className="text-dp-secondary" /> {t('cr.myReports')} <PortalHelp pageKey="reportProblem" /></h1>
+          <h1 className="font-heading text-[22px] sm:text-[26px] font-bold text-dp-primary flex items-center gap-2"><AlertTriangle size={22} className="text-dp-secondary" /> {t('cr.myReports')} <PortalHelp pageKey="reportProblem" /></h1>
           <p className="font-sans text-[14px] text-dp-on-surface-variant mt-1">{t('cr.blurb')}</p>
         </div>
-        <button onClick={() => { setForm(empty); setShowForm(true) }} className="flex items-center gap-2 px-4 py-2.5 bg-dp-secondary text-white rounded-lg font-sans text-[13.5px] font-semibold hover:bg-dp-primary transition-all cursor-pointer">
+        <button onClick={() => { setForm(empty); setShowForm(true) }} className="flex items-center gap-2 px-4 py-2.5 bg-dp-secondary text-white rounded-lg font-sans text-[13.5px] font-semibold active:scale-[0.98] hover:bg-dp-primary transition-colors cursor-pointer">
           <PlusCircle size={16} /> {t('cr.newReport')}
         </button>
       </div>
@@ -136,7 +136,7 @@ export default function ReportProblemPage() {
                 <label className="block font-sans text-[13px] font-semibold text-dp-on-surface-variant mb-1.5">{t('lf.location')}</label>
                 <input value={form.location_text} onChange={(e) => setForm({ ...form, location_text: e.target.value })} placeholder={t('cr.locationPlaceholder')} className="input-field" />
               </div>
-              <button onClick={save} disabled={saving} className="w-full bg-dp-secondary text-white py-3 rounded-lg font-sans font-semibold cursor-pointer hover:bg-dp-primary transition-all disabled:opacity-50">
+              <button onClick={save} disabled={saving} className="w-full bg-dp-secondary text-white py-3 rounded-lg font-sans font-semibold active:scale-[0.98] cursor-pointer hover:bg-dp-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                 {saving ? t('p.saving') : t('cr.submitReport')}
               </button>
             </div>

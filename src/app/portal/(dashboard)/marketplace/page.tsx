@@ -121,7 +121,7 @@ export default function PortalMarketplacePage() {
             <Bell size={16} />
           </Link>
         </div>
-        <h1 className="font-heading text-[30px] leading-[1.25] font-bold text-dp-primary mt-1" style={{ textWrap: 'balance' }}>{t('mp.heroHeadline')}</h1>
+        <h1 className="font-heading text-[22px] sm:text-[26px] leading-[1.25] font-bold text-dp-primary mt-1" style={{ textWrap: 'balance' }}>{t('mp.heroHeadline')}</h1>
       </div>
 
       <div className="relative mb-6">

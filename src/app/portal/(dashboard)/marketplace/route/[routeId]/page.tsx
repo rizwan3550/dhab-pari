@@ -309,7 +309,7 @@ export default function RouteDetailPage() {
                 <option value="">—</option>
                 {stops.map((s) => <option key={s.id} value={s.id}>{isUrdu && s.label_ur ? s.label_ur : s.label}</option>)}
               </select>
-              <button onClick={applyForSeat} disabled={applying || !selectedBoardStopId} className="w-full bg-dp-secondary text-white rounded-lg py-2.5 font-sans font-semibold cursor-pointer disabled:opacity-50">
+              <button onClick={applyForSeat} disabled={applying || !selectedBoardStopId} className="w-full bg-dp-secondary text-white rounded-lg py-2.5 font-sans font-semibold active:scale-[0.98] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
                 {applying ? t('mp.placingBooking') : t('mv.applyMonthlySeatBtn')}
               </button>
             </div>
@@ -370,7 +370,7 @@ export default function RouteDetailPage() {
                 </div>
               </>
             )}
-            <button onClick={submit} disabled={submitting} className="w-full mt-4 bg-dp-secondary text-white py-3 rounded-lg font-sans font-semibold cursor-pointer hover:bg-dp-primary transition-all disabled:opacity-50">
+            <button onClick={submit} disabled={submitting} className="w-full mt-4 bg-dp-secondary text-white py-3 rounded-lg font-sans font-semibold active:scale-[0.98] cursor-pointer hover:bg-dp-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
               {submitting ? t('mp.placingBooking') : t('mp.bookSeatsBtn')}
             </button>
           </>

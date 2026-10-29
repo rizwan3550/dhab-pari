@@ -76,7 +76,7 @@ export default function PortalGetInvolvedPage() {
   return (
     <div dir={isUrdu ? 'rtl' : 'ltr'}>
       <div className="mb-6">
-        <h1 className="font-heading text-[26px] font-bold text-dp-primary flex items-center gap-2">{t('p.getInvolved')} <PortalHelp pageKey="getInvolved" /></h1>
+        <h1 className="font-heading text-[22px] sm:text-[26px] font-bold text-dp-primary flex items-center gap-2">{t('p.getInvolved')} <PortalHelp pageKey="getInvolved" /></h1>
         <p className="font-sans text-[14px] text-dp-on-surface-variant mt-1">{t('p.getInvolvedBlurb')}</p>
       </div>
 
@@ -85,7 +85,7 @@ export default function PortalGetInvolvedPage() {
           <h2 className="font-heading text-[17px] font-bold text-dp-primary flex items-center gap-2 mb-3"><HandHeart size={18} className="text-dp-secondary" /> {t('p.volunteer')}</h2>
           <p className="font-sans text-[13px] text-dp-on-surface-variant mb-3">{t('p.volunteerBlurb')}</p>
           <textarea value={skills} onChange={(e) => setSkills(e.target.value)} rows={4} placeholder={t('p.volunteerPlaceholder')} className="input-field resize-none mb-3" />
-          <button onClick={submitVolunteer} disabled={savingVolunteer} className="w-full flex items-center justify-center gap-2 bg-dp-secondary text-white py-2.5 rounded-lg font-sans text-[13.5px] font-semibold cursor-pointer hover:bg-dp-primary transition-all disabled:opacity-50">
+          <button onClick={submitVolunteer} disabled={savingVolunteer} className="w-full flex items-center justify-center gap-2 bg-dp-secondary text-white py-2.5 rounded-lg font-sans text-[13.5px] font-semibold active:scale-[0.98] cursor-pointer hover:bg-dp-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
             <Send size={14} /> {savingVolunteer ? t('p.submitting') : t('p.submit')}
           </button>
         </div>
@@ -94,7 +94,7 @@ export default function PortalGetInvolvedPage() {
           <h2 className="font-heading text-[17px] font-bold text-dp-primary flex items-center gap-2 mb-3"><Sparkles size={18} className="text-dp-secondary" /> {t('p.requestPublisher')}</h2>
           <p className="font-sans text-[13px] text-dp-on-surface-variant mb-3">{t('p.requestPublisherBlurb')}</p>
           <textarea value={roleSkills} onChange={(e) => setRoleSkills(e.target.value)} rows={4} placeholder={t('p.rolePlaceholder')} className="input-field resize-none mb-3" />
-          <button onClick={submitRoleRequest} disabled={savingRole} className="w-full flex items-center justify-center gap-2 bg-dp-secondary text-white py-2.5 rounded-lg font-sans text-[13.5px] font-semibold cursor-pointer hover:bg-dp-primary transition-all disabled:opacity-50">
+          <button onClick={submitRoleRequest} disabled={savingRole} className="w-full flex items-center justify-center gap-2 bg-dp-secondary text-white py-2.5 rounded-lg font-sans text-[13.5px] font-semibold active:scale-[0.98] cursor-pointer hover:bg-dp-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
             <Send size={14} /> {savingRole ? t('p.submitting') : t('p.request')}
           </button>
         </div>

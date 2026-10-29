@@ -170,10 +170,10 @@ export default function PortalRecurringPage() {
     <div dir={isUrdu ? 'rtl' : 'ltr'}>
       <div className="flex items-center justify-between gap-3 flex-wrap mb-6">
         <div>
-          <h1 className="font-heading text-[26px] font-bold text-dp-primary flex items-center gap-2">{t('p.recurringDonations')} <PortalHelp pageKey="recurring" /></h1>
+          <h1 className="font-heading text-[22px] sm:text-[26px] font-bold text-dp-primary flex items-center gap-2">{t('p.recurringDonations')} <PortalHelp pageKey="recurring" /></h1>
           <p className="font-sans text-[14px] text-dp-on-surface-variant mt-1">{t('p.recurringBlurb')}</p>
         </div>
-        <button onClick={() => { setForm(empty); setAcknowledged(false); setShowForm(true) }} className="flex items-center gap-2 px-4 py-2 bg-dp-secondary text-white rounded-lg font-sans text-[14px] font-semibold cursor-pointer hover:bg-dp-primary transition-all">
+        <button onClick={() => { setForm(empty); setAcknowledged(false); setShowForm(true) }} className="flex items-center gap-2 px-4 py-2 bg-dp-secondary text-white rounded-lg font-sans text-[14px] font-semibold active:scale-[0.98] cursor-pointer hover:bg-dp-primary transition-colors">
           <PlusCircle size={16} /> {t('p.newSchedule')}
         </button>
       </div>
