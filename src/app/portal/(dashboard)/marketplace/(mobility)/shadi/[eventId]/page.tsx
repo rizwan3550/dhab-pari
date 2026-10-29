@@ -208,7 +208,7 @@ export default function ShadiEventDetailPage() {
                     <p className="flex items-center gap-1.5 text-[11.5px] mt-1.5" style={{ color: '#b91c1c' }}><AlertCircle size={11} /> {r.decline_reason}</p>
                   )}
                   {event.status === 'confirmed' && r.advance_share_pkr != null && !hasLiveReplacement && (
-                    <button onClick={() => openInvite(r.id)} className="w-full flex items-center justify-center gap-1.5 py-2 mt-1.5 border border-[#e5e2d0] rounded-xl text-[12px] font-semibold cursor-pointer">
+                    <button onClick={() => openInvite(r.id)} className="w-full flex items-center justify-center gap-1.5 min-h-[36px] py-2 mt-1.5 border border-[#e5e2d0] rounded-xl text-[12px] font-semibold cursor-pointer transition hover:bg-[#f2f1e8] active:scale-[0.98]">
                       <Plus size={12} /> {t('vp.inviteReplacementBtn')}
                     </button>
                   )}
@@ -238,7 +238,7 @@ export default function ShadiEventDetailPage() {
       </div>
 
       {event.status === 'collecting' && (
-        <button onClick={() => openInvite()} className="w-full flex items-center justify-center gap-1.5 py-2.5 border border-[#e5e2d0] rounded-xl text-[13px] font-semibold cursor-pointer">
+        <button onClick={() => openInvite()} className="w-full flex items-center justify-center gap-1.5 min-h-[40px] py-2.5 border border-[#e5e2d0] rounded-xl text-[13px] font-semibold cursor-pointer transition hover:bg-[#f2f1e8] active:scale-[0.98]">
           <Plus size={14} /> {t('vp.inviteAnotherVehicleBtn')}
         </button>
       )}
@@ -266,12 +266,12 @@ export default function ShadiEventDetailPage() {
       )}
 
       {canAnnounce && (
-        <button onClick={() => setShowAdvance(true)} className="w-full bg-[#166534] text-white rounded-xl py-3 font-semibold cursor-pointer">
+        <button onClick={() => setShowAdvance(true)} className="w-full bg-[#166534] text-white rounded-xl py-3 font-semibold cursor-pointer transition hover:bg-[#14532d] active:scale-[0.98]">
           {t('vp.payAdvanceBtn')}
         </button>
       )}
       {event.status === 'collecting' && (
-        <button onClick={cancelEvent} disabled={busy} className="w-full flex items-center justify-center gap-1.5 py-2.5 text-[13px] font-semibold cursor-pointer disabled:opacity-50" style={{ color: '#b91c1c' }}>
+        <button onClick={cancelEvent} disabled={busy} className="w-full flex items-center justify-center gap-1.5 min-h-[40px] py-2.5 rounded-xl text-[13px] font-semibold cursor-pointer transition hover:bg-[#fee2e2] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed" style={{ color: '#b91c1c' }}>
           <Ban size={13} /> {t('vp.cancelShadiEventBtn')}
         </button>
       )}
@@ -284,8 +284,8 @@ export default function ShadiEventDetailPage() {
             <div className="flex flex-col gap-2">
               {candidates.map((v) => (
                 <button key={v.id} onClick={() => invite(v.id)} disabled={inviting === v.id}
-                  className="w-full flex items-center justify-between gap-2 border border-[#e5e2d0] rounded-xl p-2.5 text-start cursor-pointer disabled:opacity-50">
-                  <div>
+                  className="w-full flex items-center justify-between gap-2 border border-[#e5e2d0] rounded-xl p-2.5 text-start cursor-pointer transition-colors hover:border-[#166534] active:bg-[#f9f9f6] disabled:opacity-50 disabled:cursor-not-allowed">
+                  <div className="min-w-0 break-words">
                     <p className="text-[13px] font-semibold text-[#1e293b]">{vehicleDisplayName(v.vehicle_type, v.model)} — {v.owner_name}</p>
                     {v.color && <p className="text-[11px] text-[#64748b]">{v.color}</p>}
                   </div>
@@ -314,7 +314,7 @@ export default function ShadiEventDetailPage() {
             <option value="bank">{t('a.bank')}</option>
           </select>
           <div className="mb-3"><DonationReceiptUpload onUpload={setProofPath} /></div>
-          <button onClick={submitAdvance} disabled={submittingAdvance} className="w-full bg-[#166534] text-white rounded-xl py-3 font-semibold cursor-pointer disabled:opacity-50">
+          <button onClick={submitAdvance} disabled={submittingAdvance} className="w-full bg-[#166534] text-white rounded-xl py-3 font-semibold cursor-pointer transition hover:bg-[#14532d] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">
             {submittingAdvance ? t('action.saving') : t('vp.submitAdvanceBtn')}
           </button>
         </MobilityBottomSheet>

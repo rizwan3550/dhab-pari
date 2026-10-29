@@ -133,13 +133,13 @@ export default function DispatchCallDetailPage() {
 
       <div className="bg-white border border-dp-outline-variant rounded-lg p-3.5 mb-4">
         <div className="flex items-center justify-between gap-2 flex-wrap">
-          <p className="font-sans text-[14px] font-bold text-dp-on-surface flex items-center gap-1.5">
-            <Store size={14} className="text-dp-secondary" /> {call.shop_is_general ? call.city_name : `${isUrdu && call.shop_name_ur ? call.shop_name_ur : call.shop_name} — ${call.city_name}`}
+          <p className="min-w-0 break-words font-sans text-[14px] font-bold text-dp-on-surface flex items-center gap-1.5">
+            <Store size={14} className="shrink-0 text-dp-secondary" /> {call.shop_is_general ? call.city_name : `${isUrdu && call.shop_name_ur ? call.shop_name_ur : call.shop_name} — ${call.city_name}`}
           </p>
           {myVehicle && <TrustPill trust={call.customer_trust} />}
         </div>
         <p className="font-sans text-[13px] text-dp-on-surface mt-1.5">{call.item}</p>
-        <p className="font-sans text-[12px] text-dp-on-surface-variant mt-1 flex items-center gap-1"><MapPin size={11} /> {call.address}</p>
+        <p className="font-sans text-[12px] text-dp-on-surface-variant mt-1 flex items-start gap-1 break-words"><MapPin size={11} className="shrink-0 mt-[3px]" /> <span className="min-w-0">{call.address}</span></p>
       </div>
 
       {(call.status === 'tier1' || call.status === 'tier2') && (
@@ -155,9 +155,9 @@ export default function DispatchCallDetailPage() {
             {invitations.length === 0 && <p className="text-dp-on-surface-variant font-sans text-[12px]">{t('vp.noOneInvitedYetNote')}</p>}
           </div>
           {canRespond && (
-            <div className="flex items-center gap-1.5 mt-2.5">
-              <button onClick={() => respond('decline')} disabled={busy} className="px-3 py-1.5 rounded-lg text-[12.5px] font-sans font-semibold cursor-pointer border border-dp-outline-variant text-dp-on-surface-variant hover:bg-dp-surface-container disabled:opacity-50">{t('vp.declineDeliveryBtn')}</button>
-              <button onClick={() => respond('accept')} disabled={busy} className="px-3 py-1.5 rounded-lg text-[12.5px] font-sans font-semibold cursor-pointer bg-dp-secondary text-white hover:bg-dp-primary disabled:opacity-50">{t('vp.acceptDeliveryBtn')}</button>
+            <div className="flex items-center gap-2 mt-2.5">
+              <button onClick={() => respond('decline')} disabled={busy} className="flex-1 min-h-[36px] px-3 py-2 rounded-lg text-[12.5px] font-sans font-semibold whitespace-nowrap cursor-pointer border border-dp-outline-variant text-dp-on-surface-variant transition hover:bg-dp-surface-container active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">{t('vp.declineDeliveryBtn')}</button>
+              <button onClick={() => respond('accept')} disabled={busy} className="flex-1 min-h-[36px] px-3 py-2 rounded-lg text-[12.5px] font-sans font-semibold whitespace-nowrap cursor-pointer bg-dp-secondary text-white transition hover:bg-dp-primary active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">{t('vp.acceptDeliveryBtn')}</button>
             </div>
           )}
         </div>
@@ -200,7 +200,7 @@ export default function DispatchCallDetailPage() {
             </div>
           )}
           {call.status === 'approved' && myVehicle && myVehicle.id === call.accepted_vehicle_id && (
-            <button onClick={complete} disabled={busy} className="w-full mt-3 flex items-center justify-center gap-1.5 py-2 bg-emerald-600 text-white rounded-lg font-sans text-[13px] font-semibold cursor-pointer hover:bg-emerald-700 disabled:opacity-50"><PackageCheck size={14} /> {t('vp.markDeliveredBtn')}</button>
+            <button onClick={complete} disabled={busy} className="w-full mt-3 flex items-center justify-center gap-1.5 min-h-[40px] py-2 bg-emerald-600 text-white rounded-lg font-sans text-[13px] font-semibold cursor-pointer transition hover:bg-emerald-700 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"><PackageCheck size={14} /> {t('vp.markDeliveredBtn')}</button>
           )}
           {call.status === 'approved' && (!myVehicle || myVehicle.id !== call.accepted_vehicle_id) && (
             <p className="mt-3 font-sans text-[12px] text-dp-secondary font-semibold flex items-center gap-1"><Clock size={11} /> {t('vp.onTheWayNote')}</p>
@@ -220,7 +220,7 @@ export default function DispatchCallDetailPage() {
       )}
 
       {(call.status === 'tier1' || call.status === 'tier2' || call.status === 'priced') && (
-        <button onClick={cancel} disabled={busy} className="font-sans text-[12px] text-dp-on-surface-variant hover:text-dp-error cursor-pointer disabled:opacity-50">{t('vp.cancelCallBtn')}</button>
+        <button onClick={cancel} disabled={busy} className="font-sans text-[12px] text-dp-on-surface-variant py-1 transition-colors hover:text-dp-error cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">{t('vp.cancelCallBtn')}</button>
       )}
       <MobilityBottomNav />
     </div>

@@ -30,6 +30,23 @@
 // is. dispatch_calls' "as_role" field is read here but currently
 // unused (always 'user' for a rider on this page) — kept for when a
 // driver-facing view of this same list gets built.
+//
+// 2026-10-29 audit (plan A1) — three real leaks of OTHER people's /
+// driver-side rows into this rider list, all fixed here:
+//  1. ride_bookings was read with no portal_user_id filter, relying on
+//     RLS alone. RLS also grants the vehicle owner (keeper_read) and —
+//     live today, because can_access_system() no longer checks for an
+//     admin_users row — every tenant user (admin_read). So a driver saw
+//     seats booked ON their route as if they'd booked them, and any user
+//     could see every ride booking in the village. Now filtered to the
+//     signed-in rider, same as shop_orders/ride_dispatch below already were.
+//  2. my_city_purchase_requests / my_parcel_deliveries / my_dispatch_calls
+//     return BOTH the rows you asked for (as_role 'user') and jobs you're
+//     carrying as a driver (as_role 'driver'). Driver jobs belong in
+//     my-vehicle/jobs, not here — filtered out.
+//  3. Adda-based ride_bookings (route_id NULL, adda_queue_entry_id set)
+//     rendered as "Adda Board · —" and route bookings were ALSO labelled
+//     "Adda Board". Each now shows its own label + real route/adda name.
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
@@ -107,7 +124,7 @@ export default function TripsPage() {
       supabase.rpc('my_trip_bookings'),
       supabase.rpc('my_hourly_bookings'),
       supabase.rpc('my_equipment_bookings'),
-      supabase.from('ride_bookings').select('id, status, total_amount_pkr, travel_date, vehicle_routes(origin, origin_ur, destination, destination_ur)').order('created_at', { ascending: false }).limit(20),
+      supabase.from('ride_bookings').select('id, status, total_amount_pkr, travel_date, vehicle_routes(origin, origin_ur, destination, destination_ur), adda_queue_entries(addas(name, name_ur))').eq('portal_user_id', user!.id).order('created_at', { ascending: false }).limit(20),
       supabase.rpc('my_shadi_events'),
       supabase.rpc('my_city_purchase_requests'),
       supabase.rpc('my_rental_bookings'),
@@ -116,7 +133,12 @@ export default function TripsPage() {
       supabase.from('shop_orders').select('id, status, total_amount_pkr, fulfillment_status, created_at, shops(name, name_ur)').eq('portal_user_id', user!.id).order('created_at', { ascending: false }).limit(20),
       supabase.from('ride_dispatch_requests').select('id, status, fare_pkr, pickup_label, dropoff_label, created_at').eq('initiator_portal_user_id', user!.id).order('created_at', { ascending: false }).limit(20),
     ])
-    if (tripShare.error) toast.error(friendlyError(tripShare.error, undefined, isUrdu))
+    // Was: only a trip-share failure surfaced; any other source failing
+    // just made that whole kind silently vanish from the list. Surface
+    // the first failure (once) so a missing booking never looks like
+    // "you have no bookings".
+    const firstError = [tripShare, hourly, equipment, ride, shadi, cityPurchase, rental, parcel, dispatch, shop, rideDispatch].find((r) => r.error)?.error
+    if (firstError) toast.error(friendlyError(firstError, undefined, isUrdu))
 
     const out: BookingRow[] = []
     for (const b of (tripShare.data ?? []) as Array<{ id: string; status: string; total_amount_pkr: number; created_at: string; origin: string; origin_ur: string | null; destination: string; destination_ur: string | null; travel_date: string }>) {
@@ -128,23 +150,35 @@ export default function TripsPage() {
     for (const b of (equipment.data ?? []) as Array<{ id: string; kind: string; model: string | null; vehicle_type: string; total_amount_pkr: number | null; rate_pkr: number; status: string; requested_at: string }>) {
       out.push({ id: `equip-${b.id}`, rawId: b.id, kind: 'equipment', title: t(`vp.${b.kind}PageTitle`), subtitle: vehicleDisplayName(b.vehicle_type, b.model), amount: b.total_amount_pkr ?? b.rate_pkr, status: mapStatus(b.status), date: b.requested_at, href: `/portal/marketplace/${b.kind}` })
     }
-    for (const b of (ride.data ?? []) as unknown as Array<{ id: string; status: string; total_amount_pkr: number; travel_date: string; vehicle_routes: { origin: string; origin_ur: string | null; destination: string; destination_ur: string | null } | null }>) {
+    for (const b of (ride.data ?? []) as unknown as Array<{ id: string; status: string; total_amount_pkr: number; travel_date: string; vehicle_routes: { origin: string; origin_ur: string | null; destination: string; destination_ur: string | null } | null; adda_queue_entries: { addas: { name: string; name_ur: string | null } | null } | null }>) {
       const vr = b.vehicle_routes
-      out.push({ id: `ride-${b.id}`, rawId: b.id, kind: 'ride', title: t('af.addaBoardPageTitle'), subtitle: vr ? `${isUrdu && vr.origin_ur ? vr.origin_ur : vr.origin} → ${isUrdu && vr.destination_ur ? vr.destination_ur : vr.destination}` : '—', amount: b.total_amount_pkr, status: mapStatus(b.status), date: b.travel_date, href: '/portal/marketplace' })
+      const adda = b.adda_queue_entries?.addas
+      // Route seat → "Route · A → B"; adda seat → "Adda Van · <adda name>".
+      // Tapping either opens BookingQuickViewSheet (kind 'ride'), which
+      // already resolves both shapes — never a dead end.
+      out.push({
+        id: `ride-${b.id}`, rawId: b.id, kind: 'ride',
+        title: vr ? t('mv.ledgerKind.route') : t('mb.svc.adda'),
+        subtitle: vr ? `${isUrdu && vr.origin_ur ? vr.origin_ur : vr.origin} → ${isUrdu && vr.destination_ur ? vr.destination_ur : vr.destination}` : adda ? (isUrdu && adda.name_ur ? adda.name_ur : adda.name) : '—',
+        amount: b.total_amount_pkr, status: mapStatus(b.status), date: b.travel_date, href: null,
+      })
     }
     for (const e of (shadi.data ?? []) as Array<{ id: string; event_date: string; venue_address: string; status: string; advance_amount_pkr: number | null; created_at: string }>) {
       out.push({ id: `shadi-${e.id}`, rawId: e.id, kind: 'shadi', title: t('vp.shadiPageTitle'), subtitle: e.venue_address, amount: e.advance_amount_pkr, status: mapStatus(e.status), date: e.event_date || e.created_at, href: `/portal/marketplace/shadi/${e.id}` })
     }
-    for (const r of (cityPurchase.data ?? []) as Array<{ id: string; item: string; status: string; total_fare_pkr: number | null; created_at: string; city_name: string; city_name_ur: string | null }>) {
+    for (const r of (cityPurchase.data ?? []) as Array<{ id: string; item: string; status: string; total_fare_pkr: number | null; created_at: string; city_name: string; city_name_ur: string | null; as_role: string }>) {
+      if (r.as_role === 'driver') continue
       out.push({ id: `cp-${r.id}`, rawId: r.id, kind: 'cityPurchase', title: t('vp.cityPurchasePageTitle'), subtitle: `${r.item} · ${isUrdu && r.city_name_ur ? r.city_name_ur : r.city_name}`, amount: r.total_fare_pkr, status: mapStatus(r.status), date: r.created_at, href: `/portal/marketplace/city-purchase/${r.id}` })
     }
     for (const b of (rental.data ?? []) as Array<{ id: string; vehicle_type: string; model: string | null; total_amount_pkr: number | null; base_amount_pkr: number; status: string; requested_at: string; from_address: string; to_address: string }>) {
       out.push({ id: `rental-${b.id}`, rawId: b.id, kind: 'rental', title: t('vp.rentalPageTitle'), subtitle: `${b.from_address} → ${b.to_address}`, amount: b.total_amount_pkr ?? b.base_amount_pkr, status: mapStatus(b.status), date: b.requested_at, href: null })
     }
-    for (const p of (parcel.data ?? []) as Array<{ id: string; description: string; status: string; total_fare_pkr: number | null; created_at: string; city_name: string; city_name_ur: string | null }>) {
+    for (const p of (parcel.data ?? []) as Array<{ id: string; description: string; status: string; total_fare_pkr: number | null; created_at: string; city_name: string; city_name_ur: string | null; as_role: string }>) {
+      if (p.as_role === 'driver') continue
       out.push({ id: `parcel-${p.id}`, rawId: p.id, kind: 'parcel', title: t('vp.parcelPageTitle'), subtitle: `${p.description} · ${isUrdu && p.city_name_ur ? p.city_name_ur : p.city_name}`, amount: p.total_fare_pkr, status: mapStatus(p.status), date: p.created_at, href: `/portal/marketplace/parcel/${p.id}` })
     }
-    for (const d of (dispatch.data ?? []) as Array<{ id: string; item: string; status: string; total_pkr: number | null; created_at: string; shop_name: string }>) {
+    for (const d of (dispatch.data ?? []) as Array<{ id: string; item: string; status: string; total_pkr: number | null; created_at: string; shop_name: string; as_role: string }>) {
+      if (d.as_role === 'driver') continue
       out.push({ id: `dispatch-${d.id}`, rawId: d.id, kind: 'dispatch', title: t('vp.dispatchPageTitle'), subtitle: `${d.item} · ${d.shop_name}`, amount: d.total_pkr, status: mapStatus(d.status), date: d.created_at, href: `/portal/marketplace/dispatch/${d.id}` })
     }
     for (const o of (shop.data ?? []) as unknown as Array<{ id: string; status: string; total_amount_pkr: number; fulfillment_status: string; created_at: string; shops: { name: string; name_ur: string | null } | null }>) {
@@ -175,18 +209,17 @@ export default function TripsPage() {
     <div className="flex flex-col gap-3">
       <h1 className="font-extrabold text-[20px] text-[#005A36] flex items-center gap-2"><Receipt size={19} /> {t('mb.myBookingsHeading')}</h1>
 
-      <div className="grid grid-cols-2 gap-1 p-1 rounded-xl bg-[#f2f1e8]">
+      <div role="tablist" className="grid grid-cols-2 gap-1 p-1 rounded-xl bg-[#f2f1e8]">
         {(['active', 'past'] as const).map((k) => (
-          <button key={k} onClick={() => setSeg(k)}
-            className="rounded-[9px] py-1.5 text-[12.5px] font-bold cursor-pointer"
-            style={{ background: seg === k ? '#166534' : 'transparent', color: seg === k ? '#fff' : '#64748b', boxShadow: seg === k ? '0 1px 2px rgba(0,0,0,.1)' : 'none' }}>
-            {k === 'active' ? `${t('mb.bookingsActiveTab')} (${active.length})` : t('mb.bookingsPastTab')}
+          <button key={k} role="tab" aria-selected={seg === k} onClick={() => setSeg(k)}
+            className={`min-h-[36px] rounded-[9px] px-2 py-1.5 text-[12.5px] font-bold whitespace-nowrap truncate cursor-pointer transition-colors active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#166534] ${seg === k ? 'bg-[#166534] text-white shadow-[0_1px_2px_rgba(0,0,0,.1)]' : 'text-[#64748b] hover:bg-white/70 hover:text-[#1e293b]'}`}>
+            {k === 'active' ? `${t('mb.bookingsActiveTab')} (${active.length})` : `${t('mb.bookingsPastTab')} (${past.length})`}
           </button>
         ))}
       </div>
 
       <div className="flex flex-col gap-2">
-        {shown.length === 0 && <p className="text-center py-10 text-[#94a3b8] text-[13.5px]">{t('vp.noEquipmentBookingsHint')}</p>}
+        {shown.length === 0 && <p className="text-center py-10 px-4 text-[#94a3b8] text-[13.5px]">{t(seg === 'active' ? 'mb.noActiveBookingsHint' : 'mb.noPastBookingsHint')}</p>}
         {shown.map((r) => {
           const style = STATUS_STYLE[r.status]
           const Icon = KIND_ICON[r.kind]
@@ -202,26 +235,27 @@ export default function TripsPage() {
                 </span>
                 {r.amount != null && <span className="shrink-0 font-extrabold text-[13px] text-[#005A36] ltr-num">{fmt(r.amount)}</span>}
               </span>
-              <span className="flex items-center justify-between gap-2 w-full">
-                <span className="text-[9.5px] font-bold px-2 py-0.5 rounded-full" style={{ background: style.bg, color: style.fg }}>{t(statusKey(r.kind, r.status))}</span>
-                <span dir="ltr" className="flex items-center gap-[3px]">
+              <span className="flex items-center justify-between gap-2 w-full min-w-0">
+                <span className="min-w-0 truncate whitespace-nowrap text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: style.bg, color: style.fg }}>{t(statusKey(r.kind, r.status))}</span>
+                <span dir="ltr" className="shrink-0 flex items-center gap-[3px]">
                   {[0, 1, 2].map((i) => <span key={i} className="w-[18px] h-1 rounded-full" style={{ background: cancelled ? '#fecaca' : i <= step ? '#16a34a' : '#e5e2d0' }} />)}
-                  {r.date && <span className="font-sans text-[9px] text-[#94a3b8] ms-1 ltr-num">{new Date(r.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>}
+                  {r.date && <span className="font-sans text-[10px] text-[#94a3b8] ms-1 ltr-num whitespace-nowrap">{new Date(r.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>}
                 </span>
               </span>
             </>
           )
-          const cls = 'w-full text-start bg-white border border-[#e5e2d0] rounded-2xl p-3 flex flex-col gap-2 cursor-pointer hover:border-[#166534]'
+          // One interactive style for every row, whether it pops the quick
+          // view sheet (<button>) or navigates (<Link>) — same hover, press
+          // and keyboard-focus feedback either way. Every kind resolves to
+          // one or the other (see QUICK_VIEW_KINDS + each href above), so
+          // the old non-interactive <div> fallback no longer exists.
+          const cls = 'w-full min-w-0 text-start bg-white border border-[#e5e2d0] rounded-2xl p-3 flex flex-col gap-2 cursor-pointer transition-colors hover:border-[#166534] active:bg-[#f9f9f6] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#166534]'
           if (isQuickViewKind(r.kind)) {
             return (
-              <button key={r.id} onClick={() => setOpenRow(r)} className={cls}>{content}</button>
+              <button key={r.id} type="button" onClick={() => setOpenRow(r)} className={cls}>{content}</button>
             )
           }
-          return r.href ? (
-            <Link key={r.id} href={r.href} className={cls}>{content}</Link>
-          ) : (
-            <div key={r.id} className={cls.replace(' cursor-pointer hover:border-[#166534]', '')}>{content}</div>
-          )
+          return <Link key={r.id} href={r.href ?? '/portal/marketplace/trips'} className={cls}>{content}</Link>
         })}
       </div>
 

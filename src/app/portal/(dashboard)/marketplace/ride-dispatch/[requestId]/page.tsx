@@ -45,6 +45,7 @@ export default function RideDispatchPage() {
   const [req, setReq] = useState<RequestDetail | null>(null)
   const [loading, setLoading] = useState(true)
   const [accepting, setAccepting] = useState(false)
+  const [cancelling, setCancelling] = useState(false)
   const [bookingId, setBookingId] = useState<string | null>(null)
   const [sheetOpen, setSheetOpen] = useState(false)
 
@@ -79,9 +80,15 @@ export default function RideDispatchPage() {
     if (booking) { setBookingId(booking.id); setSheetOpen(true) }
   }
 
+  // Had no busy guard at all — a double-tap fired the cancel RPC twice
+  // (second call always errored with a confusing toast). Same
+  // disabled-while-in-flight pattern as accept above.
   const cancel = async () => {
+    if (cancelling) return
     if (!window.confirm(t('mb.confirmCancelRideRequest'))) return
+    setCancelling(true)
     const { error } = await supabase.rpc('cancel_ride_dispatch_request', { p_request_id: requestId })
+    setCancelling(false)
     if (error) { toast.error(friendlyError(error, undefined, isUrdu)); return }
     reload()
   }
@@ -91,14 +98,14 @@ export default function RideDispatchPage() {
 
   return (
     <div dir={isUrdu ? 'rtl' : 'ltr'} className="flex flex-col gap-3 max-w-lg mx-auto">
-      <button onClick={() => router.back()} className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#64748b] cursor-pointer w-fit">
+      <button onClick={() => router.back()} className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#64748b] cursor-pointer w-fit py-1 transition-colors hover:text-[#166534]">
         <ArrowLeft size={14} className={isUrdu ? 'rotate-180' : ''} /> {t('action.back')}
       </button>
 
       <div className="bg-gradient-to-r from-[#005A36] to-[#166534] rounded-2xl p-4 text-white">
         <p className="text-[12px] font-bold text-white/75 uppercase tracking-[0.05em]">{req.category_emoji} {isUrdu && req.category_name_ur ? req.category_name_ur : req.category_name}</p>
-        <div className="flex items-center gap-1.5 mt-1 text-[14px] font-bold">
-          <MapPin size={14} className="shrink-0" /> {req.pickup_label} → {req.dropoff_label}
+        <div className="flex items-start gap-1.5 mt-1 text-[14px] font-bold min-w-0">
+          <MapPin size={14} className="shrink-0 mt-[3px]" /> <span className="min-w-0 break-words">{req.pickup_label} → {req.dropoff_label}</span>
         </div>
         <p className="text-[12px] text-white/80 mt-1 ltr-num">{req.distance_km.toFixed(1)} km</p>
         <p className="font-extrabold text-[22px] mt-2 ltr-num">{fmt(req.fare_pkr)}</p>
@@ -110,14 +117,14 @@ export default function RideDispatchPage() {
           <p className="font-bold text-[14px] text-[#1e293b]">{t('mb.rideScheduledHeading')}</p>
           <p className="text-[12.5px] text-[#64748b] ltr-num">{new Date(req.scheduled_for).toLocaleString(undefined, { weekday: 'short', hour: 'numeric', minute: '2-digit', month: 'short', day: 'numeric' })}</p>
           <p className="text-[11.5px] text-[#94a3b8]">{t('mb.rideScheduledHint')}</p>
-          <button onClick={cancel} className="mt-2 text-[12.5px] font-semibold text-[#b91c1c] cursor-pointer">{t('mb.cancelRideRequestBtn')}</button>
+          <button onClick={cancel} disabled={cancelling} className="mt-2 min-h-[36px] px-3 py-1.5 rounded-xl text-[12.5px] font-semibold text-[#b91c1c] cursor-pointer transition hover:bg-[#fee2e2] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">{t('mb.cancelRideRequestBtn')}</button>
         </div>
       ) : req.status === 'open' && req.is_mine_as_rider && (
         <div className="bg-white border border-[#e5e2d0] rounded-2xl p-5 text-center flex flex-col items-center gap-2">
           <Loader2 size={28} className="animate-spin text-[#166534]" />
           <p className="font-bold text-[14px] text-[#1e293b]">{t('mb.waitingForDriverHeading')}</p>
           <p className="text-[12.5px] text-[#64748b]">{t('mb.waitingForDriverHint')}</p>
-          <button onClick={cancel} className="mt-2 text-[12.5px] font-semibold text-[#b91c1c] cursor-pointer">{t('mb.cancelRideRequestBtn')}</button>
+          <button onClick={cancel} disabled={cancelling} className="mt-2 min-h-[36px] px-3 py-1.5 rounded-xl text-[12.5px] font-semibold text-[#b91c1c] cursor-pointer transition hover:bg-[#fee2e2] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">{t('mb.cancelRideRequestBtn')}</button>
         </div>
       )}
 
@@ -128,7 +135,7 @@ export default function RideDispatchPage() {
             <TrustPill trust={req.rider_trust} />
           </div>
           <p className="text-[12.5px] text-[#64748b]">{t('mb.acceptRideHint')}</p>
-          <button onClick={accept} disabled={accepting} className="w-full bg-[#166534] text-white rounded-xl py-3 font-bold text-[14px] cursor-pointer disabled:opacity-50">
+          <button onClick={accept} disabled={accepting} className="w-full bg-[#166534] text-white rounded-xl py-3 font-bold text-[14px] cursor-pointer transition hover:bg-[#14532d] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">
             {accepting ? t('action.saving') : t('mb.acceptRideBtn').replace('{price}', fmt(req.fare_pkr))}
           </button>
         </div>
@@ -152,7 +159,7 @@ export default function RideDispatchPage() {
               original push notification) gets the exact same opener. */}
           {bookingId && (
             <button onClick={() => setSheetOpen(true)}
-              className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#166534] text-white rounded-xl text-[13px] font-bold cursor-pointer mt-1">
+              className="inline-flex items-center gap-1.5 min-h-[40px] px-4 py-2 bg-[#166534] text-white rounded-xl text-[13px] font-bold whitespace-nowrap cursor-pointer mt-1 transition hover:bg-[#14532d] active:scale-[0.98]">
               <Navigation size={14} /> {t('cm.openRideBtn')}
             </button>
           )}

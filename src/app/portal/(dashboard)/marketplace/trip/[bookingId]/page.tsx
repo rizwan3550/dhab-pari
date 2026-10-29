@@ -129,7 +129,7 @@ export default function TripTrackingPage() {
             <p className="font-sans text-[12.5px] text-dp-on-surface-variant mt-2">{role === 'driver' ? t('cm.waitingForRiderLocation') : t('cm.waitingForDriverLocation')}</p>
           )}
           <Link href={`/portal/marketplace/trip-group/${booking.trip_offer_id}`}
-            className="flex items-center justify-center gap-1.5 w-full mt-3 py-2.5 rounded-xl text-[13px] font-sans font-bold cursor-pointer border border-dp-secondary text-dp-secondary">
+            className="flex items-center justify-center gap-1.5 w-full mt-3 min-h-[40px] py-2.5 rounded-xl text-[13px] font-sans font-bold cursor-pointer border border-dp-secondary text-dp-secondary transition hover:bg-dp-surface-container active:scale-[0.98]">
             <Users size={14} /> {t('cm.openGroupChatBtn')}
           </Link>
         </>

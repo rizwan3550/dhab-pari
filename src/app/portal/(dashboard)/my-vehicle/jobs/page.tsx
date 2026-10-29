@@ -187,10 +187,10 @@ export default function MyVehicleJobsPage() {
     <div className="flex flex-col gap-3">
       <h1 className="font-bold text-[20px] text-[#005A36]">{t('mb.navJobs')}</h1>
 
-      <div className="flex items-center gap-1 bg-white border border-[#e5e2d0] rounded-full p-1 w-fit">
+      <div className="flex items-center gap-1 bg-white border border-[#e5e2d0] rounded-full p-1 w-fit max-w-full overflow-x-auto">
         {(['new', 'active', 'done'] as const).map((k) => (
-          <button key={k} onClick={() => setSeg(k)} className="px-3.5 py-1.5 rounded-full text-[12px] font-sans font-bold cursor-pointer whitespace-nowrap"
-            style={{ background: seg === k ? '#166534' : 'transparent', color: seg === k ? '#fff' : '#64748b' }}>
+          <button key={k} onClick={() => setSeg(k)} aria-pressed={seg === k}
+            className={`min-h-[32px] px-3.5 py-1.5 rounded-full text-[12px] font-sans font-bold cursor-pointer whitespace-nowrap transition-colors active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#166534] ${seg === k ? 'bg-[#166534] text-white' : 'text-[#64748b] hover:bg-[#f2f1e8] hover:text-[#1e293b]'}`}>
             {t(`vp.jobsSeg.${k}`)} ({groups[k].length})
           </button>
         ))}
@@ -213,12 +213,14 @@ export default function MyVehicleJobsPage() {
               </>
             )
             const rowStyle = r.needsAction ? { borderInlineStart: '4px solid #D4AF37' } : undefined
+            // Same hover/press/focus feedback for both row shapes (sheet vs link).
+            const rowCls = 'w-full min-w-0 flex items-center gap-3 bg-white border border-[#e5e2d0] rounded-2xl p-3 text-start cursor-pointer transition-colors hover:border-[#166534] active:bg-[#f9f9f6] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#166534]'
             return isQuickActionKind(r.type) ? (
-              <button key={`${r.type}-${r.id}`} onClick={() => setOpenJob(r)} className="flex items-center gap-3 bg-white border border-[#e5e2d0] rounded-2xl p-3 text-start cursor-pointer" style={rowStyle}>
+              <button key={`${r.type}-${r.id}`} type="button" onClick={() => setOpenJob(r)} className={rowCls} style={rowStyle}>
                 {content}
               </button>
             ) : (
-              <Link key={`${r.type}-${r.id}`} href={r.href} className="flex items-center gap-3 bg-white border border-[#e5e2d0] rounded-2xl p-3" style={rowStyle}>
+              <Link key={`${r.type}-${r.id}`} href={r.href} className={rowCls} style={rowStyle}>
                 {content}
               </Link>
             )

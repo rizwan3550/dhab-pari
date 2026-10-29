@@ -137,7 +137,7 @@ export default function ParcelDeliveryDetailPage() {
 
   return (
     <div className="flex flex-col gap-3">
-      <button onClick={() => router.push('/portal/marketplace/parcel')} className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#64748b] cursor-pointer w-fit">
+      <button onClick={() => router.push('/portal/marketplace/parcel')} className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#64748b] cursor-pointer w-fit py-1 transition-colors hover:text-[#166534]">
         <ArrowLeft size={14} className={isUrdu ? 'rotate-180' : ''} /> {t('vp.backToParcel')}
       </button>
 
@@ -162,9 +162,9 @@ export default function ParcelDeliveryDetailPage() {
             {invitations.length === 0 && <p className="text-[#64748b] text-[12px]">{t('vp.noOneInvitedYetNote')}</p>}
           </div>
           {canRespond && (
-            <div className="mt-3 pt-3 border-t border-amber-200 flex items-center gap-1.5">
-              <button onClick={decline} disabled={busy} className="px-3 py-1.5 rounded-xl text-[12.5px] font-semibold cursor-pointer border border-[#e5e2d0] text-[#64748b] disabled:opacity-50">{t('vp.declineDeliveryBtn')}</button>
-              <button onClick={accept} disabled={busy} className="px-3 py-1.5 rounded-xl text-[12.5px] font-semibold cursor-pointer bg-[#166534] text-white disabled:opacity-50">{t('vp.acceptDeliveryBtn')}</button>
+            <div className="mt-3 pt-3 border-t border-amber-200 flex items-center gap-2">
+              <button onClick={decline} disabled={busy} className="flex-1 min-h-[36px] px-3 py-2 rounded-xl text-[12.5px] font-semibold whitespace-nowrap cursor-pointer border border-[#e5e2d0] text-[#64748b] transition hover:bg-[#f2f1e8] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">{t('vp.declineDeliveryBtn')}</button>
+              <button onClick={accept} disabled={busy} className="flex-1 min-h-[36px] px-3 py-2 rounded-xl text-[12.5px] font-semibold whitespace-nowrap cursor-pointer bg-[#166534] text-white transition hover:bg-[#14532d] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">{t('vp.acceptDeliveryBtn')}</button>
             </div>
           )}
         </div>
@@ -193,7 +193,7 @@ export default function ParcelDeliveryDetailPage() {
           {delivery.status === 'priced' && !isAcceptedDriver && (
             <div className="mt-3 flex items-center justify-between gap-2">
               <p className="text-[11.5px] text-[#64748b]">{t('vp.approveBeforeDepartNote')}</p>
-              <button onClick={approve} disabled={busy} className="shrink-0 px-3.5 py-1.5 bg-[#166534] text-white rounded-xl text-[12.5px] font-semibold cursor-pointer disabled:opacity-50">{t('vp.approvePriceBtn')}</button>
+              <button onClick={approve} disabled={busy} className="shrink-0 min-h-[36px] px-3.5 py-2 bg-[#166534] text-white rounded-xl text-[12.5px] font-semibold whitespace-nowrap cursor-pointer transition hover:bg-[#14532d] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">{t('vp.approvePriceBtn')}</button>
             </div>
           )}
           {delivery.status === 'priced' && isAcceptedDriver && (
@@ -201,21 +201,21 @@ export default function ParcelDeliveryDetailPage() {
           )}
 
           {delivery.status === 'approved' && isAcceptedDriver && (
-            <button onClick={markPickedUp} disabled={busy} className="w-full mt-3 flex items-center justify-center gap-1.5 py-2 bg-[#166534] text-white rounded-xl text-[13px] font-semibold cursor-pointer disabled:opacity-50"><PackageCheck size={14} /> {t('vp.markPickedUpBtn')}</button>
+            <button onClick={markPickedUp} disabled={busy} className="w-full mt-3 flex items-center justify-center gap-1.5 min-h-[40px] py-2 bg-[#166534] text-white rounded-xl text-[13px] font-semibold cursor-pointer transition hover:bg-[#14532d] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"><PackageCheck size={14} /> {t('vp.markPickedUpBtn')}</button>
           )}
           {delivery.status === 'approved' && !isAcceptedDriver && (
             <p className="mt-3 text-[12px] text-[#166534] font-semibold flex items-center gap-1"><Clock size={11} /> {t('vp.awaitingPickupNote')}</p>
           )}
 
           {delivery.status === 'picked_up' && isAcceptedDriver && (
-            <button onClick={markDelivered} disabled={busy} className="w-full mt-3 flex items-center justify-center gap-1.5 py-2 bg-emerald-600 text-white rounded-xl text-[13px] font-semibold cursor-pointer disabled:opacity-50"><PackageCheck size={14} /> {t('vp.markDeliveredBtn')}</button>
+            <button onClick={markDelivered} disabled={busy} className="w-full mt-3 flex items-center justify-center gap-1.5 min-h-[40px] py-2 bg-emerald-600 text-white rounded-xl text-[13px] font-semibold cursor-pointer transition hover:bg-emerald-700 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"><PackageCheck size={14} /> {t('vp.markDeliveredBtn')}</button>
           )}
           {delivery.status === 'picked_up' && !isAcceptedDriver && (
             <p className="mt-3 text-[12px] text-[#166534] font-semibold flex items-center gap-1"><Clock size={11} /> {t('vp.pickedUpNote')}</p>
           )}
 
           {delivery.status === 'delivered' && !isAcceptedDriver && (
-            <button onClick={confirmReceived} disabled={busy} className="w-full mt-3 flex items-center justify-center gap-1.5 py-2 bg-emerald-600 text-white rounded-xl text-[13px] font-semibold cursor-pointer disabled:opacity-50"><CheckCircle2 size={14} /> {t('vp.confirmReceivedBtn')}</button>
+            <button onClick={confirmReceived} disabled={busy} className="w-full mt-3 flex items-center justify-center gap-1.5 min-h-[40px] py-2 bg-emerald-600 text-white rounded-xl text-[13px] font-semibold cursor-pointer transition hover:bg-emerald-700 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"><CheckCircle2 size={14} /> {t('vp.confirmReceivedBtn')}</button>
           )}
           {delivery.status === 'delivered' && isAcceptedDriver && (
             <p className="mt-3 text-[12px] text-[#166534] font-semibold flex items-center gap-1"><Clock size={11} /> {t('vp.awaitingConfirmationNote')}</p>
@@ -236,7 +236,7 @@ export default function ParcelDeliveryDetailPage() {
       )}
 
       {!isAcceptedDriver && ['ringing', 'priced'].includes(delivery.status) && (
-        <button onClick={cancel} disabled={busy} className="text-[12px] text-[#64748b] cursor-pointer disabled:opacity-50 w-fit">{t('vp.cancelCallBtn')}</button>
+        <button onClick={cancel} disabled={busy} className="text-[12px] text-[#64748b] cursor-pointer w-fit py-1 transition-colors hover:text-[#b91c1c] disabled:opacity-50 disabled:cursor-not-allowed">{t('vp.cancelCallBtn')}</button>
       )}
     </div>
   )

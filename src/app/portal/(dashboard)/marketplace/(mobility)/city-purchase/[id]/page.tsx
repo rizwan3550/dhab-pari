@@ -162,7 +162,7 @@ export default function CityPurchaseDetailPage() {
 
   return (
     <div className="flex flex-col gap-3">
-      <button onClick={() => router.push('/portal/marketplace/city-purchase')} className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#64748b] cursor-pointer w-fit">
+      <button onClick={() => router.push('/portal/marketplace/city-purchase')} className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#64748b] cursor-pointer w-fit py-1 transition-colors hover:text-[#166534]">
         <ArrowLeft size={14} className={isUrdu ? 'rotate-180' : ''} /> {t('vp.backToCityPurchase')}
       </button>
 
@@ -191,9 +191,9 @@ export default function CityPurchaseDetailPage() {
             <div className="mt-3 pt-3 border-t border-amber-200 flex flex-col gap-2">
               <input type="number" value={addonInput} onChange={(e) => setAddonInput(e.target.value)} placeholder={t('vp.yourServiceFeePlaceholder')} className="dp2-input text-[13.5px] bg-white" />
               <p className="text-[11px] text-[#64748b]">{t('vp.serviceFeeBandHint')}</p>
-              <div className="flex items-center gap-1.5">
-                <button onClick={decline} disabled={busy} className="px-3 py-1.5 rounded-xl text-[12.5px] font-semibold cursor-pointer border border-[#e5e2d0] text-[#64748b] disabled:opacity-50">{t('vp.declineDeliveryBtn')}</button>
-                <button onClick={accept} disabled={busy} className="px-3 py-1.5 rounded-xl text-[12.5px] font-semibold cursor-pointer bg-[#166534] text-white disabled:opacity-50">{t('vp.acceptDeliveryBtn')}</button>
+              <div className="flex items-center gap-2">
+                <button onClick={decline} disabled={busy} className="flex-1 min-h-[36px] px-3 py-2 rounded-xl text-[12.5px] font-semibold whitespace-nowrap cursor-pointer border border-[#e5e2d0] text-[#64748b] transition hover:bg-[#f2f1e8] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">{t('vp.declineDeliveryBtn')}</button>
+                <button onClick={accept} disabled={busy} className="flex-1 min-h-[36px] px-3 py-2 rounded-xl text-[12.5px] font-semibold whitespace-nowrap cursor-pointer bg-[#166534] text-white transition hover:bg-[#14532d] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">{t('vp.acceptDeliveryBtn')}</button>
               </div>
             </div>
           )}
@@ -233,7 +233,7 @@ export default function CityPurchaseDetailPage() {
           {request.status === 'priced' && !isAcceptedDriver && (
             <div className="mt-3 flex items-center justify-between gap-2">
               <p className="text-[11.5px] text-[#64748b]">{t('vp.approveBeforeDepartNote')}</p>
-              <button onClick={approve} disabled={busy} className="shrink-0 px-3.5 py-1.5 bg-[#166534] text-white rounded-xl text-[12.5px] font-semibold cursor-pointer disabled:opacity-50">{t('vp.approvePriceBtn')}</button>
+              <button onClick={approve} disabled={busy} className="shrink-0 min-h-[36px] px-3.5 py-2 bg-[#166534] text-white rounded-xl text-[12.5px] font-semibold whitespace-nowrap cursor-pointer transition hover:bg-[#14532d] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">{t('vp.approvePriceBtn')}</button>
             </div>
           )}
           {request.status === 'priced' && isAcceptedDriver && (
@@ -245,7 +245,7 @@ export default function CityPurchaseDetailPage() {
               <p className="text-[12.5px] font-semibold text-[#1e293b]">{t('vp.markPurchasedHeading')}</p>
               <input type="number" value={purchaseCostInput} onChange={(e) => setPurchaseCostInput(e.target.value)} placeholder={t('vp.actualGoodsCostPlaceholder')} className="dp2-input text-[13.5px]" />
               <DonationReceiptUpload bucket="city_purchase_attachments" label={t('vp.attachBillLabel')} onUpload={setBillPath} />
-              <button onClick={markPurchased} disabled={busy} className="w-full flex items-center justify-center gap-1.5 py-2 bg-[#166534] text-white rounded-xl text-[13px] font-semibold cursor-pointer disabled:opacity-50">{t('vp.markPurchasedBtn')}</button>
+              <button onClick={markPurchased} disabled={busy} className="w-full flex items-center justify-center gap-1.5 min-h-[40px] py-2 bg-[#166534] text-white rounded-xl text-[13px] font-semibold cursor-pointer transition hover:bg-[#14532d] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">{t('vp.markPurchasedBtn')}</button>
             </div>
           )}
           {request.status === 'approved' && !isAcceptedDriver && (
@@ -253,14 +253,14 @@ export default function CityPurchaseDetailPage() {
           )}
 
           {request.status === 'purchased' && isAcceptedDriver && (
-            <button onClick={markDelivered} disabled={busy} className="w-full mt-3 flex items-center justify-center gap-1.5 py-2 bg-emerald-600 text-white rounded-xl text-[13px] font-semibold cursor-pointer disabled:opacity-50"><PackageCheck size={14} /> {t('vp.markDeliveredBtn')}</button>
+            <button onClick={markDelivered} disabled={busy} className="w-full mt-3 flex items-center justify-center gap-1.5 min-h-[40px] py-2 bg-emerald-600 text-white rounded-xl text-[13px] font-semibold cursor-pointer transition hover:bg-emerald-700 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"><PackageCheck size={14} /> {t('vp.markDeliveredBtn')}</button>
           )}
           {request.status === 'purchased' && !isAcceptedDriver && (
             <p className="mt-3 text-[12px] text-[#166534] font-semibold flex items-center gap-1"><Clock size={11} /> {t('vp.itemPurchasedNote')}</p>
           )}
 
           {request.status === 'delivered' && !isAcceptedDriver && (
-            <button onClick={confirmReceived} disabled={busy} className="w-full mt-3 flex items-center justify-center gap-1.5 py-2 bg-emerald-600 text-white rounded-xl text-[13px] font-semibold cursor-pointer disabled:opacity-50"><CheckCircle2 size={14} /> {t('vp.confirmReceivedBtn')}</button>
+            <button onClick={confirmReceived} disabled={busy} className="w-full mt-3 flex items-center justify-center gap-1.5 min-h-[40px] py-2 bg-emerald-600 text-white rounded-xl text-[13px] font-semibold cursor-pointer transition hover:bg-emerald-700 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"><CheckCircle2 size={14} /> {t('vp.confirmReceivedBtn')}</button>
           )}
           {request.status === 'delivered' && isAcceptedDriver && (
             <p className="mt-3 text-[12px] text-[#166534] font-semibold flex items-center gap-1"><Clock size={11} /> {t('vp.awaitingConfirmationNote')}</p>
@@ -296,7 +296,7 @@ export default function CityPurchaseDetailPage() {
           ReportProblemButton above is the real path once goods have
           actually changed hands. */}
       {!isAcceptedDriver && ['ringing', 'priced', 'approved', 'purchased'].includes(request.status) && (
-        <button onClick={cancel} disabled={busy} className="text-[12px] text-[#64748b] cursor-pointer disabled:opacity-50 w-fit">{t('vp.cancelCallBtn')}</button>
+        <button onClick={cancel} disabled={busy} className="text-[12px] text-[#64748b] cursor-pointer w-fit py-1 transition-colors hover:text-[#b91c1c] disabled:opacity-50 disabled:cursor-not-allowed">{t('vp.cancelCallBtn')}</button>
       )}
     </div>
   )
