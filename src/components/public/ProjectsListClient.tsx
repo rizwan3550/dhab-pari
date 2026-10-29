@@ -188,7 +188,13 @@ export interface ProjectsListClientProps {
 // is kept — it's a real content page, not a condensed homepage tile, and
 // that layout still earns its keep on desktop — only the color/radius/
 // spacing language changes.
-export function ProjectsListClient({ projects, voteCounts, commentCounts, receivedByProject, expenseByProject, feeByProject, privateTotal, lang }: ProjectsListClientProps) {
+export function ProjectsListClient({ projects, voteCounts, commentCounts, receivedByProject, expenseByProject, feeByProject, privateTotal }: ProjectsListClientProps) {
+  // Follows the visitor's own English/Urdu toggle (which itself falls back
+  // to the committee's display_language default), so this page never
+  // stays in one language while the header and nav around it are in the
+  // other.
+  const { isUrdu: localeIsUrdu } = useLocale()
+  const lang: Lang = localeIsUrdu ? 'ur' : 'en'
   const [activeFilter, setActiveFilter] = useState('All')
   // A second, independent exclusive filter — status and category each
   // narrow on their own axis and combine (AND), same as any normal
@@ -233,7 +239,7 @@ export function ProjectsListClient({ projects, voteCounts, commentCounts, receiv
     <div className="max-w-[1200px] mx-auto px-6 md:px-12 py-10 min-h-screen" dir={isUrdu ? 'rtl' : 'ltr'}>
       {/* Header */}
       <div className="mb-12">
-        <h2 className="font-heading text-[33px] font-bold leading-[41px] text-dp2-primary" style={isUrdu ? { fontFamily: 'var(--font-urdu-ui)' } : undefined}>
+        <h2 className="font-heading text-[23px] md:text-[33px] font-bold leading-tight md:leading-[41px] text-dp2-primary" style={isUrdu ? { fontFamily: 'var(--font-urdu-ui)' } : undefined}>
           {dt('pageTitle')}
         </h2>
         <p className="text-slate-500 font-sans text-[19px] leading-[29px] max-w-2xl mt-2" style={isUrdu ? { fontFamily: 'var(--font-urdu-ui)' } : undefined}>
@@ -335,7 +341,7 @@ export function ProjectsListClient({ projects, voteCounts, commentCounts, receiv
       {/* Bottom CTA */}
       <div className="mt-20 text-white p-12 rounded-2xl text-center relative overflow-hidden border border-dp2-gold/20" style={{ background: 'linear-gradient(135deg,#005A36,#166534)' }}>
         <div className="relative z-10">
-          <h3 className="font-heading text-[33px] font-bold leading-[41px] mb-4" style={isUrdu ? { fontFamily: 'var(--font-urdu-ui)' } : undefined}>
+          <h3 className="font-heading text-[23px] md:text-[33px] font-bold leading-tight md:leading-[41px] mb-4" style={isUrdu ? { fontFamily: 'var(--font-urdu-ui)' } : undefined}>
             {dt('ctaTitle')}
           </h3>
           <p className="font-sans text-[19px] leading-[29px] mb-8 max-w-xl mx-auto opacity-90" style={isUrdu ? { fontFamily: 'var(--font-urdu-ui)' } : undefined}>

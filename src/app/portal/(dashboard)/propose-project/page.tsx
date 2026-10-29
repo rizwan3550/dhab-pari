@@ -123,7 +123,12 @@ export default function ProposeProjectPage() {
   const { t: tr } = useLocale()
   const { user, loading: userLoading } = usePortalUser()
   const router = useRouter()
-  const [lang, setLang] = useState<Lang>('en')
+  // Follows the visitor's own English/Urdu toggle (which itself falls back
+  // to the committee's display_language default), so this page never
+  // stays in one language while the header and nav around it are in the
+  // other.
+  const { isUrdu: localeIsUrdu } = useLocale()
+  const lang: Lang = localeIsUrdu ? 'ur' : 'en'
   const dt = (key: keyof typeof t) => t[key][lang]
   const isUrdu = lang === 'ur'
 
@@ -154,12 +159,6 @@ export default function ProposeProjectPage() {
   const [aiWaitingForAnswer, setAiWaitingForAnswer] = useState(false)
   const [modernEstimate, setModernEstimate] = useState<number | null>(null)
   const [cheapestEstimate, setCheapestEstimate] = useState<number | null>(null)
-
-  useEffect(() => {
-    createClient().from('site_settings').select('value').eq('key', 'display_language').maybeSingle().then(({ data }) => {
-      if (data?.value === 'ur') setLang('ur')
-    })
-  }, [])
 
   const runAiTurn = async (stage: 'modern' | 'cheapest', history: ChatTurn[]) => {
     setAiBusy(true)

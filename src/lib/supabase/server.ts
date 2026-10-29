@@ -33,3 +33,29 @@ export async function createClient() {
     }
   )
 }
+
+/**
+ * A server client that never sends the visitor's auth session — reads as
+ * `anon`, with the same tenant header as createClient() above. For public
+ * content that must look the same whether or not the visitor happens to be
+ * logged into the portal: several public-read RLS policies are anon-only
+ * (migration 622) and a logged-in villager matched nothing on those tables
+ * until 773, so the homepage's committee announcement vanished for anyone
+ * signed in to the app.
+ */
+export async function createPublicClient() {
+  const cookieStore = await cookies()
+  const tenantId = cookieStore.get('x-tenant-id')?.value
+
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() { return [] },
+        setAll() { /* no session to persist */ },
+      },
+      ...(tenantId ? { global: { headers: { 'x-tenant-id': tenantId } } } : {}),
+    }
+  )
+}

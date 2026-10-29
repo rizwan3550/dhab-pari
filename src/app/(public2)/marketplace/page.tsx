@@ -17,6 +17,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { useLocale } from '@/lib/i18n/LocaleProvider'
 import { Search, Store, Bus, MapPin, LogIn } from 'lucide-react'
 import { usePortalUser } from '@/hooks/usePortalUser'
 
@@ -74,7 +75,12 @@ export default function MarketplaceLandingPage() {
   // detail page, anyone else to login first (same next= pattern the
   // sign-in banner above already uses).
   const goTo = (path: string) => router.push(portalUser ? path : `/portal/login?next=${path}`)
-  const [lang, setLang] = useState<Lang>('en')
+  // Follows the visitor's own English/Urdu toggle (which itself falls back
+  // to the committee's display_language default), so this page never
+  // stays in one language while the header and nav around it are in the
+  // other.
+  const { isUrdu: localeIsUrdu } = useLocale()
+  const lang: Lang = localeIsUrdu ? 'ur' : 'en'
   const isUrdu = lang === 'ur'
   const dt = (key: keyof typeof t) => t[key][lang]
 
@@ -87,9 +93,6 @@ export default function MarketplaceLandingPage() {
 
   useEffect(() => {
     const supabase = createClient()
-    supabase.from('site_settings').select('value').eq('key', 'display_language').maybeSingle().then(({ data }) => {
-      if (data?.value === 'ur') setLang('ur')
-    })
     supabase.from('shops').select('id, name, name_ur, location, location_ur, delivery_enabled').eq('status', 'active').order('name')
       .then(({ data }) => setShops(data ?? []))
     supabase.from('vehicle_routes').select('id, vehicle_id, origin, origin_ur, destination, destination_ur, fare_per_seat_pkr').eq('is_active', true).order('origin')
@@ -115,7 +118,7 @@ export default function MarketplaceLandingPage() {
   return (
     <div className="max-w-[1000px] mx-auto px-4 md:px-6 py-8" dir={isUrdu ? 'rtl' : 'ltr'}>
       <div className="mb-6">
-        <h1 className="font-heading text-[30px] md:text-[34px] font-bold text-dp2-primary section-title flex items-center gap-2.5">
+        <h1 className="font-heading text-[23px] md:text-[34px] font-bold text-dp2-primary section-title flex items-center gap-2.5">
           <Store size={26} className="text-dp2-primary-dark" /> {dt('heading')}
         </h1>
         <p className="text-slate-500 font-sans text-[16px] mt-1.5">{dt('subheading')}</p>

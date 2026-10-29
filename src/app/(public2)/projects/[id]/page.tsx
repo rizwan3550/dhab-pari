@@ -110,7 +110,12 @@ export default function ProjectDetailPage() {
   const [announced, setAnnounced] = useState<DonorRow[]>([])
   const [expenses, setExpenses] = useState<ExpenseRow[]>([])
   const [loading, setLoading] = useState(true)
-  const [lang, setLang] = useState<Lang>('en')
+  // Follows the visitor's own English/Urdu toggle (which itself falls back
+  // to the committee's display_language default), so this page never
+  // stays in one language while the header and nav around it are in the
+  // other.
+  const { isUrdu: localeIsUrdu } = useLocale()
+  const lang: Lang = localeIsUrdu ? 'ur' : 'en'
   const dt = (key: keyof typeof t) => t[key][lang]
   const isUrdu = lang === 'ur'
   const [comments, setComments] = useState<CommentRow[]>([])
@@ -227,12 +232,6 @@ export default function ProjectDetailPage() {
   }, [id])
 
   useEffect(() => { load() }, [load])
-
-  useEffect(() => {
-    createClient().from('site_settings').select('value').eq('key', 'display_language').maybeSingle().then(({ data }) => {
-      if (data?.value === 'ur') setLang('ur')
-    })
-  }, [])
 
   // Live expenses — updates the moment staff post a project-tagged expense,
   // no refresh needed (migration 134 enables Realtime on ledger_entries).

@@ -208,15 +208,17 @@ export default function WaterBillPage() {
                 className="w-full px-4 py-4 bg-white border-2 border-dp2-card-border rounded-2xl focus:border-dp2-primary-dark focus:ring-0 transition-all font-sans text-[19px] leading-[20px] text-slate-800"
               />
               <p className="font-sans text-[14px] text-slate-500 mt-2">
-                This keeps your bill private — only someone who knows your number can see it.
+                {isUrdu
+                  ? 'اس سے آپ کا بل محفوظ رہتا ہے — صرف وہی دیکھ سکتا ہے جسے آپ کا نمبر معلوم ہو۔'
+                  : 'This keeps your bill private — only someone who knows your number can see it.'}
               </p>
             </div>
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-dp2-primary-dark text-white py-4 rounded-xl font-sans text-[21px] font-semibold leading-[20px] hover:bg-dp2-primary transition-all active:scale-[0.98] flex justify-center items-center gap-3 disabled:opacity-50"
+              className="w-full bg-dp2-primary-dark text-white py-4 rounded-xl font-sans text-[17px] md:text-[21px] font-semibold leading-tight hover:bg-dp2-primary transition-colors active:scale-[0.98] flex justify-center items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Searching...' : 'Check Bill Status / بل چیک کریں'}
+              {loading ? (isUrdu ? 'تلاش ہو رہی ہے...' : 'Searching...') : (isUrdu ? 'بل چیک کریں' : 'Check Bill Status')}
             </button>
           </form>
         </div>

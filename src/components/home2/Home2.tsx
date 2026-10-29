@@ -256,7 +256,7 @@ export function Home2(props: Home2Props) {
               <div className="grid gap-1.5" style={{ gridTemplateColumns: `repeat(${fundTabs.length}, 1fr)` }}>
                 {fundTabs.map((f, i) => (
                   <button key={i} onClick={() => setFundTab(i)}
-                    className="flex flex-col items-center gap-0.5 py-2 rounded-[14px] text-[10.5px] font-semibold cursor-pointer border"
+                    className="flex flex-col items-center justify-start gap-0.5 px-1 py-2 rounded-[14px] text-[10.5px] font-semibold leading-tight text-center cursor-pointer border"
                     style={{ background: i === fundTab ? '#166534' : '#fff', color: i === fundTab ? '#fff' : '#334155', borderColor: i === fundTab ? '#166534' : '#e2e8f0' }}>
                     <f.emoji size={15} /> {f.label}
                   </button>

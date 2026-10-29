@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createPublicClient } from '@/lib/supabase/server'
 import { getPaymentAccount } from '@/lib/paymentAccounts'
 import { getPublicSiteContext, getCardImages } from '@/lib/publicSite'
 import { getCookieTenantId } from '@/lib/tenant'
@@ -137,7 +137,9 @@ export default async function HomePage() {
     // cache issue in the first place.
     (async () => {
       for (let attempt = 1; attempt <= 2; attempt++) {
-        const res = await supabase.from('committee_notes').select('id, body_en, body_ur, release_date, linked_project_id, link_url, link_label_en, link_label_ur, projects(title, title_ur, display_name)')
+        // Public client: read as anon so a visitor logged into the portal
+        // sees the same announcement as everyone else (see createPublicClient).
+        const res = await (await createPublicClient()).from('committee_notes').select('id, body_en, body_ur, release_date, linked_project_id, link_url, link_label_en, link_label_ur, projects(title, title_ur, display_name)')
           .eq('is_published', true).order('created_at', { ascending: false }).limit(6)
         if (!res.error) return res
         if (attempt === 2) { console.error('Homepage committee_notes query failed twice', res.error); return res }

@@ -56,7 +56,12 @@ export default function DonateSubmitPage() {
 function DonateSubmitPageInner() {
   const { t: tr } = useLocale()
   const searchParams = useSearchParams()
-  const [lang, setLang] = useState<Lang>('en')
+  // Follows the visitor's own English/Urdu toggle (which itself falls back
+  // to the committee's display_language default), so this page never
+  // stays in one language while the header and nav around it are in the
+  // other.
+  const { isUrdu: localeIsUrdu } = useLocale()
+  const lang: Lang = localeIsUrdu ? 'ur' : 'en'
   const [targetItems, setTargetItems] = useState<PickerItem[]>([])
   // A raw ?project=<uuid> (the existing contract other pages link with)
   // wins over the picker's own default; otherwise the list's default
@@ -82,22 +87,14 @@ function DonateSubmitPageInner() {
   const isUrdu = lang === 'ur'
 
   useEffect(() => {
-    supabase.from('site_settings').select('value').eq('key', 'display_language').maybeSingle().then(({ data }) => {
-      // The picker's own labels (group headings, fund names) follow this
-      // same site-default lookup, not the shared LocaleProvider — that
-      // provider resolves independently for a signed-out visitor and can
-      // briefly (or permanently, with no saved preference) disagree with
-      // it, which would otherwise leave half the picker in English while
-      // this page's own Urdu text renders normally around it.
-      const resolvedLang: Lang = data?.value === 'ur' ? 'ur' : 'en'
-      setLang(resolvedLang)
-      fetchDonationTargets(supabase, resolvedLang).then(({ items, defaultTargetId }) => {
-        setTargetItems(items)
-        setTargetId((current) => current || defaultTargetId)
-      })
+    // The picker's own labels (group headings, fund names) follow the same
+    // language as the rest of this page, refetched when the visitor toggles.
+    fetchDonationTargets(supabase, lang).then(({ items, defaultTargetId }) => {
+      setTargetItems(items)
+      setTargetId((current) => current || defaultTargetId)
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [lang])
 
   useEffect(() => {
     getPaymentAccount(supabase, 'donors_projects').then((pa) => {

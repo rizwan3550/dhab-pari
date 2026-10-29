@@ -90,7 +90,12 @@ interface GroupCount { blood_group: string; registered: number; available_now: n
 export default function PublicBloodPage() {
   const { t: tr } = useLocale()
   const site = useSite()
-  const [lang, setLang] = useState<Lang>('en')
+  // Follows the visitor's own English/Urdu toggle (which itself falls back
+  // to the committee's display_language default), so this page never
+  // stays in one language while the header and nav around it are in the
+  // other.
+  const { isUrdu: localeIsUrdu } = useLocale()
+  const lang: Lang = localeIsUrdu ? 'ur' : 'en'
   const [counts, setCounts] = useState<GroupCount[]>([])
   const [form, setForm] = useState({
     patientName: '', requesterName: '', requesterWhatsapp: '', relation: '',
@@ -107,9 +112,6 @@ export default function PublicBloodPage() {
   const waNumber = site.whatsapp.replace(/[^0-9]/g, '').replace(/^0/, '92')
 
   useEffect(() => {
-    supabase.from('site_settings').select('value').eq('key', 'display_language').maybeSingle().then(({ data }) => {
-      if (data?.value === 'ur') setLang('ur')
-    })
     supabase.rpc('blood_group_counts').then(({ data }) => {
       if (data) setCounts(data as GroupCount[])
     })
@@ -196,7 +198,7 @@ export default function PublicBloodPage() {
             <div className="grid grid-cols-4 gap-3">
               {counts.map((g) => (
                 <div key={g.blood_group} className="text-center border border-dp2-card-border rounded-xl py-3">
-                  <p className="font-heading text-[19px] font-bold text-red-600 leading-none">{g.blood_group}</p>
+                  <p dir="ltr" className="font-heading text-[19px] font-bold text-red-600 leading-none">{g.blood_group}</p>
                   <p className="font-sans text-[23px] font-bold text-slate-800 leading-tight mt-1">{g.registered}</p>
                   <p className="font-sans text-[11px] text-slate-500 leading-tight">{dt('registered')}</p>
                   <p className="font-sans text-[12px] text-dp2-primary-dark font-semibold mt-1">{g.available_now} {dt('available')}</p>
@@ -239,7 +241,7 @@ export default function PublicBloodPage() {
               <label className="block font-sans text-[14px] font-semibold text-slate-500 mb-1.5">{dt('bloodGroup')} *</label>
               <div className="grid grid-cols-4 gap-2">
                 {GROUPS.map((g) => (
-                  <button key={g} type="button" onClick={() => setForm((p) => ({ ...p, bloodGroup: g }))}
+                  <button key={g} type="button" dir="ltr" onClick={() => setForm((p) => ({ ...p, bloodGroup: g }))}
                     className={`py-2.5 rounded-xl font-sans text-[16px] font-bold cursor-pointer transition-all ${form.bloodGroup === g ? 'bg-red-600 text-white' : 'border border-dp2-card-border text-slate-500 hover:border-red-600'}`}>
                     {g}
                   </button>

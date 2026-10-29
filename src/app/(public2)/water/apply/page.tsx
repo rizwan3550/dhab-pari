@@ -38,7 +38,12 @@ const t: Record<string, { en: string; ur: string }> = {
 
 export default function WaterApplyPage() {
   const { t: tr } = useLocale()
-  const [lang, setLang] = useState<Lang>('en')
+  // Follows the visitor's own English/Urdu toggle (which itself falls back
+  // to the committee's display_language default), so this page never
+  // stays in one language while the header and nav around it are in the
+  // other.
+  const { isUrdu: localeIsUrdu } = useLocale()
+  const lang: Lang = localeIsUrdu ? 'ur' : 'en'
   const [form, setForm] = useState({
     name: '',
     fatherName: '',
@@ -57,9 +62,6 @@ export default function WaterApplyPage() {
   const isUrdu = lang === 'ur'
 
   useEffect(() => {
-    supabase.from('site_settings').select('value').eq('key', 'display_language').maybeSingle().then(({ data }) => {
-      if (data?.value === 'ur') setLang('ur')
-    })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 

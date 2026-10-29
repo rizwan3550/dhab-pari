@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { Search, X, ChevronDown } from 'lucide-react'
+import { useLocale } from '@/lib/i18n/LocaleProvider'
 
 export interface PickerItem { id: string; label: string; sublabel?: string; group?: string }
 
@@ -121,9 +122,10 @@ interface SearchableFieldProps {
 // the SearchablePicker on click. Scales to hundreds of consumers/accounts,
 // where a native <select> becomes unusable without search.
 export function SearchableField({
-  label, value, items, onChange, placeholder = 'Select...', disabled,
+  label, value, items, onChange, placeholder, disabled,
   pickerTitle, searchPlaceholder, extraAction, compact,
 }: SearchableFieldProps) {
+  const { t } = useLocale()
   const [open, setOpen] = useState(false)
   const selected = items.find((i) => i.id === value)
   return (
@@ -134,7 +136,7 @@ export function SearchableField({
         onClick={() => setOpen(true)}
         className="input-field flex items-center justify-between text-start disabled:bg-dp-surface-container-low disabled:text-dp-on-surface-variant disabled:cursor-not-allowed cursor-pointer"
       >
-        <span className={`truncate ${selected ? 'text-dp-on-surface' : 'text-dp-on-surface-variant'}`}>{selected ? selected.label : placeholder}</span>
+        <span className={`truncate ${selected ? 'text-dp-on-surface' : 'text-dp-on-surface-variant'}`}>{selected ? selected.label : (placeholder ?? t('a.select'))}</span>
         <ChevronDown size={15} className="text-dp-on-surface-variant shrink-0 ms-2" />
       </button>
       <SearchablePicker
