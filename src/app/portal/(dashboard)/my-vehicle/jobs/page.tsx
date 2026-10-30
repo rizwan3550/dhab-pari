@@ -20,8 +20,9 @@ import { useLocale } from '@/lib/i18n/LocaleProvider'
 import { LoadingDots } from '@/components/shared/LoadingDots'
 import { useDriverJobsBadge } from '@/components/mobility/DriverJobsBadgeContext'
 import { JobQuickActionSheet, type QuickActionKind, type QuickActionRow } from '@/components/mobility/JobQuickActionSheet'
+import { BookingLifecycleSheet, type LifecycleKind } from '@/components/mobility/BookingLifecycleSheet'
 
-interface Vehicle { id: string; offers_hourly: boolean; offers_shadi: boolean; offers_equipment: boolean; offers_rental: boolean; delivers: boolean }
+interface Vehicle { id: string; offers_hourly: boolean; offers_shadi: boolean; offers_equipment: boolean; offers_rental: boolean; delivers: boolean; commission_mode: string }
 interface Row {
   id: string; type: 'hourly' | 'shadi' | 'equipment' | 'rental' | 'route' | 'dispatch' | 'city_purchase' | 'delivery' | 'parcel' | 'ride_dispatch'
   title: string; subtitle: string; amount: number | null; at: string; needsAction: boolean; done: boolean; href: string
@@ -35,6 +36,14 @@ interface Row {
 // broadcast, not a per-vehicle invitation.
 const QUICK_ACTION_KINDS = new Set<Row['type']>(['hourly', 'rental', 'equipment', 'shadi', 'route', 'dispatch', 'city_purchase', 'parcel', 'delivery', 'ride_dispatch'])
 function isQuickActionKind(t: Row['type']): t is QuickActionKind { return QUICK_ACTION_KINDS.has(t) }
+// These three run their whole accept → start → finish → settle lifecycle
+// in one popup (BookingLifecycleSheet) instead of the accept/decline-only
+// quick sheet plus a jump to their own page.
+const LIFECYCLE_KINDS = new Set<Row['type']>(['hourly', 'rental', 'equipment'])
+function isLifecycleKind(t: Row['type']): t is LifecycleKind { return LIFECYCLE_KINDS.has(t) }
+// Finished-but-unpaid stays in Active — the driver still has to confirm
+// the cash, so filing it under Done hid the one job that needed them.
+function isClosed(status: string, settled: boolean) { return status === 'declined' || status === 'cancelled' || (status === 'completed' && settled) }
 
 function fmt(n: number) { return Number(n ?? 0).toLocaleString(undefined, { maximumFractionDigits: 0 }) }
 
@@ -55,8 +64,8 @@ export default function MyVehicleJobsPage() {
 
     if (v.offers_hourly) {
       const { data } = await supabase.rpc('vehicle_hourly_bookings', { p_vehicle_id: v.id })
-      for (const b of (data ?? []) as { id: string; status: string; customer_name: string; pickup_address: string; base_amount_pkr: number; total_amount_pkr: number | null; requested_at: string }[]) {
-        out.push({ id: b.id, type: 'hourly', title: b.customer_name, subtitle: b.pickup_address, amount: b.total_amount_pkr ?? b.base_amount_pkr, at: b.requested_at, needsAction: b.status === 'requested', done: ['completed', 'declined', 'cancelled'].includes(b.status), href: '/portal/my-vehicle/hourly' })
+      for (const b of (data ?? []) as { id: string; status: string; status_confirmed: boolean; customer_name: string; pickup_address: string; base_amount_pkr: number; total_amount_pkr: number | null; requested_at: string }[]) {
+        out.push({ id: b.id, type: 'hourly', title: b.customer_name, subtitle: b.pickup_address, amount: b.total_amount_pkr ?? b.base_amount_pkr, at: b.requested_at, needsAction: b.status === 'requested', done: isClosed(b.status, b.status_confirmed), href: '/portal/my-vehicle/hourly' })
       }
     }
     if (v.offers_shadi) {
@@ -67,14 +76,14 @@ export default function MyVehicleJobsPage() {
     }
     if (v.offers_equipment) {
       const { data } = await supabase.rpc('vehicle_equipment_bookings', { p_vehicle_id: v.id })
-      for (const b of (data ?? []) as { id: string; status: string; customer_name: string; site_address: string; rate_pkr: number; total_amount_pkr: number | null; requested_at: string }[]) {
-        out.push({ id: b.id, type: 'equipment', title: b.customer_name, subtitle: b.site_address, amount: b.total_amount_pkr ?? b.rate_pkr, at: b.requested_at, needsAction: b.status === 'requested', done: ['completed', 'declined', 'cancelled'].includes(b.status), href: '/portal/my-vehicle/equipment' })
+      for (const b of (data ?? []) as { id: string; status: string; status_confirmed: boolean; customer_name: string; site_address: string; rate_pkr: number; total_amount_pkr: number | null; requested_at: string }[]) {
+        out.push({ id: b.id, type: 'equipment', title: b.customer_name, subtitle: b.site_address, amount: b.total_amount_pkr ?? b.rate_pkr, at: b.requested_at, needsAction: b.status === 'requested', done: isClosed(b.status, b.status_confirmed), href: '/portal/my-vehicle/equipment' })
       }
     }
     if (v.offers_rental) {
       const { data } = await supabase.rpc('vehicle_rental_bookings', { p_vehicle_id: v.id })
-      for (const b of (data ?? []) as { id: string; status: string; customer_name: string; from_address: string; to_address: string; total_amount_pkr: number; requested_at: string }[]) {
-        out.push({ id: b.id, type: 'rental', title: b.customer_name, subtitle: `${b.from_address} → ${b.to_address}`, amount: b.total_amount_pkr, at: b.requested_at, needsAction: b.status === 'requested', done: ['completed', 'declined', 'cancelled'].includes(b.status), href: '/portal/my-vehicle/rental' })
+      for (const b of (data ?? []) as { id: string; status: string; status_confirmed: boolean; customer_name: string; from_address: string; to_address: string; total_amount_pkr: number; requested_at: string }[]) {
+        out.push({ id: b.id, type: 'rental', title: b.customer_name, subtitle: `${b.from_address} → ${b.to_address}`, amount: b.total_amount_pkr, at: b.requested_at, needsAction: b.status === 'requested', done: isClosed(b.status, b.status_confirmed), href: '/portal/my-vehicle/rental' })
       }
     }
     {
@@ -157,9 +166,9 @@ export default function MyVehicleJobsPage() {
 
   useEffect(() => {
     if (!user) return
-    supabase.from('vehicles').select('id, offers_hourly, offers_shadi, offers_rental, offers_machinery, offers_tractor, offers_loader, delivers').eq('portal_user_id', user.id).maybeSingle().then(({ data }) => {
+    supabase.from('vehicles').select('id, offers_hourly, offers_shadi, offers_rental, offers_machinery, offers_tractor, offers_loader, delivers, commission_mode').eq('portal_user_id', user.id).maybeSingle().then(({ data }) => {
       if (!data) { setLoading(false); return }
-      const v: Vehicle = { id: data.id, offers_hourly: data.offers_hourly, offers_shadi: data.offers_shadi, offers_rental: data.offers_rental, offers_equipment: !!(data.offers_machinery || data.offers_tractor || data.offers_loader), delivers: data.delivers }
+      const v: Vehicle = { id: data.id, offers_hourly: data.offers_hourly, offers_shadi: data.offers_shadi, offers_rental: data.offers_rental, offers_equipment: !!(data.offers_machinery || data.offers_tractor || data.offers_loader), delivers: data.delivers, commission_mode: data.commission_mode }
       setVehicle(v)
       reload(v)
     })
@@ -213,7 +222,7 @@ export default function MyVehicleJobsPage() {
               </>
             )
             const rowStyle = r.needsAction ? { borderInlineStart: '4px solid #D4AF37' } : undefined
-            return isQuickActionKind(r.type) ? (
+            return isLifecycleKind(r.type) || isQuickActionKind(r.type) ? (
               <button key={`${r.type}-${r.id}`} onClick={() => setOpenJob(r)} className="flex items-center gap-3 bg-white border border-[#e5e2d0] rounded-2xl p-3 text-start cursor-pointer" style={rowStyle}>
                 {content}
               </button>
@@ -226,7 +235,14 @@ export default function MyVehicleJobsPage() {
         </div>
       )}
 
-      {openJob && isQuickActionKind(openJob.type) && (
+      {openJob && isLifecycleKind(openJob.type) && vehicle && (
+        <BookingLifecycleSheet
+          kind={openJob.type} bookingId={openJob.id} vehicleId={vehicle.id} commissionMode={vehicle.commission_mode}
+          onClose={() => setOpenJob(null)}
+          onChanged={() => reload(vehicle)}
+        />
+      )}
+      {openJob && !isLifecycleKind(openJob.type) && isQuickActionKind(openJob.type) && (
         <JobQuickActionSheet
           row={{ id: openJob.id, type: openJob.type, title: openJob.title, subtitle: openJob.subtitle, amount: openJob.amount, href: openJob.href, needsAction: openJob.needsAction, riderTrust: openJob.riderTrust, riderVillage: openJob.riderVillage }}
           vehicleId={vehicle?.id ?? null}
