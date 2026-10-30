@@ -32,6 +32,14 @@ interface RequestDetail {
   accepted_vehicle_id: string | null; accepted_owner_name: string | null; accepted_owner_mobile: string | null; accepted_vehicle_type: string | null
   initiator_portal_user_id: string
   created_at: string
+  // 777
+  urgency?: string; trip_mode?: 'carry_back' | 'dedicated' | null; urgency_premium_pkr?: number; detour_km?: number | null
+  approved_at?: string | null; driver_confirmed_at?: string | null; deliver_by?: string | null
+}
+interface PriceQuote {
+  trip_mode: 'carry_back' | 'dedicated'; leg_pkr: number; distance_fare_pkr: number; urgency_premium_pkr: number; urgency_premium_pct: number
+  detour_km: number | null; detour_free_km: number; on_route: boolean; detour_fuel_pkr: number; addon_fee_pkr: number; tip_pkr: number
+  total_fare_pkr: number; deliver_within_hours: number; addon_min_pkr: number; addon_max_pkr: number
 }
 interface Invitation { vehicle_id: string; owner_name: string; source: string; reference_destination: string | null; status: string; invited_at: string; responded_at: string | null }
 interface MyVehicleLite { id: string; owner_name: string }
@@ -54,6 +62,8 @@ export default function CityPurchaseDetailPage() {
   const [addonInput, setAddonInput] = useState('')
   const [purchaseCostInput, setPurchaseCostInput] = useState('')
   const [billPath, setBillPath] = useState<string | null>(null)
+  const [quote, setQuote] = useState<PriceQuote | null>(null)
+  const [riderChecked, setRiderChecked] = useState(false)
 
   useEffect(() => {
     if (!user) return
@@ -77,6 +87,19 @@ export default function CityPurchaseDetailPage() {
 
   const myInvitation = invitations.find((i) => myVehicle && i.vehicle_id === myVehicle.id)
   const canRespond = myInvitation?.status === 'ringing'
+  // The invited driver sees exactly what he'd be paid before accepting —
+  // carry-back (one leg) or special trip (two legs), any urgency premium,
+  // and whether the shop is on his way (777).
+  useEffect(() => {
+    if (!canRespond || !myVehicle) return
+    let live = true
+    const id = setTimeout(() => {
+      supabase.rpc('city_purchase_quote_for_vehicle', { p_request_id: requestId, p_vehicle_id: myVehicle.id, p_addon_fee_pkr: addonInput ? Number(addonInput) : null })
+        .then(({ data }) => { if (live && data) setQuote(data as PriceQuote) })
+    }, 300)
+    return () => { live = false; clearTimeout(id) }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canRespond, myVehicle?.id, addonInput, requestId])
   const isAcceptedDriver = !!(myVehicle && request?.accepted_vehicle_id === myVehicle.id)
 
   const decline = async () => {
@@ -106,6 +129,15 @@ export default function CityPurchaseDetailPage() {
     toast.success(t('vp.priceApprovedToast'))
     reload()
   }
+  const confirmDeal = async () => {
+    setBusy(true)
+    const { error } = await supabase.rpc('confirm_city_purchase_deal', { p_request_id: requestId })
+    setBusy(false)
+    if (error) { toast.error(friendlyError(error, undefined, isUrdu)); return }
+    toast.success(t('cpx.dealLockedToast'))
+    reload()
+  }
+
   const markPurchased = async () => {
     const cost = Number(purchaseCostInput)
     if (!purchaseCostInput || cost < 0) { toast.error(t('vp.enterActualCostError')); return }
@@ -175,6 +207,24 @@ export default function CityPurchaseDetailPage() {
         )}
       </div>
 
+      {(request.status === 'ringing' || request.status === 'no_answer') && !canRespond && !isAcceptedDriver && (
+        <div className="rounded-[24px] overflow-hidden text-white text-center px-5 py-6" style={{ backgroundImage: 'linear-gradient(160deg,#0f3d2e,#166534)' }}>
+          <div className="relative w-24 h-24 mx-auto flex items-center justify-center">
+            {request.status === 'ringing' && (
+              <>
+                <span className="absolute inset-0 rounded-full border-2 border-white/40 animate-ping [animation-duration:2.2s]" />
+                <span className="absolute inset-3 rounded-full border-2 border-white/30 animate-ping [animation-duration:2.2s] [animation-delay:.7s]" />
+              </>
+            )}
+            <div className="relative w-14 h-14 rounded-full bg-white text-[#166534] flex items-center justify-center shadow-lg"><ShoppingBag size={26} /></div>
+          </div>
+          <p className="font-sans text-[18px] font-extrabold mt-2">{request.status === 'ringing' ? t('cpx.searchingHeading') : t('cpx.savedHeading')}</p>
+          <p className="font-sans text-[12.5px] text-white/85 mt-1">
+            {(request.status === 'ringing' ? t('cpx.searchingHint') : t('cpx.savedHint')).replace('{city}', isUrdu && request.city_name_ur ? request.city_name_ur : request.city_name)}
+          </p>
+        </div>
+      )}
+
       {request.status === 'ringing' && (
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3.5">
           <p className="text-[13px] font-bold text-amber-800 flex items-center gap-1.5"><Clock size={13} className="animate-pulse" /> {t('vp.ringingCityPurchaseLabel')}</p>
@@ -190,7 +240,19 @@ export default function CityPurchaseDetailPage() {
           {canRespond && (
             <div className="mt-3 pt-3 border-t border-amber-200 flex flex-col gap-2">
               <input type="number" value={addonInput} onChange={(e) => setAddonInput(e.target.value)} placeholder={t('vp.yourServiceFeePlaceholder')} className="dp2-input text-[13.5px] bg-white" />
-              <p className="text-[11px] text-[#64748b]">{t('vp.serviceFeeBandHint')}</p>
+              <p className="text-[11px] text-[#64748b]">{t('vp.serviceFeeBandHint')}{quote ? <span className="ltr-num"> ({fmt(quote.addon_min_pkr)}–{fmt(quote.addon_max_pkr)})</span> : null}</p>
+              {quote && (
+                <div className="rounded-xl bg-white border border-amber-200 p-3 flex flex-col gap-1 text-[12px]">
+                  <p className="font-bold text-[12.5px] text-[#1e293b]">{quote.trip_mode === 'carry_back' ? `🚗↩ ${t('cpx.carryTitle')}` : `🚗⇄ ${t('cpx.dedicatedTitle')}`}</p>
+                  <p className="text-[11px] text-[#64748b] mb-1">{t(quote.trip_mode === 'carry_back' ? 'cpx.driverCarryHint' : 'cpx.driverDedicatedHint').replace('{h}', String(quote.deliver_within_hours))}</p>
+                  <div className="flex justify-between"><span className="text-[#64748b]">{quote.trip_mode === 'carry_back' ? t('cpx.oneLeg') : t('cpx.twoLegs')}</span><span className="ltr-num">{fmt(quote.distance_fare_pkr)}</span></div>
+                  {quote.urgency_premium_pkr > 0 && <div className="flex justify-between text-[#b45309] font-semibold"><span>{t('cpx.urgencyPremium')} ({quote.urgency_premium_pct}%)</span><span className="ltr-num">{fmt(quote.urgency_premium_pkr)}</span></div>}
+                  <div className="flex justify-between"><span className="text-[#64748b]">{quote.on_route ? t('cpx.onRoute') : t('cpx.detourLine').replace('{km}', String(quote.detour_km ?? 0))}</span><span className="ltr-num">{fmt(quote.detour_fuel_pkr)}</span></div>
+                  <div className="flex justify-between"><span className="text-[#64748b]">{t('vp.driverServiceFeeLabel')}</span><span className="ltr-num">{fmt(quote.addon_fee_pkr)}</span></div>
+                  {quote.tip_pkr > 0 && <div className="flex justify-between"><span className="text-[#64748b]">{t('vp.additionalTipLabel')}</span><span className="ltr-num">{fmt(quote.tip_pkr)}</span></div>}
+                  <div className="flex justify-between font-extrabold text-[13.5px] pt-1 border-t border-[#f1f5f9]"><span>{t('cpx.youEarn')}</span><span className="ltr-num text-[#166534]">₨{fmt(quote.total_fare_pkr)}</span></div>
+                </div>
+              )}
               <div className="flex items-center gap-1.5">
                 <button onClick={decline} disabled={busy} className="px-3 py-1.5 rounded-xl text-[12.5px] font-semibold cursor-pointer border border-[#e5e2d0] text-[#64748b] disabled:opacity-50">{t('vp.declineDeliveryBtn')}</button>
                 <button onClick={accept} disabled={busy} className="px-3 py-1.5 rounded-xl text-[12.5px] font-semibold cursor-pointer bg-[#166534] text-white disabled:opacity-50">{t('vp.acceptDeliveryBtn')}</button>
@@ -200,7 +262,7 @@ export default function CityPurchaseDetailPage() {
         </div>
       )}
 
-      {request.status === 'no_answer' && (
+      {request.status === 'no_answer' && isAcceptedDriver && (
         <div className="bg-[#F9F9F6] border border-[#e5e2d0] rounded-2xl p-3.5 text-center">
           <XCircle size={18} className="text-red-600 mx-auto mb-1" />
           <p className="text-[13px] font-semibold text-[#1e293b]">{t('vp.noAnswerNote')}</p>
@@ -212,11 +274,17 @@ export default function CityPurchaseDetailPage() {
           <p className="text-[13px] font-bold text-[#1e293b] flex items-center gap-1.5"><Truck size={13} className="text-[#166534]" /> {request.accepted_owner_name} · {request.accepted_vehicle_type}</p>
           {request.accepted_owner_mobile && <a href={`tel:${request.accepted_owner_mobile}`} className="inline-flex items-center gap-1 text-[12px] text-[#166534] mt-1"><Phone size={11} /> {request.accepted_owner_mobile}</a>}
 
+          {request.trip_mode && (
+            <span className={`inline-block mt-2 text-[11px] font-bold px-2 py-0.5 rounded-full ${request.trip_mode === 'carry_back' ? 'bg-[#dcfce7] text-[#166534]' : 'bg-[#e0e7ff] text-[#3730a3]'}`}>
+              {request.trip_mode === 'carry_back' ? `🚗↩ ${t('cpx.carryTitle')}` : `🚗⇄ ${t('cpx.dedicatedTitle')}`}
+            </span>
+          )}
           <div className="mt-2.5 pt-2.5 border-t border-[#f1f5f9] flex flex-col gap-1 text-[12.5px]">
+            {!!request.urgency_premium_pkr && <div className="flex justify-between"><span className="text-[#b45309]">{t('cpx.urgencyPremium')}</span><span className="ltr-num text-[#b45309]">{fmt(request.urgency_premium_pkr)}</span></div>}
             <div className="flex justify-between"><span className="text-[#64748b]">{t('vp.distanceFareLabel')}</span><span className="ltr-num text-[#1e293b]">{fmt(request.distance_fare_pkr ?? 0)}</span></div>
             <div className="flex justify-between"><span className="text-[#64748b]">{t('vp.driverServiceFeeLabel')}</span><span className="ltr-num text-[#1e293b]">{fmt(request.addon_fee_pkr ?? 0)}</span></div>
             {!!request.detour_fuel_pkr && (
-              <div className="flex justify-between"><span className="text-[#64748b]">{t('vp.detourFuelLabel')}</span><span className="ltr-num text-[#1e293b]">{fmt(request.detour_fuel_pkr)}</span></div>
+              <div className="flex justify-between"><span className="text-[#64748b]">{request.detour_km != null ? t('cpx.detourLine').replace('{km}', String(request.detour_km)) : t('vp.detourFuelLabel')}</span><span className="ltr-num text-[#1e293b]">{fmt(request.detour_fuel_pkr)}</span></div>
             )}
             {!!request.tip_pkr && (
               <div className="flex justify-between"><span className="text-[#64748b]">{t('vp.additionalTipLabel')}</span><span className="ltr-num text-[#1e293b]">{fmt(request.tip_pkr)}</span></div>
@@ -231,16 +299,29 @@ export default function CityPurchaseDetailPage() {
           )}
 
           {request.status === 'priced' && !isAcceptedDriver && (
-            <div className="mt-3 flex items-center justify-between gap-2">
-              <p className="text-[11.5px] text-[#64748b]">{t('vp.approveBeforeDepartNote')}</p>
-              <button onClick={approve} disabled={busy} className="shrink-0 px-3.5 py-1.5 bg-[#166534] text-white rounded-xl text-[12.5px] font-semibold cursor-pointer disabled:opacity-50">{t('vp.approvePriceBtn')}</button>
+            <div className="mt-3 rounded-xl bg-[#fffbeb] border border-[#fde68a] p-3 flex flex-col gap-2">
+              <p className="text-[12.5px] font-bold text-[#92400e]">{t('cpx.stage1Heading')}</p>
+              <label className="flex items-start gap-2 text-[12px] text-[#78350f] cursor-pointer">
+                <input type="checkbox" checked={riderChecked} onChange={(e) => setRiderChecked(e.target.checked)} className="mt-0.5 accent-[#166534]" />
+                <span>{t('cpx.riderCheck').replace('{total}', fmt(request.total_fare_pkr ?? 0)).replace('{goods}', fmt(request.goods_budget_pkr))}</span>
+              </label>
+              <button onClick={approve} disabled={busy || !riderChecked} className="w-full py-2.5 bg-[#166534] text-white rounded-xl text-[13px] font-bold cursor-pointer disabled:opacity-50">{t('vp.approvePriceBtn')}</button>
             </div>
           )}
           {request.status === 'priced' && isAcceptedDriver && (
             <p className="mt-3 text-[12px] text-[#166534] font-semibold flex items-center gap-1"><Clock size={11} /> {t('vp.waitingForApprovalNote')}</p>
           )}
 
-          {request.status === 'approved' && isAcceptedDriver && (
+          {request.status === 'approved' && isAcceptedDriver && !request.driver_confirmed_at && (
+            <div className="mt-3 rounded-xl bg-[#eff6ff] border border-[#bfdbfe] p-3 flex flex-col gap-2">
+              <p className="text-[12.5px] font-bold text-[#1e3a8a]">{t('cpx.stage2Heading')}</p>
+              <p className="text-[12px] text-[#1e3a8a]">{t('cpx.driverCheck').replace('{total}', fmt(request.total_fare_pkr ?? 0))}</p>
+              <div className="flex gap-2">
+                <button onClick={confirmDeal} disabled={busy} className="flex-1 py-2.5 bg-[#1d4ed8] text-white rounded-xl text-[13px] font-bold cursor-pointer disabled:opacity-50">{t('cpx.lockDealBtn')}</button>
+              </div>
+            </div>
+          )}
+          {request.status === 'approved' && isAcceptedDriver && request.driver_confirmed_at && (
             <div className="mt-3 pt-3 border-t border-[#f1f5f9] flex flex-col gap-2">
               <p className="text-[12.5px] font-semibold text-[#1e293b]">{t('vp.markPurchasedHeading')}</p>
               <input type="number" value={purchaseCostInput} onChange={(e) => setPurchaseCostInput(e.target.value)} placeholder={t('vp.actualGoodsCostPlaceholder')} className="dp2-input text-[13.5px]" />
@@ -249,7 +330,12 @@ export default function CityPurchaseDetailPage() {
             </div>
           )}
           {request.status === 'approved' && !isAcceptedDriver && (
-            <p className="mt-3 text-[12px] text-[#166534] font-semibold flex items-center gap-1"><Clock size={11} /> {t('vp.onTheWayNote')}</p>
+            <p className="mt-3 text-[12px] text-[#166534] font-semibold flex items-center gap-1"><Clock size={11} /> {request.driver_confirmed_at ? t('vp.onTheWayNote') : t('cpx.waitingDriverLock')}</p>
+          )}
+          {request.deliver_by && ['approved', 'purchased'].includes(request.status) && (
+            <p className="mt-2 text-[12px] font-semibold flex items-center gap-1 text-[#92400e]">
+              <Clock size={11} /> {t('cpx.deliverBy').replace('{time}', new Date(request.deliver_by).toLocaleTimeString(isUrdu ? 'ur-PK' : 'en-PK', { hour: 'numeric', minute: '2-digit' }))}
+            </p>
           )}
 
           {request.status === 'purchased' && isAcceptedDriver && (

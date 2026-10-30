@@ -169,6 +169,18 @@ export function JobQuickActionSheet({ row: baseRow, vehicleId, onClose, onDone }
   const router = useRouter()
   const [busy, setBusy] = useState<'accept' | 'decline' | null>(null)
   const [fee, setFee] = useState('')
+  // City purchase: what this driver would actually earn — carry-back
+  // (one leg) if he's already going there, else a special trip (777).
+  const [cpQuote, setCpQuote] = useState<{ trip_mode: string; total_fare_pkr: number; deliver_within_hours: number; on_route: boolean } | null>(null)
+  useEffect(() => {
+    if (baseRow.type !== 'city_purchase' || !baseRow.needsAction || !vehicleId) return
+    let live = true
+    const id = setTimeout(() => {
+      createClient().rpc('city_purchase_quote_for_vehicle', { p_request_id: baseRow.id, p_vehicle_id: vehicleId, p_addon_fee_pkr: fee ? Number(fee) : null })
+        .then(({ data }) => { if (live && data) setCpQuote(data as typeof cpQuote) })
+    }, 300)
+    return () => { live = false; clearTimeout(id) }
+  }, [baseRow.type, baseRow.id, baseRow.needsAction, vehicleId, fee])
 
   // A short buzz when a new request pops up, like every driver app —
   // the driver is often holding the phone with the screen on a map.
@@ -329,6 +341,14 @@ export function JobQuickActionSheet({ row: baseRow, vehicleId, onClose, onDone }
                 <div>
                   <input type="number" inputMode="numeric" value={fee} onChange={(e) => setFee(e.target.value)} placeholder={t('vp.yourServiceFeePlaceholder')} className="dp2-input" />
                   <p className="font-sans text-[11px] text-[#64748b] mt-1">{t('vp.serviceFeeBandHint')}</p>
+                  {cpQuote && (
+                    <div className="mt-2 flex items-center justify-between rounded-xl bg-[#f0fdf4] border border-[#bbf7d0] px-3 py-2">
+                      <span className="font-sans text-[12px] font-semibold text-[#166534]">
+                        {cpQuote.trip_mode === 'carry_back' ? `🚗↩ ${t('cpx.carryTitle')}` : `🚗⇄ ${t('cpx.dedicatedTitle')}`} · {t('cpx.withinHours').replace('{h}', String(cpQuote.deliver_within_hours))}
+                      </span>
+                      <span className="font-sans text-[14px] font-extrabold text-[#14532d]"><span className="ltr-num">₨{fmt(cpQuote.total_fare_pkr)}</span></span>
+                    </div>
+                  )}
                 </div>
               )}
               <div className="flex items-center gap-2.5">
