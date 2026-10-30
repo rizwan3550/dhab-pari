@@ -37,7 +37,7 @@ import { useLocale } from '@/lib/i18n/LocaleProvider'
 import { FarePolicyCard } from '@/components/mobility/FarePolicyCard'
 import { LoadingDots } from '@/components/shared/LoadingDots'
 import { LocationPickerSheet, type PickedLocation } from '@/components/mobility/LocationPickerSheet'
-import { MobilityBottomSheet } from '@/components/mobility/MobilityBottomSheet'
+import { RideRequestShell } from '@/components/mobility/RideRequestShell'
 import { RideLifecycleSheet } from '@/components/portal/RideLifecycleSheet'
 import { fetchRoadRoute } from '@/lib/roadRoute'
 import { useRealtimeRefresh } from '@/hooks/useRealtimeRefresh'
@@ -247,6 +247,17 @@ function ResultsPageInner() {
     setOpenRideBookingId(bookingId)
     setSheetCategory(null); setQuote(null); setActiveRequest(null); setBookingId(null)
   }, [bookingId])
+
+  // The searching screen's own two-tap Cancel — no browser confirm()
+  // needed on top of it.
+  const cancelActiveRequest = async () => {
+    if (activeRequest?.status === 'open') {
+      const { error } = await supabase.rpc('cancel_ride_dispatch_request', { p_request_id: activeRequest.id })
+      if (error) { toast.error(friendlyError(error, undefined, isUrdu)); return }
+    }
+    setSheetCategory(null); setQuote(null); setActiveRequest(null); setBookingId(null)
+    setFallbackOptions(null); setSelectedFallback(new Set()); setScheduleAt('')
+  }
 
   const closeSheet = async () => {
     if (activeRequest?.status === 'open') {
@@ -476,36 +487,29 @@ function ResultsPageInner() {
       )}
 
       {sheetCategory && (
-        <MobilityBottomSheet
-          title={`${sheetCategory.emoji} ${isUrdu && sheetCategory.name_ur ? sheetCategory.name_ur : sheetCategory.name}`}
+        <RideRequestShell
+          emoji={sheetCategory.emoji}
+          title={isUrdu && sheetCategory.name_ur ? sheetCategory.name_ur : sheetCategory.name}
+          fare={activeRequest?.fare_pkr || quote?.base_fare_pkr || null}
+          from={pickup?.label || null}
+          to={city ? (isUrdu && city.name_ur ? city.name_ur : city.name) : null}
+          distanceKm={distanceKm}
+          phase={!activeRequest ? 'form'
+            : activeRequest.status === 'open' && !activeRequest.activated_at && activeRequest.scheduled_for ? 'scheduled'
+            : activeRequest.status === 'open' ? 'searching'
+            : activeRequest.status === 'accepted' ? 'found' : 'closed'}
+          since={activeRequest?.activated_at}
+          scheduledFor={activeRequest?.scheduled_for}
           onClose={closeSheet}
-          // Real ask, 2026-10-28: "when there is no driver around is too
-          // small it should be display on half or 75% of the screen" —
-          // only the no-immediate-driver states (village/cross-village/
-          // pick-another-type) get the taller floor; the plain "N online,
-          // tap to send" case stays its natural compact size.
-          minHeight={!activeRequest && quote && quote.online_in_city === 0 ? '60vh' : undefined}
+          onCancel={cancelActiveRequest}
         >
           {quoting ? (
             <div className="flex justify-center py-8"><Loader2 size={22} className="animate-spin text-[#166534]" /></div>
-          ) : !activeRequest ? (
-            quote && (
+          ) : quote ? (
               <div className="flex flex-col gap-3">
-                {/* Real ask, 2026-10-29: "was it one way or two way? there
-                    should be clearly mentioned for the both parties" —
-                    ride-dispatch (this instant category-match flow) is
-                    always a direct one-way trip, there's no return-leg
-                    concept here at all (that's the separate Routes
-                    feature) — just never actually said so on screen. */}
-                <span className="self-start text-[10px] font-bold uppercase tracking-[0.05em] px-2 py-0.5 rounded-full bg-sky-100 text-sky-700">{t('cm.tripTypeOneway')}</span>
-                <div className="flex items-center justify-between bg-[#F9F9F6] rounded-xl p-3">
-                  <span className="text-[12.5px] text-[#64748b]">{t('mb.fareForTripLabel')}</span>
-                  <span className="font-extrabold text-[18px] text-[#166534] ltr-num">{fmt(quote.base_fare_pkr)}</span>
-                </div>
-
                 <div className="flex items-center gap-2">
                   <button type="button" onClick={() => setScheduleAt('')}
-                    className="flex-1 py-1.5 rounded-lg text-[12px] font-sans font-bold cursor-pointer"
+                    className="flex-1 py-2.5 rounded-xl text-[13px] font-sans font-bold cursor-pointer"
                     style={{ background: !scheduleAt ? '#166534' : '#F9F9F6', color: !scheduleAt ? '#fff' : '#64748b' }}>
                     {t('mb.sendNowBtn')}
                   </button>
@@ -515,7 +519,7 @@ function ResultsPageInner() {
                     min={new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16)}
                     max={new Date(Date.now() + 7 * 24 * 60 * 60 * 1000 - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16)}
                     onChange={(e) => setScheduleAt(e.target.value)}
-                    className="flex-1 px-2 py-1.5 rounded-lg text-[12px] font-sans border"
+                    className="flex-1 px-2 py-2.5 rounded-xl text-[12.5px] font-sans border"
                     style={{ borderColor: scheduleAt ? '#166534' : '#e5e2d0', color: scheduleAt ? '#166534' : '#94a3b8' }}
                   />
                 </div>
@@ -527,12 +531,12 @@ function ResultsPageInner() {
                     <p className="text-[12px] text-[#166534] font-semibold flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full bg-[#166534] animate-pulse" /> {t('mb.driversOnlineNote').replace('{n}', String(quote.online_in_city))}
                     </p>
-                    <button onClick={() => sendRequest()} disabled={requesting} className="w-full bg-[#166534] text-white rounded-xl py-3 font-bold text-[14px] cursor-pointer disabled:opacity-50">
+                    <button onClick={() => sendRequest()} disabled={requesting} className="w-full h-[52px] bg-[#15803d] text-white rounded-2xl font-bold text-[15px] cursor-pointer active:scale-[0.98] transition-transform shadow-[0_8px_20px_-6px_rgba(21,128,61,0.6)] disabled:opacity-50">
                       {requesting ? t('action.saving') : t('mb.sendRideRequestBtn').replace('{price}', fmt(quote.base_fare_pkr))}
                     </button>
                   </>
                 ) : quote.active_total > 0 ? (
-                  <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 flex flex-col gap-2">
+                  <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3.5 flex flex-col gap-2">
                     <p className="text-[12.5px] font-bold text-amber-800">{t('mb.noDriverHereNote')}</p>
                     <p className="text-[12px] text-amber-800">{t('mb.askVillageDriverNote').replace('{village}', quote.own_tenant_name)}</p>
                     <div className="flex flex-col gap-1 text-[12px] bg-white rounded-lg p-2.5">
@@ -540,12 +544,12 @@ function ResultsPageInner() {
                       <div className="flex justify-between"><span className="text-[#64748b]">{t('mb.villageDetourFeeLabel')}</span><span className="ltr-num text-[#1e293b]">{fmt(quote.village_detour_pkr)}</span></div>
                       <div className="flex justify-between font-bold pt-1 border-t border-[#f1f5f9]"><span className="text-[#1e293b]">{t('vp.totalLabel')}</span><span className="ltr-num text-[#166534]">{fmt(quote.total_with_village_pkr)}</span></div>
                     </div>
-                    <button onClick={() => sendRequest()} disabled={requesting} className="w-full bg-[#166534] text-white rounded-xl py-3 font-bold text-[14px] cursor-pointer disabled:opacity-50">
+                    <button onClick={() => sendRequest()} disabled={requesting} className="w-full h-[52px] bg-[#15803d] text-white rounded-2xl font-bold text-[15px] cursor-pointer active:scale-[0.98] transition-transform shadow-[0_8px_20px_-6px_rgba(21,128,61,0.6)] disabled:opacity-50">
                       {requesting ? t('action.saving') : t('mb.callVillageDriverBtn').replace('{price}', fmt(quote.total_with_village_pkr))}
                     </button>
                   </div>
                 ) : quote.cross_tenant ? (
-                  <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 flex flex-col gap-2">
+                  <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3.5 flex flex-col gap-2">
                     <p className="text-[12.5px] font-bold text-amber-800">
                       {t('mb.crossVillageAvailableNote')
                         .replace('{type}', isUrdu && sheetCategory?.name_ur ? sheetCategory.name_ur : sheetCategory?.name ?? '')
@@ -557,12 +561,12 @@ function ResultsPageInner() {
                       <div className="flex justify-between"><span className="text-[#64748b]">{t('mb.villageDetourFeeLabel')}</span><span className="ltr-num text-[#1e293b]">{fmt(quote.cross_tenant.detour_pkr)}</span></div>
                       <div className="flex justify-between font-bold pt-1 border-t border-[#f1f5f9]"><span className="text-[#1e293b]">{t('vp.totalLabel')}</span><span className="ltr-num text-[#166534]">{fmt(quote.base_fare_pkr + quote.cross_tenant.detour_pkr)}</span></div>
                     </div>
-                    <button onClick={() => sendRequest()} disabled={requesting} className="w-full bg-[#166534] text-white rounded-xl py-3 font-bold text-[14px] cursor-pointer disabled:opacity-50">
+                    <button onClick={() => sendRequest()} disabled={requesting} className="w-full h-[52px] bg-[#15803d] text-white rounded-2xl font-bold text-[15px] cursor-pointer active:scale-[0.98] transition-transform shadow-[0_8px_20px_-6px_rgba(21,128,61,0.6)] disabled:opacity-50">
                       {requesting ? t('action.saving') : t('mb.callNearbyVillageBtn').replace('{village}', quote.cross_tenant.tenant_name).replace('{price}', fmt(quote.base_fare_pkr + quote.cross_tenant.detour_pkr))}
                     </button>
                   </div>
                 ) : (
-                  <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 flex flex-col gap-2.5">
+                  <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3.5 flex flex-col gap-2.5">
                     <p className="text-[12.5px] font-bold text-amber-800">
                       {t('mb.noDriverAnywhereNote').replace('{type}', isUrdu && sheetCategory?.name_ur ? sheetCategory.name_ur : sheetCategory?.name ?? '')}
                     </p>
@@ -586,7 +590,7 @@ function ResultsPageInner() {
                           })}
                         </div>
                         <button onClick={() => sendRequest(Array.from(selectedFallback))} disabled={requesting || selectedFallback.size === 0}
-                          className="w-full bg-[#166534] text-white rounded-xl py-3 font-bold text-[14px] cursor-pointer disabled:opacity-50">
+                          className="w-full h-[52px] bg-[#15803d] text-white rounded-2xl font-bold text-[15px] cursor-pointer active:scale-[0.98] transition-transform shadow-[0_8px_20px_-6px_rgba(21,128,61,0.6)] disabled:opacity-50">
                           {requesting ? t('action.saving') : t('mb.sendToSelectedBtn').replace('{n}', String(selectedFallback.size))}
                         </button>
                       </>
@@ -594,34 +598,8 @@ function ResultsPageInner() {
                   </div>
                 )}
               </div>
-            )
-          ) : activeRequest.status === 'open' && !activeRequest.activated_at && activeRequest.scheduled_for ? (
-            <div className="flex flex-col items-center gap-2 py-4 text-center">
-              <span className="text-[28px]">🕑</span>
-              <p className="font-bold text-[14px] text-[#1e293b]">{t('mb.rideScheduledHeading')}</p>
-              <p className="text-[12.5px] text-[#64748b] ltr-num">{new Date(activeRequest.scheduled_for).toLocaleString(undefined, { weekday: 'short', hour: 'numeric', minute: '2-digit', month: 'short', day: 'numeric' })}</p>
-              <p className="text-[11.5px] text-[#94a3b8] mt-1">{t('mb.rideScheduledHint')}</p>
-            </div>
-          ) : activeRequest.status === 'open' ? (
-            <div className="flex flex-col items-center gap-2 py-4 text-center">
-              <Loader2 size={26} className="animate-spin text-[#166534]" />
-              <p className="font-bold text-[14px] text-[#1e293b]">{t('mb.waitingForDriverHeading')}</p>
-              <p className="text-[12.5px] text-[#64748b]">{t('mb.waitingForDriverHint')}</p>
-            </div>
-          ) : activeRequest.status === 'accepted' ? (
-            // Real bug found live, 2026-10-29: used to show its own
-            // separate "accepted" card here (old track-location/chat
-            // buttons) — the hand-off effect above opens the one real
-            // popup the instant bookingId arrives, so this only
-            // renders for the brief moment before that fetch resolves.
-            <div className="flex flex-col items-center gap-2 py-6 text-center">
-              <Loader2 size={24} className="animate-spin text-[#166534]" />
-              <p className="font-sans text-[12.5px] text-[#64748b]">{t('mb.rideAcceptedHeading')}</p>
-            </div>
-          ) : (
-            <p className="text-center text-[12.5px] text-[#64748b] py-6">{t('mb.rideRequestCancelledNote')}</p>
-          )}
-        </MobilityBottomSheet>
+          ) : null}
+        </RideRequestShell>
       )}
 
       {openRideBookingId && <RideLifecycleSheet bookingId={openRideBookingId} onClose={() => setOpenRideBookingId(null)} />}
