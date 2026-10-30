@@ -30,8 +30,9 @@ import { createClient } from '@/lib/supabase/client'
 import { useLocale } from '@/lib/i18n/LocaleProvider'
 import { useDriverJobsBadge } from '@/components/mobility/DriverJobsBadgeContext'
 import { JobQuickActionSheet, type QuickActionKind, type QuickActionRow } from '@/components/mobility/JobQuickActionSheet'
+import { fetchPendingRequestRows, ALL_REQUEST_KINDS, type RowCtx } from '@/lib/driverRequestRows'
 
-interface VehicleFlags { offers_hourly: boolean; offers_shadi: boolean; offers_equipment: boolean; offers_rental: boolean; delivers: boolean }
+interface VehicleFlags { offers_hourly: boolean; offers_shadi: boolean; offers_equipment: boolean; offers_rental: boolean; delivers: boolean; commission_mode?: string | null }
 
 // Every "a new request needs your response" event_type this app's
 // booking RPCs already insert into portal_notifications, mapped to the
@@ -50,147 +51,10 @@ const EVENT_TO_KIND: Record<string, QuickActionKind> = {
   route_seat_booked: 'route',
   adda_seat_booked: 'route',
   ride_dispatch_requested: 'ride_dispatch',
+  // Shop deliveries were never listened for (or scanned) here, so a
+  // driver who delivers for shops never got the popup for them.
+  shop_delivery_invited: 'delivery',
 }
-
-type Fact = NonNullable<QuickActionRow['facts']>[number]
-type Tr = (key: string) => string
-const n = (tr: Tr, key: string, v: number | string) => tr(key).replace('{n}', String(v))
-function payFact(tr: Tr, method: string | null | undefined): Fact[] {
-  if (method === 'cash') return [{ icon: 'wallet', text: tr('rq.cash') }]
-  if (method === 'credit') return [{ icon: 'wallet', text: tr('rq.credit') }]
-  return []
-}
-function whenFact(date: string | null | undefined, time: string | null | undefined, isUrdu: boolean): Fact[] {
-  if (!date) return []
-  const d = new Date(`${date.slice(0, 10)}T${time ? time.slice(0, 5) : '00:00'}:00`)
-  if (isNaN(d.getTime())) return []
-  const loc = isUrdu ? 'ur-PK' : 'en-PK'
-  const day = d.toLocaleDateString(loc, { weekday: 'short', day: 'numeric', month: 'short' })
-  return [{ icon: 'calendar', text: time ? `${day} · ${d.toLocaleTimeString(loc, { hour: 'numeric', minute: '2-digit' })}` : day }]
-}
-
-async function fetchPendingRows(supabase: ReturnType<typeof createClient>, kind: QuickActionKind, vehicleId: string, tr: Tr, isUrdu: boolean): Promise<QuickActionRow[]> {
-  if (kind === 'hourly') {
-    const { data } = await supabase.rpc('vehicle_hourly_bookings', { p_vehicle_id: vehicleId })
-    return ((data ?? []) as { id: string; status: string; customer_name: string; pickup_address: string; base_amount_pkr: number; total_amount_pkr: number | null; hours: number | null; included_km: number | null; notes: string | null; payment_method: string | null; customer_trust: QuickActionRow['riderTrust'] }[])
-      .filter((b) => b.status === 'requested')
-      .map((b) => ({
-        id: b.id, type: 'hourly', title: b.customer_name, subtitle: b.pickup_address, amount: b.total_amount_pkr ?? b.base_amount_pkr, href: '/portal/my-vehicle/hourly', needsAction: true,
-        riderTrust: b.customer_trust ?? null, note: b.notes,
-        facts: [
-          ...(b.hours ? [{ icon: 'clock', text: n(tr, 'rq.hours', b.hours) } as Fact] : []),
-          ...(b.included_km ? [{ icon: 'distance', text: n(tr, 'rq.includedKm', b.included_km) } as Fact] : []),
-          ...payFact(tr, b.payment_method),
-        ],
-      }))
-  }
-  if (kind === 'rental') {
-    const { data } = await supabase.rpc('vehicle_rental_bookings', { p_vehicle_id: vehicleId })
-    return ((data ?? []) as { id: string; status: string; customer_name: string; from_address: string; to_address: string; total_amount_pkr: number; trip_type: string | null; km: number | null; wait_hours: number | null; notes: string | null; payment_method: string | null; customer_trust: QuickActionRow['riderTrust'] }[])
-      .filter((b) => b.status === 'requested')
-      .map((b) => ({
-        id: b.id, type: 'rental', title: b.customer_name, subtitle: `${b.from_address} → ${b.to_address}`, amount: b.total_amount_pkr, href: '/portal/my-vehicle/rental', needsAction: true,
-        from: b.from_address, to: b.to_address, riderTrust: b.customer_trust ?? null, note: b.notes,
-        facts: [
-          { icon: 'repeat', text: tr(b.trip_type === 'return' ? 'rq.returnTrip' : 'rq.oneWay') } as Fact,
-          ...(b.km ? [{ icon: 'distance', text: n(tr, 'rq.km', Math.round(b.km)) } as Fact] : []),
-          ...(b.wait_hours ? [{ icon: 'wait', text: n(tr, 'rq.waitHours', b.wait_hours) } as Fact] : []),
-          ...payFact(tr, b.payment_method),
-        ],
-      }))
-  }
-  if (kind === 'equipment') {
-    const { data } = await supabase.rpc('vehicle_equipment_bookings', { p_vehicle_id: vehicleId })
-    return ((data ?? []) as { id: string; status: string; customer_name: string; site_address: string; pickup_address: string | null; rate_pkr: number; total_amount_pkr: number | null; requested_hours: number | null; trip_count: number | null; scheduled_date: string | null; scheduled_time: string | null; material: string | null; notes: string | null; payment_method: string | null }[])
-      .filter((b) => b.status === 'requested')
-      .map((b) => ({
-        id: b.id, type: 'equipment', title: b.customer_name, subtitle: b.site_address, amount: b.total_amount_pkr ?? b.rate_pkr, href: '/portal/my-vehicle/equipment', needsAction: true,
-        ...(b.pickup_address ? { from: b.pickup_address, to: b.site_address } : {}),
-        note: [b.material, b.notes].filter(Boolean).join(' · ') || null,
-        facts: [
-          ...whenFact(b.scheduled_date, b.scheduled_time, isUrdu),
-          ...(b.requested_hours ? [{ icon: 'clock', text: n(tr, 'rq.hours', b.requested_hours) } as Fact] : []),
-          ...(b.trip_count && b.trip_count > 1 ? [{ icon: 'repeat', text: n(tr, 'rq.trips', b.trip_count) } as Fact] : []),
-          ...payFact(tr, b.payment_method),
-        ],
-      }))
-  }
-  if (kind === 'shadi') {
-    const { data } = await supabase.rpc('vehicle_shadi_requests', { p_vehicle_id: vehicleId })
-    return ((data ?? []) as { id: string; status: string; customer_name: string; venue_address: string; full_day_rate_pkr: number; event_date: string | null; distance_km: number | null; notes: string | null; customer_trust: QuickActionRow['riderTrust'] }[])
-      .filter((r) => r.status === 'requested')
-      .map((r) => ({
-        id: r.id, type: 'shadi', title: r.customer_name, subtitle: r.venue_address, amount: r.full_day_rate_pkr, href: '/portal/my-vehicle/shadi', needsAction: true,
-        riderTrust: r.customer_trust ?? null, note: r.notes,
-        facts: [
-          ...whenFact(r.event_date, null, isUrdu),
-          ...(r.distance_km ? [{ icon: 'distance', text: n(tr, 'rq.km', Math.round(r.distance_km)) } as Fact] : []),
-        ],
-      }))
-  }
-  if (kind === 'dispatch') {
-    const { data } = await supabase.rpc('my_dispatch_invitations', { p_vehicle_id: vehicleId })
-    return ((data ?? []) as { call_id: string; item: string; address: string; goods_budget_pkr: number; shop_name: string | null; city_name: string | null; customer_trust: QuickActionRow['riderTrust'] }[])
-      .map((d) => ({
-        id: d.call_id, type: 'dispatch', title: d.item, subtitle: d.address, amount: d.goods_budget_pkr, href: '/portal/my-vehicle/requests', needsAction: true,
-        riderTrust: d.customer_trust ?? null,
-        facts: [d.shop_name, d.city_name].filter(Boolean).map((s) => ({ icon: 'shop', text: s as string } as Fact)),
-      }))
-  }
-  if (kind === 'city_purchase') {
-    const { data } = await supabase.rpc('my_city_purchase_invitations', { p_vehicle_id: vehicleId })
-    return ((data ?? []) as { request_id: string; item: string; goods_budget_pkr: number; pickup_label: string | null; urgency: string | null; city_name: string | null; city_name_ur: string | null }[])
-      .map((c) => {
-        const city = (isUrdu ? c.city_name_ur : null) ?? c.city_name
-        const urgencyKey = c.urgency === 'urgent' ? 'rq.urgent' : c.urgency === '1hr' ? 'rq.within1hr' : c.urgency === '2hr' ? 'rq.within2hr' : null
-        return {
-          id: c.request_id, type: 'city_purchase' as const, title: c.item, subtitle: c.pickup_label ?? '', amount: c.goods_budget_pkr, href: '/portal/my-vehicle/requests', needsAction: true,
-          facts: [
-            ...(urgencyKey ? [{ icon: 'urgent', text: tr(urgencyKey) } as Fact] : []),
-            ...(city ? [{ icon: 'shop', text: city } as Fact] : []),
-          ],
-        }
-      })
-  }
-  if (kind === 'parcel') {
-    const { data } = await supabase.rpc('my_parcel_delivery_invitations', { p_vehicle_id: vehicleId })
-    return ((data ?? []) as { delivery_id: string; description: string; pickup_label: string | null; dropoff_label: string | null; city_name: string | null; city_name_ur: string | null }[])
-      .map((p) => {
-        const city = (isUrdu ? p.city_name_ur : null) ?? p.city_name
-        return {
-          id: p.delivery_id, type: 'parcel' as const, title: p.description, subtitle: p.pickup_label ?? '', amount: null, href: '/portal/my-vehicle/requests', needsAction: true,
-          ...(p.pickup_label && p.dropoff_label ? { from: p.pickup_label, to: p.dropoff_label } : {}),
-          facts: city ? [{ icon: 'shop', text: city } as Fact] : [],
-        }
-      })
-  }
-  if (kind === 'ride_dispatch') {
-    const { data } = await supabase.rpc('my_pending_ride_dispatch_requests', { p_vehicle_id: vehicleId })
-    return ((data ?? []) as { id: string; pickup_label: string; dropoff_label: string; fare_pkr: number; category_emoji: string; category_name: string; category_name_ur: string | null; rider_trust: QuickActionRow['riderTrust']; rider_tenant_name: string }[])
-      .map((r) => ({
-        id: r.id, type: 'ride_dispatch', title: `${r.category_emoji} ${(isUrdu ? r.category_name_ur : null) ?? r.category_name}`, subtitle: `${r.pickup_label} → ${r.dropoff_label}`,
-        amount: r.fare_pkr, href: `/portal/marketplace/ride-dispatch/${r.id}`, needsAction: true,
-        from: r.pickup_label, to: r.dropoff_label,
-        riderTrust: r.rider_trust, riderVillage: r.rider_tenant_name,
-      }))
-  }
-  // 'route' — covers both route-based and adda-based ride_bookings, same
-  // two-query split as the Jobs list (see its own comment on why).
-  const [routeRes, addaRes] = await Promise.all([
-    supabase.from('ride_bookings').select('id, status, total_amount_pkr, vehicle_routes!inner(vehicle_id, origin, destination)').eq('vehicle_routes.vehicle_id', vehicleId).eq('status', 'announced'),
-    supabase.from('ride_bookings').select('id, status, total_amount_pkr, adda_queue_entries!inner(vehicle_id, addas(name))').eq('adda_queue_entries.vehicle_id', vehicleId).eq('status', 'announced'),
-  ])
-  const out: QuickActionRow[] = []
-  for (const b of (routeRes.data ?? []) as unknown as { id: string; total_amount_pkr: number; vehicle_routes: { origin: string; destination: string } }[]) {
-    out.push({ id: b.id, type: 'route', title: `${b.vehicle_routes.origin} → ${b.vehicle_routes.destination}`, subtitle: 'Route', amount: b.total_amount_pkr, href: '/portal/my-vehicle/routes', needsAction: true })
-  }
-  for (const b of (addaRes.data ?? []) as unknown as { id: string; total_amount_pkr: number; adda_queue_entries: { addas: { name: string } } }[]) {
-    out.push({ id: b.id, type: 'route', title: b.adda_queue_entries.addas.name, subtitle: 'Adda', amount: b.total_amount_pkr, href: '/portal/my-vehicle/adda', needsAction: true })
-  }
-  return out
-}
-
-const ALL_KINDS: QuickActionKind[] = ['hourly', 'rental', 'equipment', 'shadi', 'dispatch', 'city_purchase', 'parcel', 'route', 'ride_dispatch']
 
 export function PendingRequestOverlay({ vehicleId, vehicle }: { vehicleId: string; vehicle: VehicleFlags }) {
   const { t, isUrdu } = useLocale()
@@ -214,33 +78,40 @@ export function PendingRequestOverlay({ vehicleId, vehicle }: { vehicleId: strin
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const kindsToScan = useCallback((): QuickActionKind[] => ALL_KINDS.filter((k) =>
+  const kindsToScan = useCallback((): QuickActionKind[] => ALL_REQUEST_KINDS.filter((k) =>
     k !== 'hourly' || vehicle.offers_hourly).filter((k) =>
     k !== 'shadi' || vehicle.offers_shadi).filter((k) =>
     k !== 'equipment' || vehicle.offers_equipment).filter((k) =>
-    k !== 'rental' || vehicle.offers_rental
-  ), [vehicle.offers_hourly, vehicle.offers_shadi, vehicle.offers_equipment, vehicle.offers_rental])
+    k !== 'rental' || vehicle.offers_rental).filter((k) =>
+    k !== 'delivery' || vehicle.delivers
+  ), [vehicle.offers_hourly, vehicle.offers_shadi, vehicle.offers_equipment, vehicle.offers_rental, vehicle.delivers])
+
+  // Only rows the driver can actually act on pop up — a lump-sum
+  // vehicle's seat booking waits on the committee, not on them.
+  const fetchActionable = useCallback(async (kind: QuickActionKind) => {
+    const ctx: RowCtx = { t, isUrdu, commissionMode: vehicle.commission_mode ?? null }
+    return (await fetchPendingRequestRows(supabase, kind, vehicleId, ctx)).filter((r) => r.needsAction)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [vehicleId, isUrdu, vehicle.commission_mode])
 
   const scanAll = useCallback(async () => {
-    const results = await Promise.all(kindsToScan().map((k) => fetchPendingRows(supabase, k, vehicleId, t, isUrdu)))
+    const results = await Promise.all(kindsToScan().map((k) => fetchActionable(k)))
     const fresh = results.flat()
     if (fresh.length === 0) return
     setQueue((cur) => {
       const curKeys = new Set(cur.map((r) => `${r.type}-${r.id}`))
       return [...cur, ...fresh.filter((r) => !curKeys.has(`${r.type}-${r.id}`))]
     })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [vehicleId, kindsToScan, isUrdu])
+  }, [kindsToScan, fetchActionable])
 
   const scanOneKind = useCallback(async (kind: QuickActionKind) => {
-    const fresh = await fetchPendingRows(supabase, kind, vehicleId, t, isUrdu)
+    const fresh = await fetchActionable(kind)
     if (fresh.length === 0) return
     setQueue((cur) => {
       const curKeys = new Set(cur.map((r) => `${r.type}-${r.id}`))
       return [...cur, ...fresh.filter((r) => !curKeys.has(`${r.type}-${r.id}`))]
     })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [vehicleId, isUrdu])
+  }, [fetchActionable])
 
   // Realtime: near-instant pop the moment a qualifying request lands.
   useEffect(() => {
@@ -287,6 +158,7 @@ export function PendingRequestOverlay({ vehicleId, vehicle }: { vehicleId: strin
       )}
       {current && (
         <JobQuickActionSheet
+          key={`${current.type}-${current.id}`}
           row={current}
           vehicleId={vehicleId}
           onClose={closeCurrent}
