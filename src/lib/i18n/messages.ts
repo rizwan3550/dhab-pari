@@ -5459,7 +5459,7 @@ export const messages: Record<Locale, Record<string, string>> = {
 
     'mb.portalSuffix': 'Portal', 'mb.headerSubtitle': 'Rides, errands & machinery',
     'mb.navHome': 'Home', 'mb.navMachinery': 'Machinery', 'mb.navBookings': 'Bookings', 'mb.navChat': 'Chat', 'mb.navAccount': 'Account',
-    'mb.myBookingsHeading': 'My Bookings', 'mb.bookingsActiveTab': 'Active', 'mb.bookingsPastTab': 'Past',
+    'mb.myBookingsHeading': 'My Bookings', 'mb.monthlySeatTitle': 'Monthly seat', 'mb.feeDueLabel': 'Fee due {amount}', 'mb.bookingsActiveTab': 'Active', 'mb.bookingsPastTab': 'Past',
     'mb.bookingDetailTitle': 'Booking details', 'mb.routeLabel': 'Route', 'mb.travelDateLabel': 'Travel date',
     'mb.navJobs': 'Jobs', 'mb.navEarnings': 'Earnings', 'mb.navVehicle': 'Vehicle',
     'mb.useMyLocationBtn': 'Use my location', 'mb.tapMapToPinHint': 'Tap the map to drop a pin', 'mb.locationLabelField': 'What is this place?', 'mb.locationLabelPlaceholder': 'e.g. House near the mosque', 'mb.confirmLocationBtn': 'Use this location',
@@ -11103,7 +11103,7 @@ export const messages: Record<Locale, Record<string, string>> = {
 
     'mb.portalSuffix': 'پورٹل', 'mb.headerSubtitle': 'سواری، خریداری اور مشینری',
     'mb.navHome': 'ہوم', 'mb.navMachinery': 'مشینری', 'mb.navBookings': 'بکنگز', 'mb.navChat': 'چیٹ', 'mb.navAccount': 'اکاؤنٹ',
-    'mb.myBookingsHeading': 'میری بکنگز', 'mb.bookingsActiveTab': 'جاری', 'mb.bookingsPastTab': 'پچھلی',
+    'mb.myBookingsHeading': 'میری بکنگز', 'mb.monthlySeatTitle': 'ماہانہ سیٹ', 'mb.feeDueLabel': 'واجب الادا فیس {amount}', 'mb.bookingsActiveTab': 'جاری', 'mb.bookingsPastTab': 'پچھلی',
     'mb.bookingDetailTitle': 'بکنگ کی تفصیل', 'mb.routeLabel': 'راستہ', 'mb.travelDateLabel': 'سفر کی تاریخ',
     'mb.navJobs': 'کام', 'mb.navEarnings': 'کمائی', 'mb.navVehicle': 'گاڑی',
     'mb.useMyLocationBtn': 'میرا مقام استعمال کریں', 'mb.tapMapToPinHint': 'نشان لگانے کے لیے نقشے پر ٹیپ کریں', 'mb.locationLabelField': 'یہ کون سی جگہ ہے؟', 'mb.locationLabelPlaceholder': 'مثلاً مسجد کے قریب گھر', 'mb.confirmLocationBtn': 'یہ جگہ استعمال کریں',
