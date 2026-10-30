@@ -19,6 +19,7 @@ export function MobilityBottomNav() {
 
   const tabs = [
     { key: 'home', href: '/portal/marketplace/travel', emoji: '🏠', label: t('mb.navHome'), active: pathname === '/portal/marketplace/travel' || pathname === '/portal/marketplace/results' },
+    { key: 'bus', href: '/portal/marketplace/buses', emoji: '🚌', label: t('mb.navBuses'), active: pathname.startsWith('/portal/marketplace/buses') || pathname.startsWith('/portal/marketplace/route/') },
     { key: 'mach', href: '/portal/marketplace/machinery', emoji: '🏗️', label: t('mb.navMachinery'), active: pathname.startsWith('/portal/marketplace/machinery') || pathname.startsWith('/portal/marketplace/tractor') || pathname.startsWith('/portal/marketplace/loader') },
     { key: 'trips', href: '/portal/marketplace/trips', emoji: '🧾', label: t('mb.navBookings'), active: pathname.startsWith('/portal/marketplace/trips') },
     { key: 'chat', href: '/portal/marketplace/negotiations', emoji: '💬', label: t('mb.navChat'), active: pathname.startsWith('/portal/marketplace/negotiations') },
@@ -27,7 +28,7 @@ export function MobilityBottomNav() {
 
   return (
     <nav className="fixed bottom-0 inset-x-0 z-40">
-      <div className="max-w-md mx-auto grid grid-cols-5 bg-white border-t border-[#e5e2d0]">
+      <div className="max-w-md mx-auto grid grid-cols-6 bg-white border-t border-[#e5e2d0]">
         {tabs.map((tab) => (
           <Link key={tab.key} href={tab.href} className="flex flex-col items-center gap-0.5 py-2.5 cursor-pointer" style={{ color: tab.active ? '#005A36' : '#94a3b8' }}>
             <span className="text-[17px] leading-none">{tab.emoji}</span>
