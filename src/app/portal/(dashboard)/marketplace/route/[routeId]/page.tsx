@@ -15,6 +15,7 @@ import { toast } from 'sonner'
 import { friendlyError } from '@/lib/errors'
 import { usePortalUser } from '@/hooks/usePortalUser'
 import { useLocale } from '@/lib/i18n/LocaleProvider'
+import { FarePolicyCard } from '@/components/mobility/FarePolicyCard'
 import { DonationReceiptUpload } from '@/components/public/DonationReceiptUpload'
 import { LoadingDots } from '@/components/shared/LoadingDots'
 import { MobilityBottomNav } from '@/components/mobility/MobilityBottomNav'
@@ -381,6 +382,7 @@ export default function RouteDetailPage() {
                 </div>
               </>
             )}
+            <div className="mt-3"><FarePolicyCard service="seat" defaultOpen={false} /></div>
             <button onClick={submit} disabled={submitting} className="w-full mt-4 bg-dp-secondary text-white py-3 rounded-lg font-sans font-semibold active:scale-[0.98] cursor-pointer hover:bg-dp-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
               {submitting ? t('mp.placingBooking') : t('mp.bookSeatsBtn')}
             </button>

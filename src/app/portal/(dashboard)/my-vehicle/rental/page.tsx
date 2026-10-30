@@ -17,6 +17,7 @@ import { Navigation } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { usePortalUser } from '@/hooks/usePortalUser'
 import { useLocale } from '@/lib/i18n/LocaleProvider'
+import { FarePolicyCard } from '@/components/mobility/FarePolicyCard'
 import { LoadingDots } from '@/components/shared/LoadingDots'
 import { LifecycleBookingsList } from '@/components/mobility/LifecycleBookingsList'
 
@@ -64,6 +65,7 @@ export default function MyRentalBookingsPage() {
         <h1 className="font-bold text-[20px] sm:text-[22px] text-dp-primary flex items-center gap-2"><Navigation size={19} /> {t('vp.myRentalBookingsHeading')}</h1>
         <p className="text-[12.5px] text-[#64748b] mt-0.5">{t('vp.myRentalBookingsSubtitle')}</p>
       </div>
+      <div><FarePolicyCard service="rental" audience="driver" defaultOpen={false} /></div>
 
       <LifecycleBookingsList
         kind="rental" vehicleId={vehicle.id} commissionMode={vehicle.commission_mode}

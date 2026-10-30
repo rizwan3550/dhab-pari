@@ -20,6 +20,7 @@ import { vehicleDisplayName } from '@/lib/vehicleDisplayName'
 import { friendlyError } from '@/lib/errors'
 import { usePortalUser } from '@/hooks/usePortalUser'
 import { useLocale } from '@/lib/i18n/LocaleProvider'
+import { useFarePolicy } from '@/lib/farePolicy'
 import { useSite } from '@/components/layout/SiteProvider'
 import { LoadingDots } from '@/components/shared/LoadingDots'
 import { DonationReceiptUpload } from '@/components/public/DonationReceiptUpload'
@@ -55,6 +56,7 @@ function fmt(n: number) {
 const REQ_STATUS_COLOR: Record<string, string> = { open: '#92400e', requested: '#92400e', accepted: '#166534', declined: '#b91c1c', cancelled: '#64748b', withdrawn: '#b91c1c' }
 
 export default function ShadiEventDetailPage() {
+  const shadiPolicy = useFarePolicy('shadi')
   const { t, isUrdu } = useLocale()
   const site = useSite()
   const { user, loading: userLoading } = usePortalUser()
@@ -135,7 +137,7 @@ export default function ShadiEventDetailPage() {
 
   const accepted = event.requests.filter((r) => r.status === 'accepted')
   const canAnnounce = event.status === 'collecting' && accepted.length > 0
-  const estimatedPct = 20
+  const estimatedPct = shadiPolicy?.advance_pct ?? 20
 
   return (
     <div className="flex flex-col gap-3">

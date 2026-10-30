@@ -88,7 +88,7 @@ export async function fetchPendingRequestRows(supabase: Supabase, kind: QuickAct
       const s = ((services ?? []) as { service_key: string; name_en: string; name_ur: string }[]).find((x) => x.service_key === key)
       return s ? loc(ctx, s.name_en, s.name_ur) : null
     }
-    return ((data ?? []) as { id: string; kind: 'machinery' | 'tractor' | 'loader'; service_key: string | null; status: string; customer_name: string; site_address: string; pickup_address: string | null; rate_pkr: number; mobilization_fee_pkr: number | null; total_amount_pkr: number | null; requested_hours: number | null; trip_count: number | null; scheduled_date: string | null; scheduled_time: string | null; material: string | null; notes: string | null; payment_method: string | null }[])
+    return ((data ?? []) as { id: string; kind: 'machinery' | 'tractor' | 'loader'; service_key: string | null; status: string; customer_name: string; site_address: string; pickup_address: string | null; rate_pkr: number; mobilization_fee_pkr: number | null; total_amount_pkr: number | null; requested_hours: number | null; travel_km?: number; travel_charge_pkr?: number; advance_pct?: number; advance_amount_pkr?: number; trip_count: number | null; scheduled_date: string | null; scheduled_time: string | null; material: string | null; notes: string | null; payment_method: string | null }[])
       .filter((b) => b.status === 'requested')
       .map((b) => {
         const service = b.kind === 'tractor' ? serviceName(b.service_key) : null
@@ -105,6 +105,8 @@ export async function fetchPendingRequestRows(supabase: Supabase, kind: QuickAct
               : when(b.requested_hours, { icon: 'clock', text: n(ctx, 'rq.hours', b.requested_hours!) })),
             { icon: 'rate', text: n(ctx, b.kind === 'loader' ? 'rq.perTrip' : 'rq.perHour', pkr(b.rate_pkr)) },
             ...when(b.mobilization_fee_pkr, { icon: 'truck', text: n(ctx, 'rq.deliveryCharge', pkr(b.mobilization_fee_pkr ?? 0)) }),
+            ...when(b.travel_charge_pkr, { icon: 'distance', text: ctx.t('rq.travelCharge').replace('{km}', String(Math.round(Number(b.travel_km ?? 0)))).replace('{amount}', pkr(b.travel_charge_pkr ?? 0)) }),
+            ...when(b.advance_pct, { icon: 'wallet', text: ctx.t('rq.advanceAfterAccept').replace('{pct}', String(b.advance_pct)).replace('{amount}', pkr(b.advance_amount_pkr ?? 0)) }),
             ...payFact(ctx, b.payment_method),
           ] as Fact[],
         }
@@ -119,7 +121,7 @@ export async function fetchPendingRequestRows(supabase: Supabase, kind: QuickAct
       const c = ((classes ?? []) as { class_key: string; name_en: string; name_ur: string }[]).find((x) => x.class_key === key)
       return c ? loc(ctx, c.name_en, c.name_ur) : null
     }
-    return ((data ?? []) as { id: string; status: string; class_key: string; customer_name: string; venue_address: string; full_day_rate_pkr: number; event_date: string | null; distance_km: number | null; notes: string | null; customer_trust: Trust }[])
+    return ((data ?? []) as { id: string; status: string; class_key: string; customer_name: string; venue_address: string; full_day_rate_pkr: number; event_date: string | null; distance_km: number | null; notes: string | null; customer_trust: Trust; travel_charge_pkr?: number }[])
       .filter((r) => r.status === 'requested')
       .map((r) => {
         const cls = className(r.class_key)

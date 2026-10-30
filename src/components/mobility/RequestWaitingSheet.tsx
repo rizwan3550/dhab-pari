@@ -39,7 +39,7 @@ export interface WaitingSummary {
 }
 
 type Phase = 'waiting' | 'accepted' | 'declined' | 'cancelled'
-interface Live { phase: Phase; reason: string | null; pin: string | null; driverName: string | null; driverMobile: string | null }
+interface Live { phase: Phase; reason: string | null; pin: string | null; driverName: string | null; driverMobile: string | null; advanceDue?: number; advancePct?: number }
 
 const TABLE: Record<WaitingKind, string> = { hourly: 'hourly_bookings', rental: 'rental_bookings', equipment: 'equipment_bookings', seat: 'ride_bookings' }
 const ICON: Record<WaitingKind, LucideIcon> = { hourly: Clock, rental: Car, equipment: Tractor, seat: Bus }
@@ -66,9 +66,15 @@ async function loadLive(kind: WaitingKind, id: string): Promise<Live | null> {
   }
   const rpc = kind === 'hourly' ? 'my_hourly_bookings' : kind === 'rental' ? 'my_rental_bookings' : 'my_equipment_bookings'
   const { data } = await supabase.rpc(rpc)
-  const b = ((data ?? []) as { id: string; status: string; decline_reason: string | null; pin: string | null; owner_name: string | null; owner_mobile: string | null }[]).find((r) => r.id === id)
+  const b = ((data ?? []) as { id: string; status: string; decline_reason: string | null; pin: string | null; owner_name: string | null; owner_mobile: string | null; advance_status?: string; advance_amount_pkr?: number; advance_pct?: number }[]).find((r) => r.id === id)
   if (!b) return null
-  return { phase: phaseOf(kind, b.status), reason: b.decline_reason, pin: b.pin, driverName: b.owner_name, driverMobile: b.owner_mobile }
+  // An equipment job with an advance still to pay isn't confirmed yet —
+  // its PIN only matters once the committee has the advance (776).
+  const advanceDue = b.advance_status === 'due' || b.advance_status === 'rejected' || b.advance_status === 'announced'
+  return {
+    phase: phaseOf(kind, b.status), reason: b.decline_reason, pin: advanceDue ? null : b.pin, driverName: b.owner_name, driverMobile: b.owner_mobile,
+    advanceDue: advanceDue ? Number(b.advance_amount_pkr ?? 0) : undefined, advancePct: b.advance_pct,
+  }
 }
 
 async function cancelRequest(kind: WaitingKind, id: string, reason: string) {
@@ -181,6 +187,13 @@ export function RequestWaitingSheet({ kind, bookingId, summary, since, onClose, 
             </div>
           )}
 
+          {phase === 'accepted' && live?.advanceDue != null && (
+            <div className="rounded-2xl bg-[#fffbeb] border border-[#fde68a] p-3.5">
+              <p className="font-sans text-[13px] font-bold text-[#92400e]">{t('eqa.payHeading').replace('{pct}', String(live.advancePct ?? 0))} <span className="ltr-num">· ₨{fmt(live.advanceDue)}</span></p>
+              <p className="font-sans text-[12px] text-[#92400e]/80 mt-0.5">{t('eqa.payHint')}</p>
+            </div>
+          )}
+
           {phase === 'accepted' && live?.pin && (
             <div className="rounded-2xl bg-[#f0fdf4] border border-[#bbf7d0] p-3.5 flex items-center justify-between gap-3">
               <div className="min-w-0">
@@ -237,7 +250,7 @@ export function RequestWaitingSheet({ kind, bookingId, summary, since, onClose, 
                 </a>
               )}
               <button onClick={onViewBooking} className="flex-[1.6] h-[50px] rounded-2xl bg-[#15803d] text-white font-sans text-[14.5px] font-bold shadow-[0_8px_20px_-6px_rgba(21,128,61,0.6)] cursor-pointer active:scale-[0.98] transition-transform">
-                {t('rw.viewBookingBtn')}
+                {live?.advanceDue != null ? t('eqa.payBtn') : t('rw.viewBookingBtn')}
               </button>
             </div>
           )}

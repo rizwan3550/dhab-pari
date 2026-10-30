@@ -34,6 +34,7 @@ import { MobilityBottomSheet } from '@/components/mobility/MobilityBottomSheet'
 import { LocationPickerSheet, type PickedLocation } from '@/components/mobility/LocationPickerSheet'
 import { CategoryVehiclePicker, type CategoryDef } from '@/components/mobility/CategoryVehiclePicker'
 import { RequestWaitingSheet, type WaitingSummary } from '@/components/mobility/RequestWaitingSheet'
+import { FarePolicyCard } from '@/components/mobility/FarePolicyCard'
 
 const LeafletMap = dynamic(() => import('@/components/shared/LeafletMap'), { ssr: false })
 
@@ -439,6 +440,8 @@ export default function RentalPage() {
               <span className="font-extrabold text-[#005A36] ltr-num">{fmt(estimatedTotal)}</span>
             </div>
           </div>
+
+          <div className="mb-3"><FarePolicyCard service="rental" /></div>
 
           <p className="flex items-start gap-1.5 text-[11px] text-[#64748b] mb-3"><AlertCircle size={12} className="shrink-0 mt-0.5 text-[#166534]" /> {t('vp.noAdvanceExplainer')}</p>
 

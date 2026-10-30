@@ -25,10 +25,11 @@ import { createClient } from '@/lib/supabase/client'
 import { friendlyError } from '@/lib/errors'
 import { usePortalUser } from '@/hooks/usePortalUser'
 import { useLocale } from '@/lib/i18n/LocaleProvider'
+import { FarePolicyCard } from '@/components/mobility/FarePolicyCard'
 import { LoadingDots } from '@/components/shared/LoadingDots'
 import { LifecycleBookingsList } from '@/components/mobility/LifecycleBookingsList'
 
-interface Vehicle { id: string; owner_name: string; commission_mode: string }
+interface Vehicle { id: string; owner_name: string; commission_mode: string; offers_machinery: boolean; offers_tractor: boolean; offers_loader: boolean }
 interface RateOffer { id: string; proposed_rate_pkr: number; counter_rate_pkr: number | null; status: string; rider_full_name: string; rider_mobile: string | null }
 interface Booking {
   id: string; kind: string; site_address: string; requested_hours: number | null; status: string; status_confirmed: boolean
@@ -45,6 +46,7 @@ export default function MyEquipmentBookingsPage() {
   const supabase = createClient()
 
   const [vehicle, setVehicle] = useState<Vehicle | null>(null)
+  const equipmentKinds = (['machinery', 'tractor', 'loader'] as const).filter((k) => vehicle?.[`offers_${k}`])
   const [bookings, setBookings] = useState<Booking[]>([])
   const [rateOffers, setRateOffers] = useState<RateOffer[]>([])
   const [loading, setLoading] = useState(true)
@@ -59,7 +61,7 @@ export default function MyEquipmentBookingsPage() {
 
   useEffect(() => {
     if (!user) return
-    supabase.from('vehicles').select('id, owner_name, commission_mode').eq('portal_user_id', user.id).maybeSingle().then(async ({ data }) => {
+    supabase.from('vehicles').select('id, owner_name, commission_mode, offers_machinery, offers_tractor, offers_loader').eq('portal_user_id', user.id).maybeSingle().then(async ({ data }) => {
       setVehicle(data)
       if (data) await Promise.all([loadBookings(data.id), loadRateOffers(data.id)])
       setLoading(false)
@@ -98,6 +100,7 @@ export default function MyEquipmentBookingsPage() {
         <h1 className="font-bold text-[20px] sm:text-[22px] text-dp-primary flex items-center gap-2"><Wrench size={19} /> {t('vp.myEquipmentBookingsHeading')}</h1>
         <p className="text-[12.5px] text-[#64748b] mt-0.5">{t('vp.myEquipmentBookingsSubtitle')}</p>
       </div>
+      {equipmentKinds.map((k) => <FarePolicyCard key={k} service={k} audience="driver" defaultOpen={false} />)}
 
       {rateOffers.length > 0 && (
         <Section title={t('vp.rateOffersHeading')}>

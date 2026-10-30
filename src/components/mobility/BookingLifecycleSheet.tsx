@@ -22,6 +22,7 @@ import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { friendlyError } from '@/lib/errors'
 import { useLocale } from '@/lib/i18n/LocaleProvider'
+import { HourlyMeter } from '@/components/mobility/HourlyMeter'
 import { useRealtimeRefresh } from '@/hooks/useRealtimeRefresh'
 import { useLiveLocation } from '@/hooks/useLiveLocation'
 import { MobilityBottomSheet } from '@/components/mobility/MobilityBottomSheet'
@@ -52,6 +53,9 @@ interface Row {
   material?: string | null; requested_hours?: number | null; rate_pkr?: number; actual_hours?: number | null
   // money
   base_amount_pkr?: number; total_amount_pkr: number | null
+  hourly_rate_pkr?: number; overage_per_km_pkr?: number; overtime_minutes?: number; overtime_amount_pkr?: number
+  travel_km?: number; travel_charge_pkr?: number
+  advance_pct?: number; advance_amount_pkr?: number; advance_status?: string
 }
 
 const LIST_RPC: Record<LifecycleKind, string> = { hourly: 'vehicle_hourly_bookings', rental: 'vehicle_rental_bookings', equipment: 'vehicle_equipment_bookings' }
@@ -163,6 +167,10 @@ export function BookingLifecycleSheet({ kind, bookingId, vehicleId, commissionMo
   const stopped = row.status === 'declined' || row.status === 'cancelled'
   const stepIndex = row.status === 'completed' ? (row.status_confirmed ? 4 : 3) : STEPS.indexOf(row.status as typeof STEPS[number])
   const amount = row.total_amount_pkr ?? row.base_amount_pkr ?? row.rate_pkr ?? 0
+  // Equipment with a 20% advance (776): the job can't start until the
+  // committee confirms it, and the driver collects only the remainder.
+  const advancePending = kind === 'equipment' && ['due', 'rejected', 'announced'].includes(row.advance_status ?? '')
+  const advanceHeld = kind === 'equipment' && ['confirmed', 'released'].includes(row.advance_status ?? '') ? Number(row.advance_amount_pkr ?? 0) : 0
   const elapsedHours = row.started_at ? (now - new Date(row.started_at).getTime()) / 3600000 : 0
 
   // Where the driver is headed right now: the pickup/site before starting,
@@ -258,7 +266,15 @@ export function BookingLifecycleSheet({ kind, bookingId, vehicleId, commissionMo
           )
         )}
 
-        {row.status === 'accepted' && (
+        {row.status === 'accepted' && advancePending && (
+          <div className="rounded-xl bg-[#fffbeb] border border-[#fde68a] p-3">
+            <p className="font-sans text-[12.5px] font-semibold text-[#92400e]">
+              {(row.advance_status === 'announced' ? t('eqa.driverChecking') : t('eqa.driverWaiting'))
+                .replace('{pct}', String(row.advance_pct ?? 0)).replace('{amount}', fmt(row.advance_amount_pkr ?? 0))}
+            </p>
+          </div>
+        )}
+        {row.status === 'accepted' && !advancePending && (
           <div className="flex flex-col gap-2 pt-3 border-t border-[#f1f5f9]">
             <p className="font-sans text-[12.5px] font-semibold text-[#1e293b]">{t('vp.pinAskHint')}</p>
             <input value={pin} onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
@@ -282,6 +298,10 @@ export function BookingLifecycleSheet({ kind, bookingId, vehicleId, commissionMo
                 {kind === 'hourly' ? `${fmt(row.distance_km)}km` : kind === 'equipment' ? `${elapsedHours.toFixed(1)}h` : ''}
               </span>
             </div>
+            {kind === 'hourly' && row.hours != null && (
+              <HourlyMeter row={{ hours: row.hours, started_at: row.started_at, distance_km: row.distance_km ?? 0, included_km: row.included_km, overage_per_km_pkr: row.overage_per_km_pkr, hourly_rate_pkr: row.hourly_rate_pkr, base_amount_pkr: row.base_amount_pkr }} />
+            )}
+            {advanceHeld > 0 && <p className="font-sans text-[12px] font-semibold text-[#166534] text-center ltr-num">{t('eqa.driverHeld').replace('{amount}', fmt(advanceHeld)).replace('{collect}', fmt(Math.max(0, amount - advanceHeld)))}</p>}
             {kind === 'hourly' && trackLocation && locError && (
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-2.5 flex items-start gap-2">
                 <AlertTriangle size={14} className="text-amber-700 shrink-0 mt-0.5" />
@@ -303,7 +323,11 @@ export function BookingLifecycleSheet({ kind, bookingId, vehicleId, commissionMo
               {kind === 'hourly' && (
                 <p className="font-sans text-[12px] text-[#64748b] ltr-num">{fmt(row.distance_km)}km {t('vp.travelledLabel')}{row.overage_km ? ` (+${fmt(row.overage_km)}km ${t('vp.overageLabel')})` : ''}</p>
               )}
+              {kind === 'hourly' && !!row.overtime_minutes && (
+                <p className="font-sans text-[12px] text-[#92400e]">{t('hm.overtime').replace('{min}', String(row.overtime_minutes)).replace('{amount}', fmt(row.overtime_amount_pkr ?? 0))}</p>
+              )}
               {kind === 'equipment' && row.actual_hours != null && <p className="font-sans text-[12px] text-[#64748b] ltr-num">{row.actual_hours}h</p>}
+              {advanceHeld > 0 && <p className="font-sans text-[12px] font-semibold text-[#166534] ltr-num">{t('eqa.driverHeld').replace('{amount}', fmt(advanceHeld)).replace('{collect}', fmt(Math.max(0, amount - advanceHeld)))}</p>}
             </div>
             {!row.status_confirmed && (commissionMode === 'per_order' ? (
               <button onClick={confirmPayment} disabled={busy}

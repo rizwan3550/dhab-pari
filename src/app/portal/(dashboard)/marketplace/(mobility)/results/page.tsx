@@ -34,6 +34,7 @@ import { ArrowLeft, Bus, Users, Car, Clock, Star, Loader2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { friendlyError } from '@/lib/errors'
 import { useLocale } from '@/lib/i18n/LocaleProvider'
+import { FarePolicyCard } from '@/components/mobility/FarePolicyCard'
 import { LoadingDots } from '@/components/shared/LoadingDots'
 import { LocationPickerSheet, type PickedLocation } from '@/components/mobility/LocationPickerSheet'
 import { MobilityBottomSheet } from '@/components/mobility/MobilityBottomSheet'
@@ -519,6 +520,7 @@ function ResultsPageInner() {
                   />
                 </div>
                 {scheduleAt && <p className="text-[11px] text-amber-700">{t('mb.scheduledPreviewNote')}</p>}
+                <FarePolicyCard service="ride" defaultOpen={false} />
 
                 {quote.online_in_city > 0 ? (
                   <>

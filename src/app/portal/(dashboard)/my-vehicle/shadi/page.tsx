@@ -19,6 +19,7 @@ import { createClient } from '@/lib/supabase/client'
 import { friendlyError } from '@/lib/errors'
 import { usePortalUser } from '@/hooks/usePortalUser'
 import { useLocale } from '@/lib/i18n/LocaleProvider'
+import { FarePolicyCard } from '@/components/mobility/FarePolicyCard'
 import { LoadingDots } from '@/components/shared/LoadingDots'
 import { TrustPill, TrustStrip, type Trust } from '@/components/shared/TrustBadge'
 import { RateAndReport } from '@/components/portal/RateAndReport'
@@ -129,6 +130,7 @@ export default function MyShadiRequestsPage() {
         <h1 className="font-bold text-[20px] sm:text-[22px] text-dp-primary flex items-center gap-2"><Users2 size={19} /> {t('vp.myShadiRequestsHeading')}</h1>
         <p className="text-[12.5px] text-[#64748b] mt-0.5">{t('vp.myShadiRequestsSubtitle')}</p>
       </div>
+      <div><FarePolicyCard service="shadi" audience="driver" defaultOpen={false} /></div>
 
       {vehicle.shadi_vehicle_class ? (
         <Section title={t('vp.availableByTypeHeading')}>

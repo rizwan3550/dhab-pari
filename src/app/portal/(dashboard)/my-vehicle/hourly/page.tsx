@@ -26,6 +26,7 @@ import { Clock3, AlertCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { usePortalUser } from '@/hooks/usePortalUser'
 import { useLocale } from '@/lib/i18n/LocaleProvider'
+import { FarePolicyCard } from '@/components/mobility/FarePolicyCard'
 import { useLiveLocation } from '@/hooks/useLiveLocation'
 import { LoadingDots } from '@/components/shared/LoadingDots'
 import { LifecycleBookingsList } from '@/components/mobility/LifecycleBookingsList'
@@ -99,6 +100,7 @@ export default function MyHourlyBookingsPage() {
         <h1 className="font-bold text-[20px] sm:text-[22px] text-dp-primary flex items-center gap-2"><Clock3 size={19} /> {t('vp.myHourlyBookingsHeading')}</h1>
         <p className="text-[12.5px] text-[#64748b] mt-0.5">{t('vp.myHourlyBookingsSubtitle')}</p>
       </div>
+      <div><FarePolicyCard service="hourly" audience="driver" defaultOpen={false} /></div>
 
       {/* Was the raw browser error ("User denied Geolocation") in red —
           shown in the reader's language now, and as a fixable warning. */}
