@@ -31,6 +31,7 @@ import { ShareBookingButton } from '@/components/portal/ShareBookingButton'
 import { CallButton } from '@/components/portal/CallButton'
 import { ChatButton } from '@/components/portal/ChatButton'
 import { MobilityBottomSheet } from '@/components/mobility/MobilityBottomSheet'
+import { RequestWaitingSheet, type WaitingSummary } from '@/components/mobility/RequestWaitingSheet'
 import { LocationPickerSheet, type PickedLocation } from '@/components/mobility/LocationPickerSheet'
 
 const LeafletMap = dynamic(() => import('@/components/shared/LeafletMap'), { ssr: false })
@@ -80,13 +81,25 @@ export default function HourlyRentalPage() {
   const [notes, setNotes] = useState('')
   const [paymentMethod, setPaymentMethod] = useState('cash')
   const [requesting, setRequesting] = useState(false)
+  const [waiting, setWaiting] = useState<{ id: string; summary: WaitingSummary; since: string | null } | null>(null)
 
   const loadVehicles = () => supabase.rpc('hourly_bookable_vehicles').then(({ data }) => setVehicles((data ?? []) as Vehicle[]))
-  const loadBookings = () => supabase.rpc('my_hourly_bookings').then(({ data }) => setBookings((data ?? []) as Booking[]))
+  const loadBookings = () => supabase.rpc('my_hourly_bookings').then(({ data }) => { const rows = (data ?? []) as Booking[]; setBookings(rows); return rows })
+  const hoursFact = (h: number) => t('rw.hours').replace('{n}', String(h))
+  const waitingFor = (b: Booking) => ({
+    id: b.id, since: b.requested_at,
+    summary: { vehicleLabel: vehicleDisplayName(b.vehicle_type, b.model), driverName: b.owner_name, from: b.pickup_address, amount: b.total_amount_pkr ?? b.base_amount_pkr, facts: [hoursFact(b.hours)] },
+  })
 
   useEffect(() => {
     if (!user) return
-    Promise.all([loadVehicles(), loadBookings()]).then(() => setLoading(false))
+    Promise.all([loadVehicles(), loadBookings()]).then(([, rows]) => {
+      setLoading(false)
+      // A request still waiting on its driver reopens its waiting
+      // popup — reloading the page shouldn't lose the "waiting" screen.
+      const pending = rows.filter((b) => b.status === 'requested').sort((a, b) => b.requested_at.localeCompare(a.requested_at))[0]
+      if (pending) setWaiting(waitingFor(pending))
+    })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
 
@@ -129,17 +142,19 @@ export default function HourlyRentalPage() {
     if (!openVehicle) return
     if (!pickupLoc) { toast.error(t('vp.hourlyAddressRequired')); return }
     setRequesting(true)
-    const { error } = await supabase.rpc('create_hourly_booking', {
+    const { data: bookingId, error } = await supabase.rpc('create_hourly_booking', {
       p_vehicle_id: openVehicle.id, p_hours: hours, p_pickup_address: pickupLoc.label,
       p_pickup_lat: pickupLoc.lat, p_pickup_lng: pickupLoc.lng,
       p_notes: notes.trim() || null, p_payment_method: paymentMethod,
     })
     setRequesting(false)
     if (error) { toast.error(friendlyError(error)); return }
-    toast.success(t('vp.hourlyRequestSentToast'))
+    setWaiting({
+      id: bookingId as string, since: null,
+      summary: { vehicleLabel: vehicleDisplayName(openVehicle.vehicle_type, openVehicle.model), driverName: openVehicle.owner_name, from: pickupLoc.label, amount: estimatedTotal, facts: [hoursFact(hours)] },
+    })
     setOpenVehicle(null)
     loadBookings()
-    setTab('mine')
   }
 
   const cancelBooking = async (id: string) => {
@@ -362,6 +377,11 @@ export default function HourlyRentalPage() {
         </MobilityBottomSheet>
       )}
 
+      {waiting && (
+        <RequestWaitingSheet kind="hourly" bookingId={waiting.id} summary={waiting.summary} since={waiting.since}
+          onClose={() => { setWaiting(null); loadBookings() }}
+          onViewBooking={() => { setWaiting(null); loadBookings(); setTab('mine') }} />
+      )}
     </div>
   )
 }

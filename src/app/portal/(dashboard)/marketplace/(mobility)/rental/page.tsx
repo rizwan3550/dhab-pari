@@ -33,6 +33,7 @@ import { ChatButton } from '@/components/portal/ChatButton'
 import { MobilityBottomSheet } from '@/components/mobility/MobilityBottomSheet'
 import { LocationPickerSheet, type PickedLocation } from '@/components/mobility/LocationPickerSheet'
 import { CategoryVehiclePicker, type CategoryDef } from '@/components/mobility/CategoryVehiclePicker'
+import { RequestWaitingSheet, type WaitingSummary } from '@/components/mobility/RequestWaitingSheet'
 
 const LeafletMap = dynamic(() => import('@/components/shared/LeafletMap'), { ssr: false })
 
@@ -92,13 +93,28 @@ export default function RentalPage() {
   const [notes, setNotes] = useState('')
   const [paymentMethod, setPaymentMethod] = useState('cash')
   const [requesting, setRequesting] = useState(false)
+  const [waiting, setWaiting] = useState<{ id: string; summary: WaitingSummary; since: string | null } | null>(null)
 
   const loadVehicles = () => supabase.rpc('rental_bookable_vehicles').then(({ data }) => setVehicles((data ?? []) as Vehicle[]))
-  const loadBookings = () => supabase.rpc('my_rental_bookings').then(({ data }) => setBookings((data ?? []) as Booking[]))
+  const loadBookings = () => supabase.rpc('my_rental_bookings').then(({ data }) => { const rows = (data ?? []) as Booking[]; setBookings(rows); return rows })
+  const tripFacts = (type: 'one' | 'return', wait: number) => [t(type === 'return' ? 'rw.returnTrip' : 'rw.oneWay'), ...(wait > 0 ? [t('rw.waitHours').replace('{n}', String(wait))] : [])]
+  const waitingFor = (b: Booking) => ({
+    id: b.id, since: b.requested_at,
+    summary: {
+      vehicleLabel: vehicleDisplayName(b.vehicle_type, b.model, isUrdu && b.category_name_ur ? b.category_name_ur : b.category_name),
+      driverName: b.owner_name, from: b.from_address, to: b.to_address, amount: b.total_amount_pkr, facts: tripFacts(b.trip_type, b.wait_hours),
+    },
+  })
 
   useEffect(() => {
     if (!user) return
-    Promise.all([loadVehicles(), loadBookings()]).then(() => setLoading(false))
+    Promise.all([loadVehicles(), loadBookings()]).then(([, rows]) => {
+      setLoading(false)
+      // A request still waiting on its driver reopens its waiting
+      // popup — reloading the page shouldn't lose the "waiting" screen.
+      const pending = rows.filter((b) => b.status === 'requested').sort((a, b) => b.requested_at.localeCompare(a.requested_at))[0]
+      if (pending) setWaiting(waitingFor(pending))
+    })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
 
@@ -178,17 +194,22 @@ export default function RentalPage() {
     if (!openVehicle) return
     if (!fromLoc || !toLoc) { toast.error(t('vp.rentalFromToRequired')); return }
     setRequesting(true)
-    const { error } = await supabase.rpc('create_rental_booking', {
+    const { data: bookingId, error } = await supabase.rpc('create_rental_booking', {
       p_vehicle_id: openVehicle.id, p_from_address: fromLoc.label, p_from_lat: fromLoc.lat, p_from_lng: fromLoc.lng,
       p_to_address: toLoc.label, p_to_lat: toLoc.lat, p_to_lng: toLoc.lng, p_trip_type: tripType, p_wait_hours: tripType === 'return' ? waitHours : 0,
       p_notes: notes.trim() || null, p_payment_method: paymentMethod,
     })
     setRequesting(false)
     if (error) { toast.error(friendlyError(error)); return }
-    toast.success(t('vp.rentalRequestSentToast'))
+    setWaiting({
+      id: bookingId as string, since: null,
+      summary: {
+        vehicleLabel: vehicleDisplayName(openVehicle.vehicle_type, openVehicle.model, isUrdu && openVehicle.category_name_ur ? openVehicle.category_name_ur : openVehicle.category_name),
+        driverName: openVehicle.owner_name, from: fromLoc.label, to: toLoc.label, amount: estimatedTotal, facts: tripFacts(tripType, tripType === 'return' ? waitHours : 0),
+      },
+    })
     setOpenVehicle(null)
     loadBookings()
-    setTab('mine')
   }
 
   const cancelBooking = async (id: string) => {
@@ -427,6 +448,11 @@ export default function RentalPage() {
         </MobilityBottomSheet>
       )}
 
+      {waiting && (
+        <RequestWaitingSheet kind="rental" bookingId={waiting.id} summary={waiting.summary} since={waiting.since}
+          onClose={() => { setWaiting(null); loadBookings() }}
+          onViewBooking={() => { setWaiting(null); loadBookings(); setTab('mine') }} />
+      )}
     </div>
   )
 }

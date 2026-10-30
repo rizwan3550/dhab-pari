@@ -31,6 +31,7 @@ import { useLocale } from '@/lib/i18n/LocaleProvider'
 import { useSite } from '@/components/layout/SiteProvider'
 import { LoadingDots } from '@/components/shared/LoadingDots'
 import { MobilityBottomSheet } from '@/components/mobility/MobilityBottomSheet'
+import { RequestWaitingSheet, type WaitingSummary } from '@/components/mobility/RequestWaitingSheet'
 import { LocationPickerSheet, type PickedLocation } from '@/components/mobility/LocationPickerSheet'
 import { ReportProblemButton } from '@/components/shared/ReportProblemButton'
 import { RateAndReport } from '@/components/portal/RateAndReport'
@@ -129,6 +130,7 @@ export function EquipmentBookingPage({ kind: defaultKind }: { kind: Kind }) {
   const [scheduledTime, setScheduledTime] = useState('')
   const [paymentMethod, setPaymentMethod] = useState('cash')
   const [requesting, setRequesting] = useState(false)
+  const [waiting, setWaiting] = useState<{ id: string; summary: WaitingSummary; since: string | null } | null>(null)
   const [rateOffer, setRateOffer] = useState<RateOffer | null>(null)
   const [proposeRate, setProposeRate] = useState('')
   const [proposing, setProposing] = useState(false)
@@ -136,12 +138,30 @@ export function EquipmentBookingPage({ kind: defaultKind }: { kind: Kind }) {
   const loadVehicles = () => Promise.all(KINDS.map((k) =>
     supabase.rpc('equipment_bookable_vehicles', { p_kind: k }).then(({ data }) => ((data ?? []) as Omit<Vehicle, 'kind'>[]).map((v) => ({ ...v, kind: k })))
   )).then((lists) => setVehicles(lists.flat()))
-  const loadBookings = () => supabase.rpc('my_equipment_bookings').then(({ data }) => setBookings((data ?? []) as Booking[]))
+  const loadBookings = () => supabase.rpc('my_equipment_bookings').then(({ data }) => { const rows = (data ?? []) as Booking[]; setBookings(rows); return rows })
+  const jobFacts = (kind: Kind, h: number | null, trips: number, date: string | null) => [
+    ...(date ? [date] : []),
+    ...(kind === 'loader' ? (trips > 1 ? [t('rw.trips').replace('{n}', String(trips))] : []) : h ? [t('rw.hours').replace('{n}', String(h))] : []),
+  ]
+  const waitingFor = (b: Booking) => ({
+    id: b.id, since: b.requested_at,
+    summary: {
+      vehicleLabel: vehicleDisplayName(b.vehicle_type, b.model), driverName: b.owner_name,
+      from: b.pickup_address ?? b.site_address, to: b.pickup_address ? b.site_address : null,
+      amount: b.total_amount_pkr ?? b.rate_pkr, facts: jobFacts(b.kind, b.requested_hours, b.trip_count, b.scheduled_date),
+    },
+  })
 
   useEffect(() => {
     if (!user) return
     setLoading(true)
-    Promise.all([loadVehicles(), loadBookings()]).then(() => setLoading(false))
+    Promise.all([loadVehicles(), loadBookings()]).then(([, rows]) => {
+      setLoading(false)
+      // A request still waiting on its owner reopens its waiting popup
+      // — reloading the page shouldn't lose the "waiting" screen.
+      const pending = rows.filter((b) => b.status === 'requested').sort((a, b) => b.requested_at.localeCompare(a.requested_at))[0]
+      if (pending) setWaiting(waitingFor(pending))
+    })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
 
@@ -226,7 +246,7 @@ export function EquipmentBookingPage({ kind: defaultKind }: { kind: Kind }) {
     if (openVehicle.kind === 'loader' && !pickupLoc) { toast.error(t('vp.goodsPickupAddressRequired')); return }
     if (!scheduledDate) { toast.error(t('vp.scheduledDateRequired')); return }
     setRequesting(true)
-    const { error } = await supabase.rpc('create_equipment_booking', {
+    const { data: bookingId, error } = await supabase.rpc('create_equipment_booking', {
       p_vehicle_id: openVehicle.id, p_kind: openVehicle.kind,
       p_service_key: openVehicle.kind === 'tractor' ? serviceKey : null,
       p_hours: openVehicle.kind === 'loader' ? null : hours,
@@ -243,10 +263,17 @@ export function EquipmentBookingPage({ kind: defaultKind }: { kind: Kind }) {
     })
     setRequesting(false)
     if (error) { toast.error(friendlyError(error)); return }
-    toast.success(t('vp.equipmentRequestSentToast'))
+    const isLoader = openVehicle.kind === 'loader'
+    setWaiting({
+      id: bookingId as string, since: null,
+      summary: {
+        vehicleLabel: vehicleDisplayName(openVehicle.vehicle_type, openVehicle.model), driverName: openVehicle.owner_name,
+        from: isLoader ? pickupLoc!.label : siteLoc.label, to: isLoader ? siteLoc.label : null,
+        amount: estimatedTotal, facts: jobFacts(openVehicle.kind, isLoader ? null : hours, isLoader ? tripCount : 1, scheduledDate),
+      },
+    })
     setOpenVehicle(null)
     loadBookings()
-    setTab('mine')
   }
 
   const cancelBooking = async (id: string) => {
@@ -659,6 +686,11 @@ export function EquipmentBookingPage({ kind: defaultKind }: { kind: Kind }) {
         </MobilityBottomSheet>
       )}
 
+      {waiting && (
+        <RequestWaitingSheet kind="equipment" bookingId={waiting.id} summary={waiting.summary} since={waiting.since}
+          onClose={() => { setWaiting(null); loadBookings() }}
+          onViewBooking={() => { setWaiting(null); loadBookings(); setTab('mine') }} />
+      )}
     </div>
   )
 }
