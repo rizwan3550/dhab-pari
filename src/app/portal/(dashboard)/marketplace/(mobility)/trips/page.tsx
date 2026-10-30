@@ -35,7 +35,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { vehicleDisplayName } from '@/lib/vehicleDisplayName'
-import { Receipt, Users, Clock, Wrench, Bus, Sparkles, ShoppingBag, Car, Package, Phone, Store, Navigation } from 'lucide-react'
+import { Receipt, Users, Clock, Wrench, Bus, Sparkles, ShoppingBag, Car, Package, Phone, Store, Navigation, CalendarDays } from 'lucide-react'
 import { toast } from 'sonner'
 import { friendlyError } from '@/lib/errors'
 import { usePortalUser } from '@/hooks/usePortalUser'
@@ -43,8 +43,8 @@ import { useLocale } from '@/lib/i18n/LocaleProvider'
 import { LoadingDots } from '@/components/shared/LoadingDots'
 import { BookingQuickViewSheet, type QuickViewKind } from '@/components/mobility/BookingQuickViewSheet'
 
-type Kind = 'trip' | 'hourly' | 'equipment' | 'ride' | 'shadi' | 'cityPurchase' | 'rental' | 'parcel' | 'dispatch' | 'shop' | 'rideDispatch'
-interface BookingRow { id: string; rawId: string; kind: Kind; title: string; subtitle: string; amount: number | null; status: 'pending' | 'confirmed' | 'declined' | 'cancelled' | 'completed'; date: string; href: string | null }
+type Kind = 'trip' | 'hourly' | 'equipment' | 'ride' | 'shadi' | 'cityPurchase' | 'rental' | 'parcel' | 'dispatch' | 'shop' | 'rideDispatch' | 'monthly'
+interface BookingRow { id: string; rawId: string; kind: Kind; title: string; subtitle: string; amount: number | null; status: 'pending' | 'confirmed' | 'declined' | 'cancelled' | 'completed'; date: string; href: string | null; note?: string }
 // Real ask: hourly/equipment/ride rows used to send the rider to a
 // generic, unscoped browse page instead of their own booking — these 3
 // now pop up that one booking's own status/actions instead (see
@@ -63,11 +63,11 @@ const STATUS_STYLE: Record<BookingRow['status'], { bg: string; fg: string }> = {
 // same tint tokens the rest of the app's category belt/service tiles use.
 const KIND_ICON: Record<Kind, typeof Users> = {
   trip: Users, hourly: Clock, equipment: Wrench, ride: Bus, shadi: Sparkles,
-  cityPurchase: ShoppingBag, rental: Car, parcel: Package, dispatch: Phone, shop: Store, rideDispatch: Navigation,
+  cityPurchase: ShoppingBag, rental: Car, parcel: Package, dispatch: Phone, shop: Store, rideDispatch: Navigation, monthly: CalendarDays,
 }
 const KIND_TINT: Record<Kind, string> = {
   trip: '#e0f2fe', hourly: '#fef9c3', equipment: '#fde68a', ride: '#dcfce7', shadi: '#fce7f3',
-  cityPurchase: '#ffe4e6', rental: '#f3e8ff', parcel: '#ffedd5', dispatch: '#e0e7ff', shop: '#fff7ed', rideDispatch: '#dbeafe',
+  cityPurchase: '#ffe4e6', rental: '#f3e8ff', parcel: '#ffedd5', dispatch: '#e0e7ff', shop: '#fff7ed', rideDispatch: '#dbeafe', monthly: '#ccfbf1',
 }
 // Our status model has 3 real stages (pending → confirmed → completed), not the
 // reference's 4 (requested/accepted/ontheway/completed) — every kind here only
@@ -103,11 +103,14 @@ export default function TripsPage() {
   const [seg, setSeg] = useState<'active' | 'past'>('active')
 
   const reloadMine = async () => {
-    const [tripShare, hourly, equipment, ride, shadi, cityPurchase, rental, parcel, dispatch, shop, rideDispatch] = await Promise.all([
+    const [tripShare, hourly, equipment, ride, shadi, cityPurchase, rental, parcel, dispatch, shop, rideDispatch, monthly] = await Promise.all([
       supabase.rpc('my_trip_bookings'),
       supabase.rpc('my_hourly_bookings'),
       supabase.rpc('my_equipment_bookings'),
-      supabase.from('ride_bookings').select('id, status, total_amount_pkr, travel_date, vehicle_routes(origin, origin_ur, destination, destination_ur)').order('created_at', { ascending: false }).limit(20),
+      // Filtered to the signed-in rider: ride_bookings' keeper policy also
+      // lets a driver read every booking on their own routes, which landed
+      // other people's seats in the driver's own "My Bookings".
+      supabase.from('ride_bookings').select('id, status, total_amount_pkr, travel_date, vehicle_routes(origin, origin_ur, destination, destination_ur)').eq('portal_user_id', user!.id).order('created_at', { ascending: false }).limit(20),
       supabase.rpc('my_shadi_events'),
       supabase.rpc('my_city_purchase_requests'),
       supabase.rpc('my_rental_bookings'),
@@ -115,6 +118,10 @@ export default function TripsPage() {
       supabase.rpc('my_dispatch_calls'),
       supabase.from('shop_orders').select('id, status, total_amount_pkr, fulfillment_status, created_at, shops(name, name_ur)').eq('portal_user_id', user!.id).order('created_at', { ascending: false }).limit(20),
       supabase.from('ride_dispatch_requests').select('id, status, fare_pkr, pickup_label, dropoff_label, created_at').eq('initiator_portal_user_id', user!.id).order('created_at', { ascending: false }).limit(20),
+      // Monthly "Teacher Van" seats (723) — a parent's or office worker's
+      // standing booking used to be reachable only by finding the route
+      // again; now it sits here with everything else, plus any fee due.
+      supabase.from('route_subscriptions').select('id, route_id, status, monthly_fee_pkr, applied_at, vehicle_routes(origin, origin_ur, destination, destination_ur, departure_time), route_subscription_charges(amount_pkr, status)').eq('portal_user_id', user!.id).neq('status', 'cancelled').order('applied_at', { ascending: false }),
     ])
     if (tripShare.error) toast.error(friendlyError(tripShare.error, undefined, isUrdu))
 
@@ -152,6 +159,18 @@ export default function TripsPage() {
     }
     for (const r of (rideDispatch.data ?? []) as Array<{ id: string; status: string; fare_pkr: number; pickup_label: string; dropoff_label: string; created_at: string }>) {
       out.push({ id: `rd-${r.id}`, rawId: r.id, kind: 'rideDispatch', title: t('vp.rideDispatchPageTitle'), subtitle: `${r.pickup_label} → ${r.dropoff_label}`, amount: r.fare_pkr, status: mapStatus(r.status), date: r.created_at, href: `/portal/marketplace/ride-dispatch/${r.id}` })
+    }
+
+    for (const m of (monthly.data ?? []) as unknown as Array<{ id: string; route_id: string; status: string; monthly_fee_pkr: number; applied_at: string; vehicle_routes: { origin: string; origin_ur: string | null; destination: string; destination_ur: string | null; departure_time: string | null } | null; route_subscription_charges: { amount_pkr: number; status: string }[] | null }>) {
+      const vr = m.vehicle_routes
+      const route = vr ? `${isUrdu && vr.origin_ur ? vr.origin_ur : vr.origin} → ${isUrdu && vr.destination_ur ? vr.destination_ur : vr.destination}${vr.departure_time ? ` · ${vr.departure_time.slice(0, 5)}` : ''}` : '—'
+      const due = (m.route_subscription_charges ?? []).filter((c) => c.status === 'due').reduce((sum, c) => sum + Number(c.amount_pkr), 0)
+      out.push({
+        id: `monthly-${m.id}`, rawId: m.id, kind: 'monthly', title: t('mb.monthlySeatTitle'),
+        subtitle: route, note: due > 0 ? t('mb.feeDueLabel').replace('{amount}', fmt(due)) : undefined,
+        amount: m.monthly_fee_pkr, status: m.status === 'waitlisted' ? 'pending' : 'confirmed',
+        date: m.applied_at, href: `/portal/marketplace/route/${m.route_id}`,
+      })
     }
 
     out.sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime())
@@ -203,7 +222,10 @@ export default function TripsPage() {
                 {r.amount != null && <span className="shrink-0 font-extrabold text-[13px] text-[#005A36] ltr-num">{fmt(r.amount)}</span>}
               </span>
               <span className="flex items-center justify-between gap-2 w-full">
-                <span className="text-[9.5px] font-bold px-2 py-0.5 rounded-full" style={{ background: style.bg, color: style.fg }}>{t(statusKey(r.kind, r.status))}</span>
+                <span className="flex items-center gap-1.5 min-w-0">
+                  <span className="text-[9.5px] font-bold px-2 py-0.5 rounded-full shrink-0" style={{ background: style.bg, color: style.fg }}>{t(statusKey(r.kind, r.status))}</span>
+                  {r.note && <span className="text-[9.5px] font-bold px-2 py-0.5 rounded-full truncate bg-amber-100 text-amber-800">{r.note}</span>}
+                </span>
                 <span dir="ltr" className="flex items-center gap-[3px]">
                   {[0, 1, 2].map((i) => <span key={i} className="w-[18px] h-1 rounded-full" style={{ background: cancelled ? '#fecaca' : i <= step ? '#16a34a' : '#e5e2d0' }} />)}
                   {r.date && <span className="font-sans text-[9px] text-[#94a3b8] ms-1 ltr-num">{new Date(r.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>}
