@@ -30,8 +30,9 @@ import { createClient } from '@/lib/supabase/client'
 import { useLocale } from '@/lib/i18n/LocaleProvider'
 import { useDriverJobsBadge } from '@/components/mobility/DriverJobsBadgeContext'
 import { JobQuickActionSheet, type QuickActionKind, type QuickActionRow } from '@/components/mobility/JobQuickActionSheet'
+import { fetchPendingRequestRows, ALL_REQUEST_KINDS, type RowCtx } from '@/lib/driverRequestRows'
 
-interface VehicleFlags { offers_hourly: boolean; offers_shadi: boolean; offers_equipment: boolean; offers_rental: boolean; delivers: boolean }
+interface VehicleFlags { offers_hourly: boolean; offers_shadi: boolean; offers_equipment: boolean; offers_rental: boolean; delivers: boolean; commission_mode?: string | null }
 
 // Every "a new request needs your response" event_type this app's
 // booking RPCs already insert into portal_notifications, mapped to the
@@ -50,77 +51,13 @@ const EVENT_TO_KIND: Record<string, QuickActionKind> = {
   route_seat_booked: 'route',
   adda_seat_booked: 'route',
   ride_dispatch_requested: 'ride_dispatch',
+  // Shop deliveries were never listened for (or scanned) here, so a
+  // driver who delivers for shops never got the popup for them.
+  shop_delivery_invited: 'delivery',
 }
-
-async function fetchPendingRows(supabase: ReturnType<typeof createClient>, kind: QuickActionKind, vehicleId: string): Promise<QuickActionRow[]> {
-  if (kind === 'hourly') {
-    const { data } = await supabase.rpc('vehicle_hourly_bookings', { p_vehicle_id: vehicleId })
-    return ((data ?? []) as { id: string; status: string; customer_name: string; pickup_address: string; base_amount_pkr: number; total_amount_pkr: number | null }[])
-      .filter((b) => b.status === 'requested')
-      .map((b) => ({ id: b.id, type: 'hourly', title: b.customer_name, subtitle: b.pickup_address, amount: b.total_amount_pkr ?? b.base_amount_pkr, href: '/portal/my-vehicle/hourly', needsAction: true }))
-  }
-  if (kind === 'rental') {
-    const { data } = await supabase.rpc('vehicle_rental_bookings', { p_vehicle_id: vehicleId })
-    return ((data ?? []) as { id: string; status: string; customer_name: string; from_address: string; to_address: string; total_amount_pkr: number }[])
-      .filter((b) => b.status === 'requested')
-      .map((b) => ({ id: b.id, type: 'rental', title: b.customer_name, subtitle: `${b.from_address} → ${b.to_address}`, amount: b.total_amount_pkr, href: '/portal/my-vehicle/rental', needsAction: true }))
-  }
-  if (kind === 'equipment') {
-    const { data } = await supabase.rpc('vehicle_equipment_bookings', { p_vehicle_id: vehicleId })
-    return ((data ?? []) as { id: string; status: string; customer_name: string; site_address: string; rate_pkr: number; total_amount_pkr: number | null }[])
-      .filter((b) => b.status === 'requested')
-      .map((b) => ({ id: b.id, type: 'equipment', title: b.customer_name, subtitle: b.site_address, amount: b.total_amount_pkr ?? b.rate_pkr, href: '/portal/my-vehicle/equipment', needsAction: true }))
-  }
-  if (kind === 'shadi') {
-    const { data } = await supabase.rpc('vehicle_shadi_requests', { p_vehicle_id: vehicleId })
-    return ((data ?? []) as { id: string; status: string; customer_name: string; venue_address: string; full_day_rate_pkr: number }[])
-      .filter((r) => r.status === 'requested')
-      .map((r) => ({ id: r.id, type: 'shadi', title: r.customer_name, subtitle: r.venue_address, amount: r.full_day_rate_pkr, href: '/portal/my-vehicle/shadi', needsAction: true }))
-  }
-  if (kind === 'dispatch') {
-    const { data } = await supabase.rpc('my_dispatch_invitations', { p_vehicle_id: vehicleId })
-    return ((data ?? []) as { call_id: string; item: string; address: string; goods_budget_pkr: number }[])
-      .map((d) => ({ id: d.call_id, type: 'dispatch', title: d.item, subtitle: d.address, amount: d.goods_budget_pkr, href: '/portal/my-vehicle/requests', needsAction: true }))
-  }
-  if (kind === 'city_purchase') {
-    const { data } = await supabase.rpc('my_city_purchase_invitations', { p_vehicle_id: vehicleId })
-    return ((data ?? []) as { request_id: string; item: string; goods_budget_pkr: number; pickup_label: string | null }[])
-      .map((c) => ({ id: c.request_id, type: 'city_purchase', title: c.item, subtitle: c.pickup_label ?? '', amount: c.goods_budget_pkr, href: '/portal/my-vehicle/requests', needsAction: true }))
-  }
-  if (kind === 'parcel') {
-    const { data } = await supabase.rpc('my_parcel_delivery_invitations', { p_vehicle_id: vehicleId })
-    return ((data ?? []) as { delivery_id: string; description: string; pickup_label: string | null }[])
-      .map((p) => ({ id: p.delivery_id, type: 'parcel', title: p.description, subtitle: p.pickup_label ?? '', amount: null, href: '/portal/my-vehicle/requests', needsAction: true }))
-  }
-  if (kind === 'ride_dispatch') {
-    const { data } = await supabase.rpc('my_pending_ride_dispatch_requests', { p_vehicle_id: vehicleId })
-    return ((data ?? []) as { id: string; pickup_label: string; dropoff_label: string; fare_pkr: number; category_emoji: string; category_name: string; rider_trust: QuickActionRow['riderTrust']; rider_tenant_name: string }[])
-      .map((r) => ({
-        id: r.id, type: 'ride_dispatch', title: `${r.category_emoji} ${r.category_name}`, subtitle: `${r.pickup_label} → ${r.dropoff_label}`,
-        amount: r.fare_pkr, href: `/portal/marketplace/ride-dispatch/${r.id}`, needsAction: true,
-        riderTrust: r.rider_trust, riderVillage: r.rider_tenant_name,
-      }))
-  }
-  // 'route' — covers both route-based and adda-based ride_bookings, same
-  // two-query split as the Jobs list (see its own comment on why).
-  const [routeRes, addaRes] = await Promise.all([
-    supabase.from('ride_bookings').select('id, status, total_amount_pkr, vehicle_routes!inner(vehicle_id, origin, destination)').eq('vehicle_routes.vehicle_id', vehicleId).eq('status', 'announced'),
-    supabase.from('ride_bookings').select('id, status, total_amount_pkr, adda_queue_entries!inner(vehicle_id, addas(name))').eq('adda_queue_entries.vehicle_id', vehicleId).eq('status', 'announced'),
-  ])
-  const out: QuickActionRow[] = []
-  for (const b of (routeRes.data ?? []) as unknown as { id: string; total_amount_pkr: number; vehicle_routes: { origin: string; destination: string } }[]) {
-    out.push({ id: b.id, type: 'route', title: `${b.vehicle_routes.origin} → ${b.vehicle_routes.destination}`, subtitle: 'Route', amount: b.total_amount_pkr, href: '/portal/my-vehicle/routes', needsAction: true })
-  }
-  for (const b of (addaRes.data ?? []) as unknown as { id: string; total_amount_pkr: number; adda_queue_entries: { addas: { name: string } } }[]) {
-    out.push({ id: b.id, type: 'route', title: b.adda_queue_entries.addas.name, subtitle: 'Adda', amount: b.total_amount_pkr, href: '/portal/my-vehicle/adda', needsAction: true })
-  }
-  return out
-}
-
-const ALL_KINDS: QuickActionKind[] = ['hourly', 'rental', 'equipment', 'shadi', 'dispatch', 'city_purchase', 'parcel', 'route', 'ride_dispatch']
 
 export function PendingRequestOverlay({ vehicleId, vehicle }: { vehicleId: string; vehicle: VehicleFlags }) {
-  const { t } = useLocale()
+  const { t, isUrdu } = useLocale()
   const supabase = createClient()
   const { refresh: refreshBadge } = useDriverJobsBadge()
   const [portalUserId, setPortalUserId] = useState<string | null>(null)
@@ -141,33 +78,40 @@ export function PendingRequestOverlay({ vehicleId, vehicle }: { vehicleId: strin
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const kindsToScan = useCallback((): QuickActionKind[] => ALL_KINDS.filter((k) =>
+  const kindsToScan = useCallback((): QuickActionKind[] => ALL_REQUEST_KINDS.filter((k) =>
     k !== 'hourly' || vehicle.offers_hourly).filter((k) =>
     k !== 'shadi' || vehicle.offers_shadi).filter((k) =>
     k !== 'equipment' || vehicle.offers_equipment).filter((k) =>
-    k !== 'rental' || vehicle.offers_rental
-  ), [vehicle.offers_hourly, vehicle.offers_shadi, vehicle.offers_equipment, vehicle.offers_rental])
+    k !== 'rental' || vehicle.offers_rental).filter((k) =>
+    k !== 'delivery' || vehicle.delivers
+  ), [vehicle.offers_hourly, vehicle.offers_shadi, vehicle.offers_equipment, vehicle.offers_rental, vehicle.delivers])
+
+  // Only rows the driver can actually act on pop up — a lump-sum
+  // vehicle's seat booking waits on the committee, not on them.
+  const fetchActionable = useCallback(async (kind: QuickActionKind) => {
+    const ctx: RowCtx = { t, isUrdu, commissionMode: vehicle.commission_mode ?? null }
+    return (await fetchPendingRequestRows(supabase, kind, vehicleId, ctx)).filter((r) => r.needsAction)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [vehicleId, isUrdu, vehicle.commission_mode])
 
   const scanAll = useCallback(async () => {
-    const results = await Promise.all(kindsToScan().map((k) => fetchPendingRows(supabase, k, vehicleId)))
+    const results = await Promise.all(kindsToScan().map((k) => fetchActionable(k)))
     const fresh = results.flat()
     if (fresh.length === 0) return
     setQueue((cur) => {
       const curKeys = new Set(cur.map((r) => `${r.type}-${r.id}`))
       return [...cur, ...fresh.filter((r) => !curKeys.has(`${r.type}-${r.id}`))]
     })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [vehicleId, kindsToScan])
+  }, [kindsToScan, fetchActionable])
 
   const scanOneKind = useCallback(async (kind: QuickActionKind) => {
-    const fresh = await fetchPendingRows(supabase, kind, vehicleId)
+    const fresh = await fetchActionable(kind)
     if (fresh.length === 0) return
     setQueue((cur) => {
       const curKeys = new Set(cur.map((r) => `${r.type}-${r.id}`))
       return [...cur, ...fresh.filter((r) => !curKeys.has(`${r.type}-${r.id}`))]
     })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [vehicleId])
+  }, [fetchActionable])
 
   // Realtime: near-instant pop the moment a qualifying request lands.
   useEffect(() => {
@@ -214,6 +158,7 @@ export function PendingRequestOverlay({ vehicleId, vehicle }: { vehicleId: strin
       )}
       {current && (
         <JobQuickActionSheet
+          key={`${current.type}-${current.id}`}
           row={current}
           vehicleId={vehicleId}
           onClose={closeCurrent}

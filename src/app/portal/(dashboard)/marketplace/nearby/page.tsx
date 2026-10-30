@@ -21,8 +21,8 @@
 // starts collapsed to a small peek bar (map fully visible on load) and
 // expands on tap, no backdrop — the map stays visible and interactive
 // above it either way, same as the apps this is modeled on.
-// Breaks out of the portal shell's own padding (-m-6/-m-10, canceling
-// <main>'s p-6/p-10) since a "full page map" can't sit inside a padded
+// Breaks out of the portal shell's own padding (-m-4/-m-6/-m-10, canceling
+// <main>'s p-4/p-6/p-10) since a "full page map" can't sit inside a padded
 // card.
 //
 // Kept as its own page rather than a tab on /portal/marketplace/trips —
@@ -403,7 +403,7 @@ export default function NearbyOpenTripsPage() {
   )
 
   return (
-    <div dir={isUrdu ? 'rtl' : 'ltr'} className="shop-ink-theme -m-6 md:-m-10">
+    <div dir={isUrdu ? 'rtl' : 'ltr'} className="shop-ink-theme -m-4 sm:-m-6 md:-m-10">
       <div className="relative lg:flex h-[calc(100dvh-160px)] min-h-[420px] lg:h-[calc(100dvh-100px)] lg:min-h-0">
 
         {/* Desktop: a static sidebar in normal flex flow, right next to the

@@ -24,6 +24,7 @@ import { vehicleDisplayName } from '@/lib/vehicleDisplayName'
 import { friendlyError } from '@/lib/errors'
 import { usePortalUser } from '@/hooks/usePortalUser'
 import { useLocale } from '@/lib/i18n/LocaleProvider'
+import { FarePolicyCard } from '@/components/mobility/FarePolicyCard'
 import { LoadingDots } from '@/components/shared/LoadingDots'
 import { LocationPickerSheet, type PickedLocation } from '@/components/mobility/LocationPickerSheet'
 import { MobilityBottomSheet } from '@/components/mobility/MobilityBottomSheet'
@@ -252,6 +253,8 @@ export default function ShadiBookingPage() {
               </div>
             </div>
           )}
+
+          <FarePolicyCard service="shadi" />
 
           <div className="flex items-start gap-2 text-[11px] text-[#1e3a5f] bg-[#eff6ff] border border-[#bfdbfe] rounded-xl p-2.5">
             <Info size={13} className="shrink-0 mt-0.5 text-[#2563eb]" />

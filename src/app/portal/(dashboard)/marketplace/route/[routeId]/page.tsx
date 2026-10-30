@@ -15,10 +15,13 @@ import { toast } from 'sonner'
 import { friendlyError } from '@/lib/errors'
 import { usePortalUser } from '@/hooks/usePortalUser'
 import { useLocale } from '@/lib/i18n/LocaleProvider'
+import { FarePolicyCard } from '@/components/mobility/FarePolicyCard'
 import { DonationReceiptUpload } from '@/components/public/DonationReceiptUpload'
 import { LoadingDots } from '@/components/shared/LoadingDots'
 import { MobilityBottomNav } from '@/components/mobility/MobilityBottomNav'
 import { RouteGroupPanel } from '@/components/mobility/RouteGroupPanel'
+import { RequestWaitingSheet, type WaitingSummary } from '@/components/mobility/RequestWaitingSheet'
+import { vehicleDisplayName } from '@/lib/vehicleDisplayName'
 import { estimateArrivalTime, estimateReturnArrivalTime } from '@/lib/roadRoute'
 
 const LeafletMap = dynamic(() => import('@/components/shared/LeafletMap'), { ssr: false })
@@ -82,6 +85,7 @@ export default function RouteDetailPage() {
   const [method, setMethod] = useState('cash')
   const [proofPath, setProofPath] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [waiting, setWaiting] = useState<{ id: string; summary: WaitingSummary } | null>(null)
   const [bookable, setBookable] = useState(true)
   const [stops, setStops] = useState<Stop[]>([])
   const [showGroup, setShowGroup] = useState(false)
@@ -175,13 +179,21 @@ export default function RouteDetailPage() {
     if (!travelDate) { toast.error(t('mp.pickDateFirst')); return }
     if (!isPerOrder && !proofPath) { toast.error(t('g.uploadPaymentScreenshot')); return }
     setSubmitting(true)
-    const { error } = await supabase.rpc('place_ride_booking', {
+    const { data: placed, error } = await supabase.rpc('place_ride_booking', {
       p_route_id: route.id, p_travel_date: travelDate, p_seats: seats, p_method: isPerOrder ? 'direct' : method, p_proof_url: isPerOrder ? null : proofPath,
     })
     setSubmitting(false)
     if (error) { toast.error(friendlyError(error)); return }
-    toast.success(isPerOrder ? t('cm.orderPlacedDirectToast') : t('mp.bookingPlacedToast'))
-    router.push('/portal/marketplace')
+    // Stays on a live "waiting for the driver" popup until they confirm
+    // or decline, instead of a toast and a jump back to the hub.
+    setWaiting({
+      id: (placed as { booking_id: string }).booking_id,
+      summary: {
+        vehicleLabel: vehicle ? vehicleDisplayName(vehicle.vehicle_type) : t('mv.tab.routes'), driverName: vehicle?.owner_name ?? null,
+        from: isUrdu && route.origin_ur ? route.origin_ur : route.origin, to: isUrdu && route.destination_ur ? route.destination_ur : route.destination,
+        amount: total, facts: [travelDate, t('rw.seats').replace('{n}', String(seats))],
+      },
+    })
   }
 
   const reloadMonthlyDetail = async () => {
@@ -370,6 +382,7 @@ export default function RouteDetailPage() {
                 </div>
               </>
             )}
+            <div className="mt-3"><FarePolicyCard service="seat" defaultOpen={false} /></div>
             <button onClick={submit} disabled={submitting} className="w-full mt-4 bg-dp-secondary text-white py-3 rounded-lg font-sans font-semibold active:scale-[0.98] cursor-pointer hover:bg-dp-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
               {submitting ? t('mp.placingBooking') : t('mp.bookSeatsBtn')}
             </button>
@@ -414,6 +427,11 @@ export default function RouteDetailPage() {
         </div>
       )}
       <MobilityBottomNav />
+      {waiting && (
+        <RequestWaitingSheet kind="seat" bookingId={waiting.id} summary={waiting.summary}
+          onClose={() => setWaiting(null)}
+          onViewBooking={() => { setWaiting(null); router.push('/portal/marketplace/trips') }} />
+      )}
     </div>
   )
 }

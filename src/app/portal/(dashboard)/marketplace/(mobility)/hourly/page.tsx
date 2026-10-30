@@ -31,6 +31,10 @@ import { ShareBookingButton } from '@/components/portal/ShareBookingButton'
 import { CallButton } from '@/components/portal/CallButton'
 import { ChatButton } from '@/components/portal/ChatButton'
 import { MobilityBottomSheet } from '@/components/mobility/MobilityBottomSheet'
+import { RequestWaitingSheet, type WaitingSummary } from '@/components/mobility/RequestWaitingSheet'
+import { FarePolicyCard, TravelQuoteLine } from '@/components/mobility/FarePolicyCard'
+import { HourlyMeter } from '@/components/mobility/HourlyMeter'
+import type { TravelQuote } from '@/lib/farePolicy'
 import { LocationPickerSheet, type PickedLocation } from '@/components/mobility/LocationPickerSheet'
 
 const LeafletMap = dynamic(() => import('@/components/shared/LeafletMap'), { ssr: false })
@@ -46,6 +50,7 @@ interface Booking {
   requested_at: string; started_at: string | null; ended_at: string | null; pin: string | null
   notes: string | null; payment_method: string
   vehicle_id: string; owner_name: string; owner_mobile: string | null; vehicle_type: string; model: string | null; color: string | null
+  hourly_rate_pkr?: number; included_km?: number; overage_per_km_pkr?: number; overtime_minutes?: number; overtime_amount_pkr?: number
 }
 
 const PAYMENT_METHODS: { key: string; emoji: string; labelKey: string }[] = [
@@ -80,13 +85,26 @@ export default function HourlyRentalPage() {
   const [notes, setNotes] = useState('')
   const [paymentMethod, setPaymentMethod] = useState('cash')
   const [requesting, setRequesting] = useState(false)
+  const [pickupQuote, setPickupQuote] = useState<TravelQuote | null>(null)
+  const [waiting, setWaiting] = useState<{ id: string; summary: WaitingSummary; since: string | null } | null>(null)
 
   const loadVehicles = () => supabase.rpc('hourly_bookable_vehicles').then(({ data }) => setVehicles((data ?? []) as Vehicle[]))
-  const loadBookings = () => supabase.rpc('my_hourly_bookings').then(({ data }) => setBookings((data ?? []) as Booking[]))
+  const loadBookings = () => supabase.rpc('my_hourly_bookings').then(({ data }) => { const rows = (data ?? []) as Booking[]; setBookings(rows); return rows })
+  const hoursFact = (h: number) => t('rw.hours').replace('{n}', String(h))
+  const waitingFor = (b: Booking) => ({
+    id: b.id, since: b.requested_at,
+    summary: { vehicleLabel: vehicleDisplayName(b.vehicle_type, b.model), driverName: b.owner_name, from: b.pickup_address, amount: b.total_amount_pkr ?? b.base_amount_pkr, facts: [hoursFact(b.hours)] },
+  })
 
   useEffect(() => {
     if (!user) return
-    Promise.all([loadVehicles(), loadBookings()]).then(() => setLoading(false))
+    Promise.all([loadVehicles(), loadBookings()]).then(([, rows]) => {
+      setLoading(false)
+      // A request still waiting on its driver reopens its waiting
+      // popup — reloading the page shouldn't lose the "waiting" screen.
+      const pending = rows.filter((b) => b.status === 'requested').sort((a, b) => b.requested_at.localeCompare(a.requested_at))[0]
+      if (pending) setWaiting(waitingFor(pending))
+    })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
 
@@ -129,17 +147,19 @@ export default function HourlyRentalPage() {
     if (!openVehicle) return
     if (!pickupLoc) { toast.error(t('vp.hourlyAddressRequired')); return }
     setRequesting(true)
-    const { error } = await supabase.rpc('create_hourly_booking', {
+    const { data: bookingId, error } = await supabase.rpc('create_hourly_booking', {
       p_vehicle_id: openVehicle.id, p_hours: hours, p_pickup_address: pickupLoc.label,
       p_pickup_lat: pickupLoc.lat, p_pickup_lng: pickupLoc.lng,
       p_notes: notes.trim() || null, p_payment_method: paymentMethod,
     })
     setRequesting(false)
     if (error) { toast.error(friendlyError(error)); return }
-    toast.success(t('vp.hourlyRequestSentToast'))
+    setWaiting({
+      id: bookingId as string, since: null,
+      summary: { vehicleLabel: vehicleDisplayName(openVehicle.vehicle_type, openVehicle.model), driverName: openVehicle.owner_name, from: pickupLoc.label, amount: estimatedTotal, facts: [hoursFact(hours)] },
+    })
     setOpenVehicle(null)
     loadBookings()
-    setTab('mine')
   }
 
   const cancelBooking = async (id: string) => {
@@ -258,6 +278,7 @@ export default function HourlyRentalPage() {
                       <Loader2 size={12} className="animate-spin text-[#166534]" />
                       <p className="text-[12px] text-[#64748b]">{t('vp.tripInProgressHint')} <span className="font-bold text-[#166534] ltr-num">{fmt(b.distance_km)}km</span></p>
                     </div>
+                    <div className="mt-2"><HourlyMeter row={b} /></div>
                     {livePos[b.id] && (
                       <LeafletMap pins={[{ lat: livePos[b.id].lat, lng: livePos[b.id].lng, label: b.owner_name, emoji: '🚐' }]} height={160} className="rounded-xl mt-2" />
                     )}
@@ -354,14 +375,24 @@ export default function HourlyRentalPage() {
             </p>
           </div>
 
+          <div className="flex flex-col gap-2 mb-3">
+            <TravelQuoteLine service="hourly" vehicleId={openVehicle.id} lat={pickupLoc?.lat} lng={pickupLoc?.lng} onQuote={setPickupQuote} />
+            <FarePolicyCard service="hourly" vehicle={{ hourlyRate: openVehicle.hourly_rate_pkr, includedKmPerHour: openVehicle.hourly_included_km, overagePerKm: openVehicle.hourly_overage_per_km_pkr }} />
+          </div>
+
           <p className="flex items-start gap-1.5 text-[11px] text-[#64748b] mb-3"><AlertCircle size={12} className="shrink-0 mt-0.5 text-[#166534]" /> {t('vp.noAdvanceExplainer')}</p>
 
-          <button onClick={submitRequest} disabled={requesting} className="w-full bg-[#166534] text-white rounded-xl py-3 font-semibold cursor-pointer disabled:opacity-50">
+          <button onClick={submitRequest} disabled={requesting || (!!pickupLoc && !!pickupQuote?.too_far)} className="w-full bg-[#166534] text-white rounded-xl py-3 font-semibold cursor-pointer disabled:opacity-50">
             {requesting ? t('action.saving') : t('vp.sendRequestBtn')}
           </button>
         </MobilityBottomSheet>
       )}
 
+      {waiting && (
+        <RequestWaitingSheet kind="hourly" bookingId={waiting.id} summary={waiting.summary} since={waiting.since}
+          onClose={() => { setWaiting(null); loadBookings() }}
+          onViewBooking={() => { setWaiting(null); loadBookings(); setTab('mine') }} />
+      )}
     </div>
   )
 }

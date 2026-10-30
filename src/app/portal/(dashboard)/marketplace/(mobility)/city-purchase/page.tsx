@@ -43,7 +43,14 @@ import type { MapPin as LeafletPin } from '@/components/shared/LeafletMap'
 const LeafletMap = dynamic(() => import('@/components/shared/LeafletMap'), { ssr: false })
 
 interface City { id: string; name: string; name_ur: string | null; lat: number | null; lng: number | null; is_home_city: boolean }
-interface FeeEstimate { distance_fare_pkr: number; detour_fuel_pkr: number; tip_pkr: number; total_fee_pkr: number }
+interface FeeEstimate {
+  distance_fare_pkr: number; detour_fuel_pkr: number; tip_pkr: number; total_fee_pkr: number
+  // 777: what a driver already in / going to the city charges (one leg)
+  leg_pkr?: number; carry_total_fee_pkr?: number; detour_km?: number | null; carry_max_hours?: number
+  premium_pct_2hr?: number; premium_pct_1hr?: number; premium_pct_urgent?: number; present_vehicles?: number
+}
+type Urgency = 'standard' | '2hr' | '1hr' | 'urgent'
+const URGENCIES: Urgency[] = ['standard', '2hr', '1hr', 'urgent']
 interface MyRequest { id: string; item: string; status: string; total_fare_pkr: number | null; estimated_fee_pkr: number | null; created_at: string; city_name: string; city_name_ur: string | null; as_role: string }
 type Area = 'city' | 'out_of_city'
 type RideType = 'bike' | 'car'
@@ -85,6 +92,7 @@ export default function CityPurchasePage() {
   const [area, setArea] = useState<Area>('city')
   const [rideType, setRideType] = useState<RideType>('bike')
   const [paymentMethod, setPaymentMethod] = useState('cash')
+  const [urgency, setUrgency] = useState<Urgency>('standard')
   const [posting, setPosting] = useState(false)
 
   useEffect(() => {
@@ -146,6 +154,14 @@ export default function CityPurchasePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [matchedCity?.id, pickupLoc?.lat, pickupLoc?.lng, tipPkr, rideType])
   const totalFee = feeEstimate?.total_fee_pkr ?? 0
+  // A driver already in (or going to) the city carries it back on his way
+  // home — one leg; a driver sent specially from the village — both legs.
+  // Urgency only adds a premium to the carry-back price: it pays the
+  // in-city driver for cutting his stay short (777).
+  const premiumPct = urgency === 'standard' ? 0 : Number(feeEstimate?.[`premium_pct_${urgency}` as const] ?? 0)
+  const premium = Math.round(((feeEstimate?.leg_pkr ?? 0) * premiumPct / 100) / 10) * 10
+  const carryFee = (feeEstimate?.carry_total_fee_pkr ?? 0) + premium
+  const deliverHours = urgency === 'standard' ? (feeEstimate?.carry_max_hours ?? 4) : urgency === '2hr' ? 2 : 1
 
   const post = async () => {
     if (!pickupLoc) { toast.error(t('vp.pickupShopPlaceholder')); return }
@@ -158,7 +174,7 @@ export default function CityPurchasePage() {
     const { data: requestId, error } = await supabase.rpc('create_city_purchase_request', {
       p_city_id: city.id, p_item: item.trim(), p_item_attachment_path: itemAttachmentPath,
       p_pickup_label: pickupLoc.label, p_pickup_lat: pickupLoc.lat, p_pickup_lng: pickupLoc.lng,
-      p_goods_budget_pkr: budget ? Number(budget) : 0, p_target_vehicle_id: null, p_urgency: 'standard',
+      p_goods_budget_pkr: budget ? Number(budget) : 0, p_target_vehicle_id: null, p_urgency: urgency,
       p_delivery_label: deliveryLoc.label, p_delivery_lat: deliveryLoc.lat, p_delivery_lng: deliveryLoc.lng,
       p_area: area, p_ride_type: rideType, p_scheduled_date: scheduledDate, p_scheduled_time: scheduledTime || null,
       p_tip_pkr: tipPkr, p_payment_method: paymentMethod,
@@ -284,40 +300,60 @@ export default function CityPurchasePage() {
         <input type="number" value={budget} onChange={(e) => setBudget(e.target.value)} placeholder={t('vp.goodsBudgetPlaceholder')} className="w-full border border-[#e5e2d0] rounded-xl p-2.5 text-[13.5px]" />
       </div>
 
-      <div className="bg-[#F9F9F6] rounded-xl p-3">
-        <div className="flex items-center justify-between text-[13px]">
-          <span className="text-[#64748b]">{t('vp.fuelFeeLabel')} <span className="ltr-num">({matchedCity ? matchedCity.name : '—'} · {t('vp.roundTripNote')})</span></span>
-          <span className="font-bold text-[#1e293b] ltr-num">{fmt(feeEstimate?.distance_fare_pkr ?? 0)}</span>
+      <div>
+        <label className="block text-[12px] font-semibold text-[#64748b] mb-1">{t('cpx.urgencyLabel')}</label>
+        <div className="grid grid-cols-4 gap-1.5">
+          {URGENCIES.map((u) => (
+            <button key={u} onClick={() => setUrgency(u)} className="px-1.5 py-2 rounded-xl text-[12px] font-bold cursor-pointer border leading-tight"
+              style={{ background: urgency === u ? (u === 'standard' ? '#166534' : '#b45309') : '#fff', color: urgency === u ? '#fff' : '#334155', borderColor: urgency === u ? 'transparent' : '#e5e2d0' }}>
+              {t(`cpx.urgency.${u}`).replace('{h}', String(feeEstimate?.carry_max_hours ?? 4))}
+            </button>
+          ))}
         </div>
-        {!!feeEstimate?.detour_fuel_pkr && (
-          <div className="flex items-center justify-between text-[12px] mt-1 text-[#64748b]">
-            <span>{t('vp.detourFuelLabel')}</span>
-            <span className="ltr-num">{fmt(feeEstimate.detour_fuel_pkr)}</span>
+        {urgency !== 'standard' && <p className="text-[11px] text-[#b45309] mt-1">{t('cpx.urgencyHint').replace('{pct}', String(premiumPct))}</p>}
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <p className="text-[12px] font-semibold text-[#64748b]">{estimating ? t('action.loading') : t('cpx.priceHeading').replace('{city}', matchedCity ? (isUrdu && matchedCity.name_ur ? matchedCity.name_ur : matchedCity.name) : '—')}</p>
+        <div className="rounded-2xl border-2 border-[#16a34a] bg-[#f0fdf4] p-3.5">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-[13.5px] font-extrabold text-[#14532d]">🚗↩ {t('cpx.carryTitle')}</p>
+              <p className="text-[11.5px] text-[#166534] mt-0.5 leading-snug">{t('cpx.carryHint').replace('{h}', String(deliverHours))}</p>
+              {!!feeEstimate?.present_vehicles && <p className="text-[11px] font-bold text-[#16a34a] mt-1">● {t('cpx.presentNow').replace('{n}', String(feeEstimate.present_vehicles))}</p>}
+            </div>
+            <span className="text-[18px] font-black text-[#14532d] shrink-0"><span className="ltr-num">₨{fmt(carryFee)}</span></span>
           </div>
-        )}
-        {tipPkr > 0 && (
-          <div className="flex items-center justify-between text-[12px] mt-1 text-[#64748b]">
-            <span>{t('vp.additionalTipLabel')}</span>
-            <span className="ltr-num">{fmt(tipPkr)}</span>
+          <div className="mt-2 pt-2 border-t border-[#bbf7d0] flex flex-col gap-0.5 text-[11.5px] text-[#166534]">
+            <div className="flex justify-between"><span>{t('cpx.oneLeg')}</span><span className="ltr-num">{fmt(feeEstimate?.leg_pkr ?? 0)}</span></div>
+            {premium > 0 && <div className="flex justify-between text-[#b45309] font-semibold"><span>{t('cpx.urgencyPremium')}</span><span className="ltr-num">{fmt(premium)}</span></div>}
+            {!!feeEstimate?.detour_fuel_pkr && <div className="flex justify-between"><span>{t('cpx.detourLine').replace('{km}', String(feeEstimate.detour_km ?? 0))}</span><span className="ltr-num">{fmt(feeEstimate.detour_fuel_pkr)}</span></div>}
+            {tipPkr > 0 && <div className="flex justify-between"><span>{t('vp.additionalTipLabel')}</span><span className="ltr-num">{fmt(tipPkr)}</span></div>}
           </div>
-        )}
-        <div className="flex items-center justify-between mt-1.5 pt-1.5 border-t border-[#e5e2d0]">
-          <span className="font-bold text-[13.5px] text-[#1e293b]">{estimating ? t('action.loading') : t('vp.totalFeeLabel')}</span>
-          <span className="font-extrabold text-[16px] text-[#166534] ltr-num">{fmt(totalFee)}</span>
         </div>
-        <p className="text-[10.5px] text-[#94a3b8] mt-1">{t('vp.driverServiceFeeAddedLaterNote')}</p>
-        <p className="text-[10.5px] text-[#94a3b8] mt-0.5">{t('vp.goodsCostSeparateNote')}</p>
+        <div className="rounded-2xl border border-[#e5e2d0] bg-white p-3.5">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-[13.5px] font-extrabold text-[#1e293b]">🚗⇄ {t('cpx.dedicatedTitle')}</p>
+              <p className="text-[11.5px] text-[#64748b] mt-0.5 leading-snug">{t('cpx.dedicatedHint')}</p>
+            </div>
+            <span className="text-[16px] font-extrabold text-[#1e293b] shrink-0"><span className="ltr-num">₨{fmt(totalFee)}</span></span>
+          </div>
+        </div>
+        <p className="text-[10.5px] text-[#94a3b8]">{t('cpx.detourRule')}</p>
+        <p className="text-[10.5px] text-[#94a3b8]">{t('vp.driverServiceFeeAddedLaterNote')} {t('vp.goodsCostSeparateNote')}</p>
       </div>
 
       <div className="flex flex-col gap-1.5 text-[11.5px] text-[#1e3a5f] bg-[#eff6ff] border border-[#bfdbfe] rounded-xl p-2.5">
         <p className="flex items-center gap-1.5 font-bold"><Info size={13} className="shrink-0 text-[#2563eb]" /> {t('vp.howPaymentWorksHeading')}</p>
-        <p>1. {t('vp.noAdvanceStepNote')}</p>
-        <p>2. {t('vp.paymentStepDriverAcceptsNote')}</p>
-        <p>3. {t('vp.paymentStepPayAfterJobNote')}</p>
+        <p>1. {t('cpx.step1')}</p>
+        <p>2. {t('cpx.step2')}</p>
+        <p>3. {t('cpx.step3')}</p>
+        <p>4. {t('cpx.step4')}</p>
       </div>
 
       <button onClick={post} disabled={posting} className="w-full bg-[#166534] text-white rounded-xl py-3 font-semibold cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2">
-        {posting ? t('action.saving') : <>{t('vp.sendRequestBtn')} <span className="ltr-num">· {fmt(totalFee)}</span></>}
+        {posting ? t('action.saving') : <>{t('vp.sendRequestBtn')} <span className="ltr-num">· ₨{fmt(carryFee)}–{fmt(totalFee)}</span></>}
       </button>
 
       {myRequests.length > 0 && (

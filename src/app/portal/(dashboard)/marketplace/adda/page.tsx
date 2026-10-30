@@ -11,7 +11,7 @@
 
 import { Suspense, useEffect, useState } from 'react'
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { createClient } from '@/lib/supabase/client'
 import { ArrowLeft, MapPin, Phone, Timer, Trophy, Users, Loader2 } from 'lucide-react'
@@ -21,6 +21,9 @@ import { usePortalUser } from '@/hooks/usePortalUser'
 import { useLocale } from '@/lib/i18n/LocaleProvider'
 import { LoadingDots } from '@/components/shared/LoadingDots'
 import { MobilityBottomNav } from '@/components/mobility/MobilityBottomNav'
+import { RequestWaitingSheet, type WaitingSummary } from '@/components/mobility/RequestWaitingSheet'
+import { FarePolicyCard } from '@/components/mobility/FarePolicyCard'
+import { vehicleDisplayName } from '@/lib/vehicleDisplayName'
 
 const LeafletMap = dynamic(() => import('@/components/shared/LeafletMap'), { ssr: false })
 
@@ -51,6 +54,7 @@ function AddaBoardPageInner() {
   const { user } = usePortalUser()
   const supabase = createClient()
   const searchParams = useSearchParams()
+  const router = useRouter()
   // Deep-linked from the "Going Home" nearby page — jump straight to
   // whichever adda the rider was actually near, instead of always
   // defaulting to the alphabetically-first one.
@@ -64,6 +68,7 @@ function AddaBoardPageInner() {
   const [bookingSeats, setBookingSeats] = useState<Record<string, number>>({})
   const [requestFare, setRequestFare] = useState<Record<string, number>>({})
   const [actionId, setActionId] = useState<string | null>(null)
+  const [waitingReq, setWaitingReq] = useState<{ id: string; summary: WaitingSummary } | null>(null)
 
   useEffect(() => {
     supabase.from('addas').select('id, name, name_ur, lat, lng, turn_minutes').eq('is_active', true).order('name').then(({ data }) => {
@@ -97,10 +102,22 @@ function AddaBoardPageInner() {
   const bookFixed = async (entry: AddaBoardEntry) => {
     const seats = bookingSeats[entry.entry_id] || 1
     setActionId(entry.entry_id)
-    const { error } = await supabase.rpc('book_adda_seat', { p_entry_id: entry.entry_id, p_seats: seats, p_method: 'direct', p_proof_url: null })
+    const { data: placed, error } = await supabase.rpc('book_adda_seat', { p_entry_id: entry.entry_id, p_seats: seats, p_method: 'direct', p_proof_url: null })
     setActionId(null)
     if (error) { toast.error(friendlyError(error, undefined, isUrdu)); return }
-    toast.success(t('af.seatBookedToast'))
+    // Stays on a live "waiting for the driver" popup until they confirm
+    // or decline, instead of a toast that vanishes.
+    const adda = board?.adda
+    const res = placed as { booking_id: string; total_amount_pkr: number }
+    setWaitingReq({
+      id: res.booking_id,
+      summary: {
+        vehicleLabel: [vehicleDisplayName(entry.vehicle_type), entry.vehicle_number].filter(Boolean).join(' · '), driverName: entry.owner_name,
+        from: adda ? (isUrdu && adda.name_ur ? adda.name_ur : adda.name) : null,
+        to: board?.pair_adda ? (isUrdu && board.pair_adda.name_ur ? board.pair_adda.name_ur : board.pair_adda.name) : null,
+        amount: res.total_amount_pkr, facts: [t('rw.seats').replace('{n}', String(seats))],
+      },
+    })
     if (activeAddaId) loadBoard(activeAddaId)
   }
   const proposeRequest = async (entry: AddaBoardEntry) => {
@@ -140,6 +157,7 @@ function AddaBoardPageInner() {
       <Link href="/portal/marketplace" className="inline-flex items-center gap-1.5 font-sans text-[13px] font-semibold text-dp-secondary hover:underline mb-3"><ArrowLeft size={14} className={isUrdu ? 'rotate-180' : ''} /> {t('mp.backToMarketplace')}</Link>
       <h1 className="font-heading text-[22px] sm:text-[24px] font-bold leading-[32px] text-dp-primary mb-1 flex items-center gap-2">{t('af.addaBoardPageTitle')}</h1>
       <p className="font-sans text-[13px] text-dp-on-surface-variant mb-5">{t('af.addaBoardHint')}</p>
+      <div className="mb-4"><FarePolicyCard service="seat" defaultOpen={false} /></div>
 
       {/* Every active adda, not just the current one's paired stand —
           replaces the old single swap-direction button, which could only
@@ -211,6 +229,11 @@ function AddaBoardPageInner() {
         )}
       </div>
       <MobilityBottomNav />
+      {waitingReq && (
+        <RequestWaitingSheet kind="seat" bookingId={waitingReq.id} summary={waitingReq.summary}
+          onClose={() => { setWaitingReq(null); if (activeAddaId) loadBoard(activeAddaId) }}
+          onViewBooking={() => { setWaitingReq(null); router.push('/portal/marketplace/trips') }} />
+      )}
     </div>
   )
 }

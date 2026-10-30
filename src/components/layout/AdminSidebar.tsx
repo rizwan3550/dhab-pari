@@ -75,6 +75,7 @@ import {
   ChevronDown,
   CreditCard,
   Building2,
+  Wrench,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
@@ -243,6 +244,8 @@ const menuItems: MenuEntry[] = [
       { href: '/admin/vehicles', label: 'Vehicles', tKey: 'nav.vehicles', icon: Bus, system: 'donors_projects' },
       { href: '/admin/vehicle-registrations', label: 'Vehicle Registrations', tKey: 'nav.vehicleRegistrations', icon: UserPlus, system: 'donors_projects' },
       { href: '/admin/shadi-bookings', label: 'Shadi Bookings', tKey: 'nav.shadiBookings', icon: Users2, system: 'donors_projects' },
+      { href: '/admin/equipment-advances', label: 'Machinery Advances', tKey: 'nav.equipmentAdvances', icon: Wrench, system: 'donors_projects' },
+      { href: '/admin/fare-policies', label: 'Fare Policies', tKey: 'nav.farePolicies', icon: Receipt, system: 'donors_projects' },
       { href: '/admin/marketplace-overview', label: 'Overview & Fleet Map', tKey: 'nav.marketplaceOverview', icon: LayoutDashboard, system: 'donors_projects' },
       { href: '/admin/marketplace-reference', label: 'Marketplace Reference', tKey: 'nav.marketplaceReference', icon: MapPin, system: 'donors_projects' },
       { href: '/admin/party-complaints', label: 'Marketplace Complaints', tKey: 'nav.partyComplaints', icon: ShieldAlert, system: 'donors_projects', badge: 'party_complaints' },

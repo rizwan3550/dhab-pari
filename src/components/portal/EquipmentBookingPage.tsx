@@ -31,6 +31,10 @@ import { useLocale } from '@/lib/i18n/LocaleProvider'
 import { useSite } from '@/components/layout/SiteProvider'
 import { LoadingDots } from '@/components/shared/LoadingDots'
 import { MobilityBottomSheet } from '@/components/mobility/MobilityBottomSheet'
+import { RequestWaitingSheet, type WaitingSummary } from '@/components/mobility/RequestWaitingSheet'
+import { FarePolicyCard, TravelQuoteLine } from '@/components/mobility/FarePolicyCard'
+import { useFarePolicy, type TravelQuote } from '@/lib/farePolicy'
+import { DonationReceiptUpload } from '@/components/public/DonationReceiptUpload'
 import { LocationPickerSheet, type PickedLocation } from '@/components/mobility/LocationPickerSheet'
 import { ReportProblemButton } from '@/components/shared/ReportProblemButton'
 import { RateAndReport } from '@/components/portal/RateAndReport'
@@ -70,6 +74,8 @@ interface Booking {
   pickup_address: string | null; pickup_lat: number | null; pickup_lng: number | null; trip_count: number
   scheduled_date: string | null; scheduled_time: string | null
   vehicle_id: string; owner_name: string; owner_mobile: string | null; vehicle_type: string; model: string | null; color: string | null
+  travel_km?: number; travel_charge_pkr?: number
+  advance_pct?: number; advance_amount_pkr?: number; advance_status?: string; advance_rejected_reason?: string | null
 }
 
 const PAYMENT_METHODS: { key: string; emoji: string; labelKey: string }[] = [
@@ -129,6 +135,13 @@ export function EquipmentBookingPage({ kind: defaultKind }: { kind: Kind }) {
   const [scheduledTime, setScheduledTime] = useState('')
   const [paymentMethod, setPaymentMethod] = useState('cash')
   const [requesting, setRequesting] = useState(false)
+  const [travelQuote, setTravelQuote] = useState<TravelQuote | null>(null)
+  // Paying the advance for one of "my bookings" (migration 776).
+  const [advanceFor, setAdvanceFor] = useState<Booking | null>(null)
+  const [advanceMethod, setAdvanceMethod] = useState('jazzcash')
+  const [advanceProof, setAdvanceProof] = useState('')
+  const [sendingAdvance, setSendingAdvance] = useState(false)
+  const [waiting, setWaiting] = useState<{ id: string; summary: WaitingSummary; since: string | null } | null>(null)
   const [rateOffer, setRateOffer] = useState<RateOffer | null>(null)
   const [proposeRate, setProposeRate] = useState('')
   const [proposing, setProposing] = useState(false)
@@ -136,12 +149,30 @@ export function EquipmentBookingPage({ kind: defaultKind }: { kind: Kind }) {
   const loadVehicles = () => Promise.all(KINDS.map((k) =>
     supabase.rpc('equipment_bookable_vehicles', { p_kind: k }).then(({ data }) => ((data ?? []) as Omit<Vehicle, 'kind'>[]).map((v) => ({ ...v, kind: k })))
   )).then((lists) => setVehicles(lists.flat()))
-  const loadBookings = () => supabase.rpc('my_equipment_bookings').then(({ data }) => setBookings((data ?? []) as Booking[]))
+  const loadBookings = () => supabase.rpc('my_equipment_bookings').then(({ data }) => { const rows = (data ?? []) as Booking[]; setBookings(rows); return rows })
+  const jobFacts = (kind: Kind, h: number | null, trips: number, date: string | null) => [
+    ...(date ? [date] : []),
+    ...(kind === 'loader' ? (trips > 1 ? [t('rw.trips').replace('{n}', String(trips))] : []) : h ? [t('rw.hours').replace('{n}', String(h))] : []),
+  ]
+  const waitingFor = (b: Booking) => ({
+    id: b.id, since: b.requested_at,
+    summary: {
+      vehicleLabel: vehicleDisplayName(b.vehicle_type, b.model), driverName: b.owner_name,
+      from: b.pickup_address ?? b.site_address, to: b.pickup_address ? b.site_address : null,
+      amount: b.total_amount_pkr ?? b.rate_pkr, facts: jobFacts(b.kind, b.requested_hours, b.trip_count, b.scheduled_date),
+    },
+  })
 
   useEffect(() => {
     if (!user) return
     setLoading(true)
-    Promise.all([loadVehicles(), loadBookings()]).then(() => setLoading(false))
+    Promise.all([loadVehicles(), loadBookings()]).then(([, rows]) => {
+      setLoading(false)
+      // A request still waiting on its owner reopens its waiting popup
+      // — reloading the page shouldn't lose the "waiting" screen.
+      const pending = rows.filter((b) => b.status === 'requested').sort((a, b) => b.requested_at.localeCompare(a.requested_at))[0]
+      if (pending) setWaiting(waitingFor(pending))
+    })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
 
@@ -218,7 +249,24 @@ export function EquipmentBookingPage({ kind: defaultKind }: { kind: Kind }) {
   const openKind = openVehicle?.kind
   const unitRate = openKind === 'tractor' ? (selectedService?.rate_pkr ?? 0) : (openKind === 'machinery' ? (acceptedRate ?? openVehicle?.machinery_hourly_rate_pkr ?? 0) : (openVehicle?.loader_trip_rate_pkr ?? 0))
   const mobilization = openKind === 'machinery' ? (openVehicle?.machinery_mobilization_fee_pkr ?? 0) : 0
-  const estimatedTotal = openKind === 'loader' ? unitRate * tripCount : unitRate * hours + mobilization
+  const travelPointSet = openKind === 'loader' ? !!(pickupLoc ?? siteLoc) : !!siteLoc
+  const travelCharge = travelPointSet && travelQuote?.known && !travelQuote.too_far ? travelQuote.travel_charge_pkr : 0
+  const estimatedTotal = (openKind === 'loader' ? unitRate * tripCount : unitRate * hours + mobilization) + travelCharge
+  const farePolicy = useFarePolicy(openKind ?? null)
+  const advancePct = farePolicy?.advance_pct ?? 0
+  const estimatedAdvance = Math.round(estimatedTotal * advancePct / 100)
+
+  const sendAdvance = async () => {
+    if (!advanceFor) return
+    if (!advanceProof) { toast.error(t('g.uploadPaymentScreenshot')); return }
+    setSendingAdvance(true)
+    const { error } = await supabase.rpc('announce_equipment_advance', { p_booking_id: advanceFor.id, p_method: advanceMethod, p_proof_url: advanceProof })
+    setSendingAdvance(false)
+    if (error) { toast.error(friendlyError(error)); return }
+    toast.success(t('eqa.sentToast'))
+    setAdvanceFor(null); setAdvanceProof('')
+    loadBookings()
+  }
 
   const submitRequest = async () => {
     if (!openVehicle) return
@@ -226,7 +274,7 @@ export function EquipmentBookingPage({ kind: defaultKind }: { kind: Kind }) {
     if (openVehicle.kind === 'loader' && !pickupLoc) { toast.error(t('vp.goodsPickupAddressRequired')); return }
     if (!scheduledDate) { toast.error(t('vp.scheduledDateRequired')); return }
     setRequesting(true)
-    const { error } = await supabase.rpc('create_equipment_booking', {
+    const { data: bookingId, error } = await supabase.rpc('create_equipment_booking', {
       p_vehicle_id: openVehicle.id, p_kind: openVehicle.kind,
       p_service_key: openVehicle.kind === 'tractor' ? serviceKey : null,
       p_hours: openVehicle.kind === 'loader' ? null : hours,
@@ -243,10 +291,17 @@ export function EquipmentBookingPage({ kind: defaultKind }: { kind: Kind }) {
     })
     setRequesting(false)
     if (error) { toast.error(friendlyError(error)); return }
-    toast.success(t('vp.equipmentRequestSentToast'))
+    const isLoader = openVehicle.kind === 'loader'
+    setWaiting({
+      id: bookingId as string, since: null,
+      summary: {
+        vehicleLabel: vehicleDisplayName(openVehicle.vehicle_type, openVehicle.model), driverName: openVehicle.owner_name,
+        from: isLoader ? pickupLoc!.label : siteLoc.label, to: isLoader ? siteLoc.label : null,
+        amount: estimatedTotal, facts: jobFacts(openVehicle.kind, isLoader ? null : hours, isLoader ? tripCount : 1, scheduledDate),
+      },
+    })
     setOpenVehicle(null)
     loadBookings()
-    setTab('mine')
   }
 
   const cancelBooking = async (id: string) => {
@@ -417,7 +472,31 @@ export function EquipmentBookingPage({ kind: defaultKind }: { kind: Kind }) {
                   <span className="shrink-0 text-[10.5px] font-bold px-2 py-1 rounded-full" style={{ background: `${STATUS_COLOR[b.status]}1a`, color: STATUS_COLOR[b.status] }}>{t(`vp.equipmentStatus.${b.status}`)}</span>
                 </div>
 
-                {b.status === 'accepted' && b.pin && (
+                {b.status === 'accepted' && (b.advance_status === 'due' || b.advance_status === 'rejected') && (
+                  <div className="mt-2 pt-2 border-t border-[#f1f5f9]">
+                    <div className="rounded-xl bg-[#fffbeb] border border-[#fde68a] p-3">
+                      <p className="text-[12.5px] font-bold text-[#92400e]">{t('eqa.payHeading').replace('{pct}', String(b.advance_pct ?? 0))}</p>
+                      {b.advance_status === 'rejected' && <p className="text-[12px] text-[#b91c1c] mt-0.5">{t('eqa.rejectedNote')} {b.advance_rejected_reason ?? ''}</p>}
+                      <p className="text-[11.5px] text-[#92400e]/80 mt-0.5">{t('eqa.payHint')}</p>
+                      <button onClick={() => { setAdvanceFor(b); setAdvanceProof('') }} className="mt-2 w-full bg-[#166534] text-white rounded-xl py-2.5 text-[13px] font-bold cursor-pointer">
+                        {t('eqa.payBtn')} <span className="ltr-num">· {fmt(b.advance_amount_pkr ?? 0)}</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+                {b.status === 'accepted' && b.advance_status === 'announced' && (
+                  <p className="mt-2 pt-2 border-t border-[#f1f5f9] text-[12px] font-semibold text-[#92400e]">{t('eqa.checkingNote').replace('{amount}', fmt(b.advance_amount_pkr ?? 0))}</p>
+                )}
+                {(b.advance_status === 'confirmed' || b.advance_status === 'released') && (
+                  <p className="mt-2 text-[11.5px] font-semibold text-[#166534] ltr-num">{t('eqa.confirmedNote').replace('{amount}', fmt(b.advance_amount_pkr ?? 0))}</p>
+                )}
+                {(b.advance_status === 'refund_due' || b.advance_status === 'refunded') && (
+                  <p className="mt-2 text-[11.5px] font-semibold text-[#475569] ltr-num">{t(b.advance_status === 'refunded' ? 'eqa.refundedNote' : 'eqa.refundDueNote').replace('{amount}', fmt(b.advance_amount_pkr ?? 0))}</p>
+                )}
+                {!!b.travel_charge_pkr && (
+                  <p className="mt-1 text-[11.5px] text-[#64748b] ltr-num">{t('eqa.travelIncluded').replace('{km}', fmt(b.travel_km ?? 0)).replace('{amount}', fmt(b.travel_charge_pkr))}</p>
+                )}
+                {b.status === 'accepted' && b.pin && (b.advance_status == null || b.advance_status === 'none' || b.advance_status === 'confirmed') && (
                   <>
                     <div className="mt-2 pt-2 border-t border-[#f1f5f9] flex items-center justify-between">
                       <span className="text-[11.5px] text-[#64748b]">{t('vp.yourPinLabel')}</span>
@@ -644,21 +723,79 @@ export function EquipmentBookingPage({ kind: defaultKind }: { kind: Kind }) {
                 <span className="ltr-num">{fmt(mobilization)}</span>
               </div>
             )}
+            {travelCharge > 0 && (
+              <div className="flex items-center justify-between text-[12px] mt-1 text-[#64748b]">
+                <span>{t('eqa.travelLabel')}</span>
+                <span className="ltr-num">{fmt(travelCharge)}</span>
+              </div>
+            )}
+            {advancePct > 0 && (
+              <div className="flex items-center justify-between text-[12px] mt-1.5 pt-1.5 border-t border-[#e5e2d0] text-[#92400e] font-semibold">
+                <span>{t('fp.advanceLine').replace('{pct}', String(advancePct))}</span>
+                <span className="ltr-num">{fmt(estimatedAdvance)}</span>
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-2 mb-3">
+            {openKind && (
+              <TravelQuoteLine service={openKind} vehicleId={openVehicle.id}
+                lat={openKind === 'loader' ? (pickupLoc?.lat ?? siteLoc?.lat) : siteLoc?.lat}
+                lng={openKind === 'loader' ? (pickupLoc?.lng ?? siteLoc?.lng) : siteLoc?.lng}
+                onQuote={setTravelQuote} />
+            )}
+            {openKind && <FarePolicyCard service={openKind} defaultOpen={false} />}
           </div>
 
           <div className="flex flex-col gap-1.5 text-[11.5px] text-[#1e3a5f] bg-[#eff6ff] border border-[#bfdbfe] rounded-xl p-2.5 mb-3">
             <p className="flex items-center gap-1.5 font-bold"><AlertCircle size={13} className="shrink-0 text-[#2563eb]" /> {t('vp.howPaymentWorksHeading')}</p>
-            <p>1. {t('vp.noAdvanceStepNote')}</p>
-            <p>2. {t('vp.paymentStepDriverAcceptsNote')}</p>
-            <p>3. {t('vp.paymentStepPayAfterJobNote')}</p>
+            {advancePct > 0 ? (
+              <>
+                <p>1. {t('eqa.step1')}</p>
+                <p>2. {t('eqa.step2').replace('{pct}', String(advancePct))}</p>
+                <p>3. {t('eqa.step3')}</p>
+              </>
+            ) : (
+              <>
+                <p>1. {t('vp.noAdvanceStepNote')}</p>
+                <p>2. {t('vp.paymentStepDriverAcceptsNote')}</p>
+                <p>3. {t('vp.paymentStepPayAfterJobNote')}</p>
+              </>
+            )}
           </div>
 
-          <button onClick={submitRequest} disabled={requesting || (openKind === 'tractor' && !serviceKey)} className="w-full flex items-center justify-center gap-1.5 bg-[#166534] text-white rounded-xl py-3 font-semibold cursor-pointer disabled:opacity-50">
+          <button onClick={submitRequest} disabled={requesting || (openKind === 'tractor' && !serviceKey) || (travelPointSet && !!travelQuote?.too_far)} className="w-full flex items-center justify-center gap-1.5 bg-[#166534] text-white rounded-xl py-3 font-semibold cursor-pointer disabled:opacity-50">
             {requesting ? t('action.saving') : <>{t('vp.sendRequestBtn')} <span className="ltr-num">· {fmt(estimatedTotal)}</span></>}
           </button>
         </MobilityBottomSheet>
       )}
 
+      {advanceFor && (
+        <MobilityBottomSheet title={t('eqa.payBtn')} onClose={() => setAdvanceFor(null)}>
+          <p className="text-[12px] text-[#64748b] mb-3">{t('eqa.payHint')}</p>
+          <div className="bg-[#F9F9F6] rounded-xl p-3 mb-3 flex items-center justify-between">
+            <span className="text-[12.5px] text-[#64748b]">{t('eqa.amountLabel').replace('{pct}', String(advanceFor.advance_pct ?? 0))}</span>
+            <span className="font-extrabold text-[16px] text-[#1e293b] ltr-num">{fmt(advanceFor.advance_amount_pkr ?? 0)}</span>
+          </div>
+          <label className="block text-[13px] font-semibold text-[#64748b] mb-1.5">{t('w.paymentMethod')}</label>
+          <select value={advanceMethod} onChange={(e) => setAdvanceMethod(e.target.value)} className="dp2-input text-[13.5px] mb-3">
+            <option value="jazzcash">{t('w.jazzcash')}</option>
+            <option value="easypaisa">{t('w.easypaisa')}</option>
+            <option value="bank">{t('a.bank')}</option>
+            <option value="cash">{t('w.cash')}</option>
+          </select>
+          <div className="mb-3"><DonationReceiptUpload onUpload={setAdvanceProof} /></div>
+          <button onClick={sendAdvance} disabled={sendingAdvance} className="w-full bg-[#166534] text-white rounded-xl py-3 font-semibold cursor-pointer disabled:opacity-50">
+            {sendingAdvance ? t('action.saving') : t('vp.submitAdvanceBtn')}
+          </button>
+        </MobilityBottomSheet>
+      )}
+
+      {waiting && (
+        <RequestWaitingSheet kind="equipment" bookingId={waiting.id} summary={waiting.summary} since={waiting.since}
+          onClose={() => { setWaiting(null); loadBookings() }}
+          onViewBooking={() => { setWaiting(null); loadBookings(); setTab('mine') }} />
+      )}
     </div>
   )
 }
